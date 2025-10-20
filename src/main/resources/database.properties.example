@@ -1,0 +1,3 @@
+db.url=jdbc:postgresql://<your_host>:<your_port>/<your_db_name>?sslmode=require
+db.username=<your_username>
+db.password=
