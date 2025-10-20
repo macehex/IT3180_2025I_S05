@@ -4,6 +4,7 @@ module com.example.quanlytoanha {
 
     requires org.controlsfx.controls;
     requires org.kordamp.ikonli.javafx;
+    requires javafx.graphics;
 
     opens com.example.quanlytoanha to javafx.fxml;
     exports com.example.quanlytoanha;
