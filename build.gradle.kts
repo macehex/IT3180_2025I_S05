@@ -26,8 +26,8 @@ tasks.withType<JavaCompile> {
 }
 
 application {
-    mainModule.set("com.example.quanlytoanha")
-    mainClass.set("com.example.quanlytoanha.HelloApplication")
+    //mainModule.set("com.example.quanlytoanha")
+    mainClass.set("com.example.quanlytoanha.Launcher")
 }
 
 javafx {

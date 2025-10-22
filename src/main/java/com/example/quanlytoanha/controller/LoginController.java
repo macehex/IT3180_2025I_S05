@@ -1,65 +1,131 @@
 package com.example.quanlytoanha.controller;
 
-// Đây là ví dụ mã trong Lớp Controller/Frame Đăng nhập của bạn
-// (Giả sử bạn có 2 ô text: txtUsername và txtPassword)
-
+import com.example.quanlytoanha.model.Role;
 import com.example.quanlytoanha.service.AuthService;
 import com.example.quanlytoanha.session.SessionManager;
 import com.example.quanlytoanha.model.User;
 
+// --- Thêm các import của JavaFX ---
+import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
+import javafx.scene.control.Button;
+import javafx.scene.control.PasswordField;
+import javafx.scene.control.TextField;
+import javafx.scene.text.Text;
+import javafx.stage.Stage;
+import java.io.IOException;
+
 public class LoginController {
 
+    @FXML
+    private TextField txtUsername;
+    @FXML
+    private PasswordField txtPassword;
+    @FXML
+    private Button loginButton;
+    @FXML
+    private Text errorText;
+
     private AuthService authService;
-    // (Giả sử có @FXML private TextField txtUsername;)
-    // (Giả sử có @FXML private PasswordField txtPassword;)
 
     public LoginController() {
         this.authService = new AuthService(); // Khởi tạo AuthService
     }
 
     /**
-     * Phương thức này được gọi khi người dùng nhấn nút "Đăng nhập".
+     * Phương thức này được tự động gọi sau khi FXML được tải.
      */
-    private void handleLoginButtonAction() {
-        String username = "user_nhap_vao"; // Lấy từ txtUsername.getText();
-        String password = "pass_nhap_vao"; // Lấy từ txtPassword.getText();
+    @FXML
+    public void initialize() {
+        // Có thể thêm logic khởi tạo ở đây (ví dụ: đặt giá trị mặc định)
+        // txtUsername.setText("admin"); // (Để test cho nhanh)
+        // txtPassword.setText("admin123"); // (Để test cho nhanh)
+    }
 
-        // 1. Gọi AuthService để xác thực
+    /**
+     * Phương thức này được gọi khi người dùng nhấn nút "Đăng nhập".
+     * (Tên hàm phải khớp với onAction="#handleLoginButtonAction" trong FXML)
+     */
+    @FXML
+    private void handleLoginButtonAction() {
+        // Lấy dữ liệu từ GIAO DIỆN
+        String username = txtUsername.getText();
+        String password = txtPassword.getText();
+
+        // 1. Kiểm tra rỗng
+        if (username.isEmpty() || password.isEmpty()) {
+            showError("Tên đăng nhập và mật khẩu không được để trống.");
+            return;
+        }
+
+        // 2. Gọi AuthService để xác thực
         User user = authService.login(username, password);
 
-        // 2. Kiểm tra kết quả
+        // 3. Kiểm tra kết quả
         if (user != null) {
             // ĐĂNG NHẬP THÀNH CÔNG!
+            errorText.setText(""); // Xóa thông báo lỗi (nếu có)
 
             // 3. Lưu user vào SessionManager
             SessionManager.getInstance().login(user);
 
-            // 4. Chuyển sang cửa sổ chính (Dashboard/Main)
-            openMainWindow();
+            // 4. Lấy cửa sổ (Stage) hiện tại
+            Stage loginStage = (Stage) loginButton.getScene().getWindow();
 
-            // 5. Đóng cửa sổ đăng nhập hiện tại
-            closeLoginWindow();
+            // 5. Mở cửa sổ chính (và đóng cửa sổ login)
+            openMainWindow(user, loginStage);
 
         } else {
             // ĐĂNG NHẬP THẤT BẠI
             // Hiển thị thông báo lỗi
-            showErrorDialog("Lỗi", "Tên đăng nhập hoặc mật khẩu không đúng.");
+            showError("Tên đăng nhập hoặc mật khẩu không đúng.");
         }
     }
 
-    // (Các phương thức giả định)
-    private void openMainWindow() {
-        // Viết mã để mở cửa sổ chính (MainWindow) của bạn ở đây
-        System.out.println("Đang mở cửa sổ chính...");
+    /**
+     * Mở cửa sổ Dashboard tương ứng với vai trò và đóng cửa sổ Login.
+     */
+    private void openMainWindow(User user, Stage loginStage) {
+        try {
+            // 1. Đóng cửa sổ login
+            loginStage.close();
+
+            // 2. Quyết định file FXML dựa trên vai trò (Role)
+            String fxmlFile;
+            if (user.getRole() == Role.ADMIN) {
+                fxmlFile = "/com/example/quanlytoanha/view/admin_dashboard.fxml";
+            } else if (user.getRole() == Role.RESIDENT) {
+                fxmlFile = "/com/example/quanlytoanha/view/resident_dashboard.fxml";
+            } else {
+                // (Bạn có thể thêm case cho Kế toán, Công an...)
+                // Fallback (dự phòng)
+                fxmlFile = "/com/example/quanlytoanha/view/admin_dashboard.fxml";
+            }
+
+            // 3. Tải FXML
+            FXMLLoader loader = new FXMLLoader(getClass().getResource(fxmlFile));
+            Parent root = loader.load();
+
+            // 4. Hiển thị cửa sổ mới
+            Stage mainStage = new Stage();
+            mainStage.setTitle("Dashboard - " + user.getFullName());
+            mainStage.setScene(new Scene(root));
+            mainStage.show();
+
+        } catch (IOException e) {
+            e.printStackTrace();
+            showError("Không thể tải giao diện chính.");
+        }
     }
 
-    private void closeLoginWindow() {
-        // Viết mã để đóng cửa sổ đăng nhập (LoginWindow)
-        System.out.println("Đang đóng cửa sổ đăng nhập...");
+    /**
+     * Hiển thị thông báo lỗi trên giao diện.
+     */
+    private void showError(String message) {
+        errorText.setText(message);
     }
 
-    private void showErrorDialog(String title, String message) {
-        // Viết mã để hiển thị Alert/Dialog lỗi (ví dụ: JavaFX Alert)
-        System.out.println(title + ": " + message);
-    }
+    // (Xóa các hàm open/close/showError giả định cũ)
 }

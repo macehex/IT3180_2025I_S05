@@ -7,8 +7,12 @@ module com.example.quanlytoanha {
     requires javafx.graphics;
     requires java.sql;
     requires java.desktop;
-    requires spring.security.crypto;
+    requires spring.security.core;
 
     opens com.example.quanlytoanha to javafx.fxml;
+    opens com.example.quanlytoanha.controller to javafx.fxml;
+    opens com.example.quanlytoanha.model to javafx.base;
     exports com.example.quanlytoanha;
+    exports com.example.quanlytoanha.controller;  // Thêm dòng này nếu cần
+
 }
