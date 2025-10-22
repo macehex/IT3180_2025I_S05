@@ -1,24 +1,30 @@
+// Vị trí: src/main/java/com/example/quanlytoanha/model/User.java
 package com.example.quanlytoanha.model;
+
 import java.sql.Timestamp;
-import java.util.List; // Import
+import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+/**
+ * Lớp cơ sở (abstract) cho tất cả người dùng trong hệ thống.
+ * Chứa các thông tin chung từ bảng 'users'.
+ */
 public abstract class User {
+
+    // --- Fields ---
     private int userId;
     private String username;
-    private String password; // Thường thì không nên lưu password ở đây, nhưng để map với DB
+    private String password; // Mật khẩu đã băm (hashed)
     private String email;
     private String phoneNumber;
     private String fullName;
-    private Role role; // Sử dụng Enum thay vì int
+    private Role role; // Sử dụng Enum
     private Timestamp createdAt;
     private Timestamp lastLogin;
+    private Set<String> permissions; // Danh sách quyền
 
-    // THÊM TRƯỜNG MỚI:
-    // Dùng Set<String> để lưu tên các quyền (ví dụ: "CREATE_INVOICE", "VIEW_ASSETS")
-    private Set<String> permissions;
-
+    // --- Constructor ---
     public User(int userId, String username, String email, String fullName, Role role, Timestamp createdAt, Timestamp lastLogin, String phoneNumber) {
         this.userId = userId;
         this.username = username;
@@ -28,18 +34,18 @@ public abstract class User {
         this.createdAt = createdAt;
         this.lastLogin = lastLogin;
         this.phoneNumber = phoneNumber;
+        // Lưu ý: 'password' và 'permissions' sẽ được nạp sau khi đối tượng được tạo
+        // (thông qua setters) vì chúng ta không muốn truyền mật khẩu trong constructor.
     }
 
-    // Mọi người dùng đều có thể xem thông tin cá nhân
+    // --- Phương thức chung ---
     public void viewProfile() {
         System.out.println("Viewing profile for: " + this.fullName);
         System.out.println("Role: " + this.role.getRoleName());
-
     }
 
-    // Mọi người dùng đều có thể cập nhật thông tin (ví dụ)
-
-    /*public void updateProfile(String newEmail, String newPhone) {
+    /*
+    public void updateProfile(String newEmail, String newPhone) {
         this.email = newEmail;
         this.phoneNumber = newPhone;
         System.out.println("Profile updated.");
@@ -47,18 +53,16 @@ public abstract class User {
     }
     */
 
-    // --- PHƯƠNG THỨC TRỪU TƯỢNG (ABSTRACT) ---
+    // --- Phương thức trừu tượng ---
     /**
      * Mỗi vai trò (Role) sẽ có một trang tổng quan (dashboard) hoặc menu khác nhau.
      * Lớp con BẮT BUỘC phải định nghĩa (implement) phương thức này.
      */
     public abstract void displayDashboard();
 
-    // --- QUẢN LÝ QUYỀN ---
-
+    // --- Quản lý Quyền (Permissions) ---
     /**
-     * Dùng để "nạp" quyền cho User sau khi lấy từ DB (bảng role_permissions)
-     * Giả sử Permission là một class bạn tạo ra có getPermissionName()
+     * Nạp quyền cho User (thường gọi sau khi login thành công).
      */
     public void setPermissions(List<Permission> permissionList) {
         if (permissionList != null) {
@@ -69,24 +73,104 @@ public abstract class User {
     }
 
     /**
-     * Phương thức cực kỳ hữu ích: Kiểm tra xem User này có quyền làm gì đó không.
+     * Kiểm tra xem User có một quyền cụ thể hay không.
      * @param permissionName Tên quyền cần kiểm tra (ví dụ: "CREATE_INVOICE")
      * @return true nếu có quyền, false nếu không
      */
     public boolean hasPermission(String permissionName) {
         if (this.permissions == null) {
-            return false;
+            return false; // Chưa nạp quyền
         }
         return this.permissions.contains(permissionName);
     }
 
-    // --- Getters and Setters ---
-    // (Thêm các getters/setters cần thiết cho các trường private)
-    public int getUserId() { return userId; }
-    public String getUsername() { return username; }
-    public String getEmail() { return email; }
-    public String getFullName() { return fullName; }
-    public Role getRole() { return role; }
-    public String getPhoneNumber() {return phoneNumber;}
-    // ... thêm các getters/setters khác
+    // --- Getters and Setters (Đầy đủ) ---
+
+    public int getUserId() {
+        return userId;
+    }
+
+    public void setUserId(int userId) {
+        this.userId = userId;
+    }
+
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
+    }
+
+    /**
+     * Lấy mật khẩu đã băm (dùng để so sánh khi login).
+     */
+    public String getPassword() {
+        return password;
+    }
+
+    /**
+     * Nạp mật khẩu đã băm từ DB vào đối tượng User.
+     * (Sẽ được gọi trong UserDAO).
+     */
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public String getPhoneNumber() {
+        return phoneNumber;
+    }
+
+    public void setPhoneNumber(String phoneNumber) {
+        this.phoneNumber = phoneNumber;
+    }
+
+    public String getFullName() {
+        return fullName;
+    }
+
+    public void setFullName(String fullName) {
+        this.fullName = fullName;
+    }
+
+    public Role getRole() {
+        return role;
+    }
+
+    public void setRole(Role role) {
+        this.role = role;
+    }
+
+    public Timestamp getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(Timestamp createdAt) {
+        this.createdAt = createdAt;
+    }
+
+    public Timestamp getLastLogin() {
+        return lastLogin;
+    }
+
+    public void setLastLogin(Timestamp lastLogin) {
+        this.lastLogin = lastLogin;
+    }
+
+    /**
+     * Lấy tập hợp (Set) các tên quyền của người dùng.
+     */
+    public Set<String> getPermissions() {
+        return permissions;
+    }
+
+    // Phương thức setPermissions(List<Permission> permissionList) đã được định nghĩa ở trên.
 }
