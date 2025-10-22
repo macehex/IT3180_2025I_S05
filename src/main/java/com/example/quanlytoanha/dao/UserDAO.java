@@ -128,7 +128,7 @@ public class UserDAO {
 
                 // !! NẠP mật khẩu băm vào đối tượng User
                 // (Bạn cần thêm trường `password` và setter/getter cho nó trong Abstract User)
-                // user.setPassword(hashedPassword); // --> Bạn cần thêm
+                user.setPassword(hashedPassword); // --> Bạn cần thêm
             }
         } catch (Exception e) {
             e.printStackTrace();
