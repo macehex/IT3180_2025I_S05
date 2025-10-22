@@ -7,6 +7,7 @@ module com.example.quanlytoanha {
     requires javafx.graphics;
     requires java.sql;
     requires java.desktop;
+    requires spring.security.crypto;
 
     opens com.example.quanlytoanha to javafx.fxml;
     exports com.example.quanlytoanha;
