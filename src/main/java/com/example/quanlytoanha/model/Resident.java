@@ -57,8 +57,45 @@ public class Resident extends User {
         System.out.println("Gửi yêu cầu sửa chữa/dịch vụ...");
     }
 
-    // Getters/Setters cho các trường riêng
-    public int getApartmentId() { return apartmentId; }
-    public Date getDateOfBirth() { return dateOfBirth; }
-    // ...
+    // --- Getters/Setters cho các trường riêng ---
+
+    public int getResidentId() {
+        return residentId;
+    }
+
+    public void setResidentId(int residentId) {
+        this.residentId = residentId;
+    }
+
+    public int getApartmentId() {
+        return apartmentId;
+    }
+
+    public void setApartmentId(int apartmentId) {
+        this.apartmentId = apartmentId;
+    }
+
+    public Date getDateOfBirth() {
+        return dateOfBirth;
+    }
+
+    public void setDateOfBirth(Date dateOfBirth) {
+        this.dateOfBirth = dateOfBirth;
+    }
+
+    public String getIdCardNumber() {
+        return idCardNumber;
+    }
+
+    public void setIdCardNumber(String idCardNumber) {
+        this.idCardNumber = idCardNumber;
+    }
+
+    public String getRelationship() {
+        return relationship;
+    }
+
+    public void setRelationship(String relationship) {
+        this.relationship = relationship;
+    }
 }
