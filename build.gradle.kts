@@ -26,8 +26,8 @@ tasks.withType<JavaCompile> {
 }
 
 application {
-    mainModule.set("com.example.quanlytoanha")
-    mainClass.set("com.example.quanlytoanha.HelloApplication")
+    //mainModule.set("com.example.quanlytoanha")
+    mainClass.set("com.example.quanlytoanha.Launcher")
 }
 
 javafx {
@@ -39,6 +39,7 @@ dependencies {
     implementation("org.postgresql:postgresql:42.7.7")
     implementation("org.controlsfx:controlsfx:11.2.1")
     implementation("org.kordamp.ikonli:ikonli-javafx:12.3.1")
+    implementation("org.springframework.security:spring-security-core:6.5.5")
     testImplementation("org.junit.jupiter:junit-jupiter-api:${junitVersion}")
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:${junitVersion}")
 }
