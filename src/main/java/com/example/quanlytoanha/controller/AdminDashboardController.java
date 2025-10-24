@@ -26,7 +26,7 @@ public class AdminDashboardController {
 
     /**
      * Phương thức được gọi tự động sau khi FXML được tải.
-     * Dùng để khởi tạo giao diện và kiểm tra quyền.
+     * Dùng để khởi tạo giao diện, kiểm tra quyền VÀ BỔ SUNG LISTENER.
      */
     @FXML
     public void initialize() {
@@ -40,6 +40,26 @@ public class AdminDashboardController {
                 boolean hasPermission = currentUser.hasPermission("CREATE_RESIDENT");
                 btnThemCuDan.setVisible(hasPermission);
                 btnThemCuDan.setManaged(hasPermission);
+
+                // --- BỔ SUNG EXPLICIT LISTENER (setOnAction) CHO NÚT CÓ QUYỀN ---
+                if (hasPermission) {
+                    // Dùng lambda expression để gọi hàm xử lý khi nút được nhấn
+                    btnThemCuDan.setOnAction(event -> handleOpenAddResidentForm());
+                }
+            }
+
+            // --- BỔ SUNG LISTENER CHO CÁC NÚT KHÁC (Chưa làm) ---
+            if (btnQuanLyTaiKhoan != null) {
+                btnQuanLyTaiKhoan.setOnAction(event -> handleQuanLyTaiKhoan());
+            }
+            if (btnQuanLyHoaDon != null) {
+                btnQuanLyHoaDon.setOnAction(event -> handleQuanLyHoaDon());
+            }
+            if (btnTaoThongBao != null) {
+                btnTaoThongBao.setOnAction(event -> handleTaoThongBao());
+            }
+            if (btnXemYeuCauDichVu != null) {
+                btnXemYeuCauDichVu.setOnAction(event -> handleXemYeuCauDichVu());
             }
 
             // TODO: (Nếu cần) Thêm logic kiểm tra quyền cho các nút khác ở đây
@@ -48,9 +68,8 @@ public class AdminDashboardController {
 
     /**
      * Xử lý sự kiện khi Ban Quản Trị nhấn nút "Thêm Cư Dân".
-     * Mở cửa sổ/form add_resident_form.fxml.
+     * LƯU Ý: Đã bỏ @FXML vì nó được gọi từ Listener trong initialize().
      */
-    @FXML
     private void handleOpenAddResidentForm() {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/example/quanlytoanha/view/add_resident_form.fxml"));
@@ -76,24 +95,21 @@ public class AdminDashboardController {
 
     // ====================================================================
     // PHƯƠNG THỨC MẪU (STUBS) AN TOÀN CHO CÁC NÚT CHƯA LÀM
+    // LƯU Ý: Đã bỏ @FXML khỏi tất cả các hàm này
     // ====================================================================
 
-    @FXML
     private void handleQuanLyTaiKhoan() {
         showAlert(Alert.AlertType.INFORMATION, "Thông báo", "Chức năng Quản lý Tài khoản chưa được triển khai.");
     }
 
-    @FXML
     private void handleQuanLyHoaDon() {
         showAlert(Alert.AlertType.INFORMATION, "Thông báo", "Chức năng Quản lý Hóa đơn chưa được triển khai.");
     }
 
-    @FXML
     private void handleTaoThongBao() {
         showAlert(Alert.AlertType.INFORMATION, "Thông báo", "Chức năng Tạo Thông báo chưa được triển khai.");
     }
 
-    @FXML
     private void handleXemYeuCauDichVu() {
         showAlert(Alert.AlertType.INFORMATION, "Thông báo", "Chức năng Xem Yêu cầu Dịch vụ chưa được triển khai.");
     }
