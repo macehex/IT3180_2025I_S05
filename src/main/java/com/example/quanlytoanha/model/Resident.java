@@ -4,7 +4,7 @@ package com.example.quanlytoanha.model;
 import java.sql.Timestamp;
 import java.util.Date;
 // Giả sử bạn có cả các model khác như Vehicle, Apartment
-// import java.util.List;
+import java.util.List;
 
 /**
  * Đại diện cho Cư dân. Kế thừa từ User và thêm các thông tin
