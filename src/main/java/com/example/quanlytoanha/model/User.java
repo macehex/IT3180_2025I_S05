@@ -24,6 +24,9 @@ public abstract class User {
     private Timestamp lastLogin;
     private Set<String> permissions; // Danh sách quyền
 
+    public User() {
+    }
+
     // --- Constructor ---
     public User(int userId, String username, String email, String fullName, Role role, Timestamp createdAt, Timestamp lastLogin, String phoneNumber) {
         this.userId = userId;

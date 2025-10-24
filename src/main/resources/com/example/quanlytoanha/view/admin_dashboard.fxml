@@ -1,19 +1,58 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<?import javafx.scene.layout.VBox?>
-<?import javafx.scene.control.Label?>
-<?import javafx.geometry.Insets?>
-<?import javafx.scene.text.Font?>
 
-<VBox alignment="CENTER" prefHeight="300.0" prefWidth="400.0" spacing="20.0" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1">
-    <children>
-        <Label text="ADMIN DASHBOARD">
-            <font>
-                <Font name="System Bold" size="24.0" />
-            </font>
-        </Label>
-        <Label text="Bạn đã đăng nhập với vai trò Quản Trị Viên." />
-    </children>
-    <padding>
-        <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
-    </padding>
-</VBox>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
+<?import javafx.scene.layout.AnchorPane?>
+<AnchorPane xmlns="http://javafx.com/javafx/17"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.example.quanlytoanha.controller.AdminDashboardController">
+
+    <VBox spacing="15.0" AnchorPane.leftAnchor="20.0" AnchorPane.topAnchor="20.0">
+        <children>
+            <Label fx:id="lblWelcome" text="Chào mừng, Ban Quản Trị">
+                <font><Font size="18.0" /></font>
+            </Label>
+
+            <Label text="QUẢN LÝ TÀI KHOẢN VÀ CƯ DÂN" style="-fx-font-weight: bold;" />
+
+            <Button fx:id="btnThemCuDan"
+
+                    text="➕ Thêm Hồ Sơ Cư Dân Mới"
+            />
+
+            <Button fx:id="btnQuanLyTaiKhoan"
+
+                    text="👤 Quản Lý Tài Khoản Người Dùng"
+            />
+
+            <Button text="📋 Xem Danh Sách Cư Dân Chi Tiết"/>
+
+            <Label text="QUẢN LÝ VẬN HÀNH TÒA NHÀ" style="-fx-font-weight: bold;">
+                <VBox.margin>
+                    <Insets top="15.0" />
+                </VBox.margin>
+            </Label>
+
+            <Button fx:id="btnQuanLyHoaDon"
+
+                    text="💰 Quản Lý Hóa Đơn &amp; Công Nợ"
+            />
+
+            <Button fx:id="btnTaoThongBao"
+
+                    text="📢 Tạo &amp; Gửi Thông Báo Chung"
+            />
+
+            <Button fx:id="btnXemYeuCauDichVu"
+
+                    text="🛠️ Xem &amp; Xử Lý Yêu Cầu Dịch Vụ"
+            />
+
+            <Button text="🏠 Quản Lý Tài Sản &amp; Thiết Bị Chung"/>
+
+        </children>
+    </VBox>
+</AnchorPane>
