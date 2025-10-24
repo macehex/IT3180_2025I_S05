@@ -25,9 +25,15 @@ tasks.withType<JavaCompile> {
     options.encoding = "UTF-8"
 }
 
+// File: build.gradle.kts
 application {
-    //mainModule.set("com.example.quanlytoanha")
+    mainModule.set("com.example.quanlytoanha")
+
+    // KHI TEST ĐÃ SỬA DÒNG NÀY:
     mainClass.set("com.example.quanlytoanha.Launcher")
+
+    // THÀNH DÒNG NÀY:
+    // mainClass.set("com.example.quanlytoanha.TestViewResidentList")
 }
 
 javafx {
