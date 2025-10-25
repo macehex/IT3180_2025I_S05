@@ -2,10 +2,7 @@
 package com.example.quanlytoanha.service;
 
 import com.example.quanlytoanha.dao.FinancialDAO;
-import com.example.quanlytoanha.model.ApartmentDebt;
-import com.example.quanlytoanha.model.DebtReport;
-import com.example.quanlytoanha.model.Role;
-import com.example.quanlytoanha.model.User;
+import com.example.quanlytoanha.model.*;
 import com.example.quanlytoanha.session.SessionManager; // Lớp SessionManager của bạn
 
 import java.util.List;
@@ -48,5 +45,12 @@ public class FinancialService {
             throw new SecurityException("Không có quyền truy cập chức năng tài chính.");
         }
         return financialDAO.getDebtListByApartment();
+    }
+
+    public List<Invoice> getDetailedDebtForApartment(int apartmentId) throws SecurityException {
+        if (!canViewFinancials()) {
+            throw new SecurityException("Không có quyền truy cập chức năng tài chính.");
+        }
+        return financialDAO.getUnpaidInvoiceDetails(apartmentId);
     }
 }

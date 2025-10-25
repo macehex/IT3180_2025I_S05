@@ -3,13 +3,17 @@ package com.example.quanlytoanha.dao;
 
 import com.example.quanlytoanha.model.DebtReport;
 import com.example.quanlytoanha.model.ApartmentDebt;
+import com.example.quanlytoanha.model.Invoice;
+import com.example.quanlytoanha.model.InvoiceDetail;
 import com.example.quanlytoanha.utils.DatabaseConnection; // Lớp kết nối của bạn
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class FinancialDAO {
 
@@ -95,5 +99,53 @@ public class FinancialDAO {
             e.printStackTrace();
         }
         return debtList;
+    }
+
+    public List<Invoice> getUnpaidInvoiceDetails(int apartmentId) {
+        // Map để nhóm các chi tiết vào đúng hóa đơn
+        Map<Integer, Invoice> invoiceMap = new HashMap<>();
+
+        String sql = """
+        SELECT 
+            i.invoice_id, i.total_amount, i.due_date,
+            d.name, d.amount
+        FROM invoices i
+        JOIN invoicedetails d ON i.invoice_id = d.invoice_id
+        WHERE i.apartment_id = ? AND i.status = 'UNPAID'
+        ORDER BY i.due_date, i.invoice_id;
+    """;
+
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setInt(1, apartmentId);
+            ResultSet rs = stmt.executeQuery();
+
+            while (rs.next()) {
+                int invoiceId = rs.getInt("invoice_id");
+
+                // Nếu chưa có hóa đơn này trong Map, tạo mới
+                if (!invoiceMap.containsKey(invoiceId)) {
+                    Invoice invoice = new Invoice(
+                            invoiceId,
+                            rs.getBigDecimal("total_amount"),
+                            rs.getDate("due_date")
+                    );
+                    invoiceMap.put(invoiceId, invoice);
+                }
+
+                // Lấy hóa đơn từ Map và thêm chi tiết vào
+                Invoice currentInvoice = invoiceMap.get(invoiceId);
+                InvoiceDetail detail = new InvoiceDetail(
+                        rs.getString("name"),
+                        rs.getBigDecimal("amount")
+                );
+                currentInvoice.addDetail(detail);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return new ArrayList<>(invoiceMap.values());
     }
 }
