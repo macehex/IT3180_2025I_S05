@@ -29,10 +29,21 @@ public class Main extends Application {
     public static void showLoginScene() throws IOException {
         FXMLLoader loader = new FXMLLoader(Main.class.getResource("view/login.fxml"));
         Parent root = loader.load();
+    public void start(Stage primaryStage) throws Exception {
+        try {
+            FXMLLoader loader = new FXMLLoader(Main.class.getResource("view/login.fxml"));
+            Parent root = loader.load();
 
-        primaryStage.setTitle("Quản lý Tòa nhà - Đăng nhập");
-        primaryStage.setScene(new Scene(root, 400, 300));
-        primaryStage.show();
+            primaryStage.setTitle("Quản lý Tòa nhà - Đăng nhập");
+            primaryStage.setScene(new Scene(root, 400, 300));
+            primaryStage.show();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static void main(String[] args) {
+        launch(args);
     }
 
     /**
