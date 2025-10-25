@@ -1,19 +1,70 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<?import javafx.scene.layout.VBox?>
-<?import javafx.scene.control.Label?>
-<?import javafx.geometry.Insets?>
-<?import javafx.scene.text.Font?>
 
-<VBox alignment="CENTER" prefHeight="300.0" prefWidth="400.0" spacing="20.0" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1">
-    <children>
-        <Label text="RESIDENT DASHBOARD">
-            <font>
-                <Font name="System Bold" size="24.0" />
-            </font>
-        </Label>
-        <Label text="Bạn đã đăng nhập với vai trò Cư Dân." />
-    </children>
-    <padding>
-        <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
-    </padding>
-</VBox>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.geometry.Insets?>
+
+<BorderPane xmlns="http://javafx.com/javafx"
+            xmlns:fx="http://javafx.com/fxml"
+            fx:controller="com.example.quanlytoanha.controller.ResidentDashboardController"
+            prefHeight="800.0" prefWidth="1200.0">
+
+    <top>
+        <HBox spacing="10" style="-fx-background-color: #f0f0f0; -fx-padding: 10;">
+            <Label text="Resident Dashboard" style="-fx-font-size: 24;"/>
+        </HBox>
+    </top>
+
+    <center>
+        <ScrollPane fitToWidth="true">
+            <VBox spacing="20" style="-fx-padding: 20;">
+                <!-- Bills Section -->
+                <VBox>
+                    <HBox fx:id="billsTilePane" spacing="20" alignment="CENTER_LEFT">
+                        <!-- Tiles will be added here programmatically -->
+                    </HBox>
+                </VBox>
+
+                <!-- Online Payment Section -->
+                <TitledPane text="Make a Payment" expanded="true">
+                    <VBox spacing="10">
+                        <padding>
+                            <Insets top="10" right="10" bottom="10" left="10"/>
+                        </padding>
+                        <ComboBox fx:id="billSelector" promptText="Select Bill" maxWidth="Infinity"/>
+                        <TextField fx:id="amountField" promptText="Amount"/>
+                        <ComboBox fx:id="paymentMethodSelector" promptText="Payment Method" maxWidth="Infinity"/>
+                        <Button text="Pay Now" onAction="#handlePayment"
+                                style="-fx-background-color: #2196F3; -fx-text-fill: white;"
+                                maxWidth="Infinity"/>
+                    </VBox>
+                </TitledPane>
+
+                <!-- Transaction History -->
+                <TitledPane text="Transaction History" expanded="true">
+                    <VBox spacing="10">
+                        <padding>
+                            <Insets top="10" right="10" bottom="10" left="10"/>
+                        </padding>
+                        <HBox spacing="10" alignment="CENTER_LEFT">
+                            <DatePicker fx:id="fromDate" promptText="From Date"/>
+                            <DatePicker fx:id="toDate" promptText="To Date"/>
+                            <Button text="Filter" onAction="#filterTransactions"
+                                    style="-fx-background-color: #4CAF50; -fx-text-fill: white;"/>
+                        </HBox>
+                        <TableView fx:id="transactionTable" VBox.vgrow="ALWAYS">
+                            <columns>
+                                <TableColumn fx:id="dateColumn" text="Date" prefWidth="150"/>
+                                <TableColumn fx:id="descriptionColumn" text="Description" prefWidth="300"/>
+                                <TableColumn fx:id="amountColumn" text="Amount" prefWidth="150"/>
+                                <TableColumn fx:id="statusColumn" text="Status" prefWidth="100"/>
+                                <TableColumn fx:id="paymentMethodColumn" text="Payment Method" prefWidth="150"/>
+                            </columns>
+                        </TableView>
+                    </VBox>
+                </TitledPane>
+            </VBox>
+        </ScrollPane>
+    </center>
+
+</BorderPane>
