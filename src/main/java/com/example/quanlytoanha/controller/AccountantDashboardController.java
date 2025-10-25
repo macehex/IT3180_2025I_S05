@@ -3,6 +3,7 @@ package com.example.quanlytoanha.controller;
 
 import com.example.quanlytoanha.model.ApartmentDebt;
 import com.example.quanlytoanha.model.DebtReport;
+import com.example.quanlytoanha.model.Invoice;
 import com.example.quanlytoanha.service.FinancialService;
 import com.example.quanlytoanha.session.SessionManager;
 import javafx.fxml.FXML;
@@ -35,6 +36,15 @@ public class AccountantDashboardController {
     public void initialize() {
         this.financialService = new FinancialService();
         loadDashboardData();
+
+        debtTable.setOnMouseClicked(event -> {
+            if (event.getClickCount() == 2) { // Chỉ xử lý khi click đúp
+                ApartmentDebt selectedDebt = debtTable.getSelectionModel().getSelectedItem();
+                if (selectedDebt != null) {
+                    handleViewDetails(selectedDebt);
+                }
+            }
+        });
     }
 
     @FXML
@@ -79,6 +89,41 @@ public class AccountantDashboardController {
             loginStage.show();
         } catch (IOException e) {
             e.printStackTrace();
+        }
+    }
+
+    private void handleViewDetails(ApartmentDebt selectedDebt) {
+        try {
+            // 1. Lấy dữ liệu chi tiết từ service
+            List<Invoice> invoiceList = financialService.getDetailedDebtForApartment(selectedDebt.getApartmentId());
+
+            if (invoiceList.isEmpty()) {
+                showAlert(Alert.AlertType.INFORMATION, "Thông báo", "Không tìm thấy chi tiết hóa đơn chưa thanh toán cho căn hộ này.");
+                return;
+            }
+
+            // 2. Tải FXML của cửa sổ chi tiết
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/example/quanlytoanha/view/debt_detail_view.fxml"));
+            Parent root = loader.load();
+
+            // 3. Lấy controller của cửa sổ mới
+            DebtDetailController detailController = loader.getController();
+
+            // 4. TRUYỀN DỮ LIỆU SANG
+            detailController.setData(selectedDebt, invoiceList);
+
+            // 5. Hiển thị cửa sổ mới (modal)
+            Stage detailStage = new Stage();
+            detailStage.setTitle("Chi tiết Công nợ");
+            detailStage.initOwner((Stage) debtTable.getScene().getWindow()); // Đặt cửa sổ cha
+            detailStage.setScene(new Scene(root));
+            detailStage.showAndWait(); // Hiển thị và chờ
+
+        } catch (SecurityException e) {
+            showAlert(Alert.AlertType.ERROR, "Lỗi Phân Quyền", e.getMessage());
+        } catch (IOException e) {
+            e.printStackTrace();
+            showAlert(Alert.AlertType.ERROR, "Lỗi Giao diện", "Không thể tải cửa sổ chi tiết.");
         }
     }
     /**
