@@ -98,7 +98,10 @@ public class LoginController {
                 fxmlFile = "/com/example/quanlytoanha/view/admin_dashboard.fxml";
             } else if (user.getRole() == Role.RESIDENT) {
                 fxmlFile = "/com/example/quanlytoanha/view/resident_dashboard.fxml";
-            } else {
+            } else if (user.getRole() == Role.ACCOUNTANT) {
+                fxmlFile = "/com/example/quanlytoanha/view/accountant_dashboard.fxml";
+            }
+            else {
                 // (Bạn có thể thêm case cho Kế toán, Công an...)
                 // Fallback (dự phòng)
                 fxmlFile = "/com/example/quanlytoanha/view/admin_dashboard.fxml";
@@ -126,6 +129,4 @@ public class LoginController {
     private void showError(String message) {
         errorText.setText(message);
     }
-
-    // (Xóa các hàm open/close/showError giả định cũ)
 }
