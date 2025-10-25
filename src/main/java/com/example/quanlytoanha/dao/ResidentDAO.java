@@ -1,3 +1,4 @@
+// Vị trí: src/main/java/com/example/quanlytoanha/dao/ResidentDAO.java
 package com.example.quanlytoanha.dao;
 
 import com.example.quanlytoanha.model.Resident;
@@ -10,11 +11,104 @@ import java.util.List;
 
 /**
  * DAO để truy vấn dữ liệu cư dân từ database
+ * (ĐÃ GỘP TÍNH NĂNG TỪ 2 BRANCH)
  */
 public class ResidentDAO {
-    
+
+    // ====================================================================
+    // --- CÁC PHƯƠNG THỨC TỪ 'topic/login-logout' (Create/Validate) ---
+    // ====================================================================
+
+    /**
+     * Kiểm tra Số căn cước (idCardNumber) đã tồn tại chưa trong DB.
+     * @param idCardNumber Số CCCD cần kiểm tra.
+     * @return true nếu số CCCD này duy nhất (chưa tồn tại), false nếu đã tồn tại.
+     */
+    public boolean isIdCardUnique(String idCardNumber) throws SQLException {
+        if (idCardNumber == null || idCardNumber.trim().isEmpty()) return true;
+
+        String SQL = "SELECT resident_id FROM residents WHERE id_card_number = ?";
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(SQL)) {
+
+            pstmt.setString(1, idCardNumber);
+            try (ResultSet rs = pstmt.executeQuery()) {
+                return !rs.next(); // Trả về TRUE nếu KHÔNG tìm thấy
+            }
+        }
+    }
+
+    /**
+     * Kiểm tra ID Căn hộ có tồn tại không.
+     * @param apartmentId ID Căn hộ.
+     * @return true nếu căn hộ tồn tại.
+     */
+    public boolean isApartmentExist(int apartmentId) throws SQLException {
+        // Giả định có bảng 'apartments'
+        String SQL = "SELECT apartment_id FROM apartments WHERE apartment_id = ?";
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(SQL)) {
+
+            pstmt.setInt(1, apartmentId);
+            try (ResultSet rs = pstmt.executeQuery()) {
+                return rs.next();
+            }
+        }
+    }
+
+    /**
+     * Thêm cư dân mới vào bảng 'residents'.
+     * @param resident Đối tượng Resident chứa dữ liệu cần lưu.
+     * @return true nếu thêm thành công.
+     */
+    public boolean addResident(Resident resident) throws SQLException {
+        // SỬA SQL: Loại bỏ status và move_in_date để khớp với Resident.java
+        String SQL = "INSERT INTO residents (apartment_id, user_id, full_name, date_of_birth, id_card_number, relationship) " +
+                "VALUES (?, ?, ?, ?, ?, ?)"; // CHỈ CÒN 6 THAM SỐ
+
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(SQL)) {
+
+            // 1. apartmentId
+            pstmt.setInt(1, resident.getApartmentId());
+
+            // 2. userId (Có thể NULL)
+            if (resident.getUserId() > 0) {
+                pstmt.setInt(2, resident.getUserId());
+            } else {
+                pstmt.setNull(2, java.sql.Types.INTEGER);
+            }
+
+            // 3. fullName
+            pstmt.setString(3, resident.getFullName());
+
+            // 4. dateOfBirth (Có thể NULL)
+            if (resident.getDateOfBirth() != null) {
+                pstmt.setDate(4, new java.sql.Date(resident.getDateOfBirth().getTime()));
+            } else {
+                pstmt.setNull(4, java.sql.Types.DATE);
+            }
+
+            // 5. idCardNumber
+            pstmt.setString(5, resident.getIdCardNumber());
+
+            // 6. relationship
+            pstmt.setString(6, resident.getRelationship());
+
+            int affectedRows = pstmt.executeUpdate();
+            return affectedRows > 0;
+        }
+    }
+
+
+    // ====================================================================
+    // --- CÁC PHƯƠNG THỨC TỪ 'feature/view-filter' (Read/Search/Stats) ---
+    // --- Đây là phiên bản được chọn để giữ lại ---
+    // ====================================================================
+
     /**
      * Lấy danh sách tất cả cư dân trong hệ thống
+     * (GIỮ PHIÊN BẢN CỦA 'feature/view-filter' VÌ CHI TIẾT HƠN)
      * @return Danh sách tất cả cư dân
      */
     public List<Resident> getAllResidents() {
@@ -201,6 +295,7 @@ public class ResidentDAO {
     
     /**
      * Chuyển đổi ResultSet thành đối tượng Resident
+     * (GIỮ PHIÊN BẢN CỦA 'feature/view-filter' VÌ CHI TIẾT HƠN)
      */
     private Resident mapResultSetToResident(ResultSet rs) throws SQLException {
         // Lấy thông tin từ bảng users
@@ -226,10 +321,15 @@ public class ResidentDAO {
         // Tạo đối tượng Resident
         Role role = Role.fromId(roleId);
         Resident resident = new Resident(userId, username, email, fullName, role, 
-                                       createdAt, lastLogin, phoneNumber,
-                                       residentId, apartmentId, dateOfBirth, 
-                                       idCardNumber, relationship, status, moveInDate, moveOutDate);
+                                        createdAt, lastLogin, phoneNumber,
+                                        residentId, apartmentId, dateOfBirth, 
+                                        idCardNumber, relationship, status, moveInDate, moveOutDate);
         
+        // Thêm các thuộc tính JOIN (từ 'feature/view-filter')
+        // (Giả sử bạn đã thêm setter cho các trường này trong model 'Resident')
+        // resident.setApartmentArea(rs.getDouble("area"));
+        // resident.setOwnerName(rs.getString("owner_name"));
+
         return resident;
     }
 }

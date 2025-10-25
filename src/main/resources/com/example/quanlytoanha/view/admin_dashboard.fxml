@@ -1,20 +1,48 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<?import javafx.scene.layout.VBox?>
-<?import javafx.scene.control.Label?>
-<?import javafx.geometry.Insets?>
-<?import javafx.scene.text.Font?>
 
-<VBox alignment="CENTER" prefHeight="300.0" prefWidth="500.0" spacing="20.0" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.quanlytoanha.controller.AdminDashboardController">
-    <children>
-        <Label text="🏢 ADMIN DASHBOARD">
-            <font>
-                <Font name="System Bold" size="28.0" />
-            </font>
-        </Label>
-        <Label fx:id="lblWelcome" text="Xin chào, Admin" />
-        <Label text="Đang chuyển đến giao diện quản lý cư dân..." textFill="#7f8c8d" />
-    </children>
-    <padding>
-        <Insets bottom="30.0" left="30.0" right="30.0" top="30.0" />
-    </padding>
-</VBox>
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
+
+<AnchorPane xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.quanlytoanha.controller.AdminDashboardController">
+
+    <VBox layoutX="5.0" layoutY="7.0" prefHeight="452.0" prefWidth="618.0" spacing="15.0" AnchorPane.leftAnchor="5.0" AnchorPane.topAnchor="7.0">
+        <children>
+            <Label fx:id="lblWelcome" text="Chào mừng, Ban Quản Trị">
+                <font><Font size="18.0" /></font>
+            </Label>
+
+            <Label style="-fx-font-weight: bold;" text="QUẢN LÝ TÀI KHOẢN VÀ CƯ DÂN" />
+
+            <Button fx:id="btnThemCuDan" text="➕ Thêm Hồ Sơ Cư Dân Mới" />
+
+            <Button fx:id="btnQuanLyTaiKhoan" text="👤 Quản Lý Tài Khoản Người Dùng" />
+
+            <Button text="📋 Xem Danh Sách Cư Dân Chi Tiết" />
+
+            <Label style="-fx-font-weight: bold;" text="QUẢN LÝ VẬN HÀNH TÒA NHÀ">
+                <VBox.margin>
+                    <Insets top="15.0" />
+                </VBox.margin>
+            </Label>
+
+            <Button fx:id="btnQuanLyHoaDon" text="💰 Quản Lý Hóa Đơn &amp; Công Nợ" />
+
+            <Button fx:id="btnTaoThongBao" text="📢 Tạo &amp; Gửi Thông Báo Chung" />
+
+            <Button fx:id="btnXemYeuCauDichVu" text="🛠️ Xem &amp; Xử Lý Yêu Cầu Dịch Vụ" />
+
+            <Button text="🏠 Quản Lý Tài Sản &amp; Thiết Bị Chung" />
+
+            <Region VBox.vgrow="ALWAYS" />
+
+            <Button fx:id="btnLogout" onAction="#handleLogout" prefHeight="25.0" prefWidth="100.0" text="Đăng xuất ↪">
+                <VBox.margin>
+                    <Insets top="20.0" />
+                </VBox.margin>
+            </Button>
+
+        </children>
+    </VBox>
+</AnchorPane>

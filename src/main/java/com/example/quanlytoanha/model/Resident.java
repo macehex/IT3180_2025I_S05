@@ -4,7 +4,7 @@ package com.example.quanlytoanha.model;
 import java.sql.Timestamp;
 import java.util.Date;
 // Giả sử bạn có cả các model khác như Vehicle, Apartment
-// import java.util.List;
+import java.util.List;
 
 /**
  * Đại diện cho Cư dân. Kế thừa từ User và thêm các thông tin
@@ -23,6 +23,11 @@ public class Resident extends User {
     private Date moveOutDate; // Ngày chuyển đi
     // private List<Vehicle> vehicles; // Có thể thêm sau
 
+    public Resident() {
+        super(); // Gọi constructor rỗng của lớp cha (User)
+        // Bạn có thể gán các giá trị mặc định cho các trường của Resident ở đây nếu cần
+    }
+
     // Constructor
     public Resident(int userId, String username, String email, String fullName, Role role, Timestamp createdAt, Timestamp lastLogin, String phoneNumber,
                     int residentId, int apartmentId, Date dateOfBirth, String idCardNumber, String relationship) {
@@ -39,7 +44,7 @@ public class Resident extends User {
         this.status = "RESIDING"; // Mặc định
     }
     
-    // Constructor đầy đủ
+    // Constructor đầy đủ (GIỮ PHIÊN BẢN TỪ 'feature/view-filter')
     public Resident(int userId, String username, String email, String fullName, Role role, Timestamp createdAt, Timestamp lastLogin, String phoneNumber,
                     int residentId, int apartmentId, Date dateOfBirth, String idCardNumber, String relationship, String status, Date moveInDate, Date moveOutDate) {
 
@@ -120,6 +125,8 @@ public class Resident extends User {
     public void setRelationship(String relationship) {
         this.relationship = relationship;
     }
+    
+    // --- GIỮ CÁC GETTER/SETTER TỪ 'feature/view-filter' ---
     
     public String getStatus() {
         return status;

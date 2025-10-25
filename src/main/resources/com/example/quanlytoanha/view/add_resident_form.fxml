@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.DatePicker?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.text.Font?>
+
+<GridPane alignment="TOP_LEFT" hgap="10" vgap="10"
+          xmlns="http://javafx.com/javafx/17"
+          xmlns:fx="http://javafx.com/fxml/1"
+          fx:controller="com.example.quanlytoanha.controller.AddResidentController">
+    <padding><Insets bottom="20.0" left="20.0" right="20.0" top="20.0" /></padding>
+
+    <Label text="TẠO HỒ SƠ CƯ DÂN MỚI" GridPane.columnIndex="0" GridPane.columnSpan="2" GridPane.rowIndex="0">
+        <font><Font size="16.0" /></font>
+    </Label>
+
+    <Label text="1. Họ tên (*):" GridPane.columnIndex="0" GridPane.rowIndex="1" />
+    <TextField fx:id="txtFullName" promptText="Nguyễn Văn A" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+
+    <Label text="2. Căn hộ (*):" GridPane.columnIndex="0" GridPane.rowIndex="2" />
+    <ComboBox fx:id="cbApartmentId" promptText="Chọn Căn hộ" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+
+    <Label text="3. Số CCCD/CMND:" GridPane.columnIndex="0" GridPane.rowIndex="3" />
+    <TextField fx:id="txtIdCard" promptText="Ví dụ: 001200000000" GridPane.columnIndex="1" GridPane.rowIndex="3" />
+
+    <Label text="4. Ngày sinh:" GridPane.columnIndex="0" GridPane.rowIndex="4" />
+    <DatePicker fx:id="dpDateOfBirth" promptText="Chọn ngày" GridPane.columnIndex="1" GridPane.rowIndex="4" />
+
+    <Label text="5. Mối quan hệ:" GridPane.columnIndex="0" GridPane.rowIndex="5" />
+    <ComboBox fx:id="cbRelationship" promptText="Chọn mối quan hệ" GridPane.columnIndex="1" GridPane.rowIndex="5" />
+
+    <HBox alignment="CENTER_RIGHT" spacing="10" GridPane.columnIndex="1" GridPane.rowIndex="6" >
+        <Button fx:id="btnSave" text="Lưu Hồ Sơ" onAction="#handleSaveButtonAction" />
+        <Button text="Hủy Bỏ" onAction="#handleCancelButtonAction" />
+    </HBox>
+
+</GridPane>
+
+
