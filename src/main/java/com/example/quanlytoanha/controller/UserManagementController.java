@@ -135,13 +135,19 @@ public class UserManagementController {
     private void openResidentForm(Resident residentToEdit) {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/example/quanlytoanha/view/add_resident_form.fxml"));
+
+            // ⚠️ DÒNG NÀY PHẢI ĐƯỢC GỌI ĐẦU TIÊN
             Parent root = loader.load();
 
             // Lấy Controller của form
             AddResidentController controller = loader.getController();
 
+            // *** GỌI HÀM KHỞI TẠO COMBOBOX MỚI ĐÃ TÁCH LOGIC ***
+            //controller.initComboBoxes(); // <--- Dòng mới được thêm
+
             // Thiết lập chế độ Sửa nếu có đối tượng Resident
             if (residentToEdit != null) {
+                // Phương thức setResident sẽ điền dữ liệu vào các ComboBox đã được init
                 controller.setResident(residentToEdit);
             }
 

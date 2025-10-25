@@ -4,6 +4,7 @@ package com.example.quanlytoanha.controller;
 import com.example.quanlytoanha.service.ValidationException;
 import com.example.quanlytoanha.model.Resident;
 import com.example.quanlytoanha.service.ResidentService;
+import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.stage.Stage;
@@ -36,17 +37,32 @@ public class AddResidentController {
      */
     @FXML
     public void initialize() {
-        // 1. Khởi tạo ComboBox Căn hộ (Apartment IDs)
-        cbApartmentId.getItems().addAll(101, 102, 201, 202, 301, 302);
+        // ⚠️ Bọc toàn bộ logic trong try-catch để bắt lỗi (nếu có)
+        try {
+            // 1. Khởi tạo ComboBox Căn hộ (Sử dụng setItems an toàn)
+            if (cbApartmentId != null) {
+                cbApartmentId.setItems(FXCollections.observableArrayList(
+                        101, 102, 201, 202, 301, 302
+                ));
+            }
 
-        // 2. Khởi tạo ComboBox Mối quan hệ
-        cbRelationship.getItems().addAll("Chủ hộ", "Vợ/Chồng", "Con", "Khách thuê");
+            // 2. Khởi tạo ComboBox Mối quan hệ (Sử dụng setItems an toàn)
+            if (cbRelationship != null) {
+                cbRelationship.setItems(FXCollections.observableArrayList(
+                        "Chủ hộ", "Vợ/Chồng", "Con", "Khách thuê"
+                ));
+            }
 
-        // Mặc định tiêu đề là Thêm Mới
-        if (titleLabel != null) {
-            titleLabel.setText("THÊM HỒ SƠ CƯ DÂN MỚI");
+            // Mặc định tiêu đề là Thêm Mới (chỉ hoạt động nếu titleLabel được tiêm đúng)
+            if (titleLabel != null) {
+                titleLabel.setText("THÊM HỒ SƠ CƯ DÂN MỚI");
+            }
+        } catch (Exception e) {
+            System.err.println("LỖI KHỞI TẠO COMBOBOX TRONG ADD_RESIDENT_CONTROLLER:");
+            e.printStackTrace();
         }
     }
+
 
     /**
      * Thiết lập Controller sang chế độ SỬA/CẬP NHẬT và điền dữ liệu cũ.
@@ -55,40 +71,89 @@ public class AddResidentController {
     public void setResident(Resident resident) {
         this.residentToEdit = resident;
 
-        // 1. Cập nhật giao diện
+        // *** KHÔNG CẦN TRY/CATCH BAO BỌC NỮA, CHỈ TRY CATCH TỪNG PHẦN ***
         if (titleLabel != null) {
-            titleLabel.setText("CẬP NHẬT HỒ SƠ CƯ DÂN");
+            titleLabel.setText("CAP NHAT HO SO CU DAN"); // Dùng tiếng Việt không dấu
         }
-        btnSave.setText("CẬP NHẬT");
-
-        // 2. Điền dữ liệu vào form - THÊM CÁC KIỂM TRA NULL AN TOÀN TẠI ĐÂY
-
-        // Xử lý các trường String (Sử dụng chuỗi rỗng nếu giá trị là null)
-        txtFullName.setText(resident.getFullName() != null ? resident.getFullName() : "");
-        txtIdCard.setText(resident.getIdCardNumber() != null ? resident.getIdCardNumber() : "");
-        txtPhoneNumber.setText(resident.getPhoneNumber() != null ? resident.getPhoneNumber() : "");
-
-        // Xử lý DatePicker (Đã đúng)
-        if (resident.getDateOfBirth() != null) {
-            LocalDate localDate = resident.getDateOfBirth().toInstant()
-                    .atZone(ZoneId.systemDefault()).toLocalDate();
-            dpDateOfBirth.setValue(localDate);
-        } else {
-            dpDateOfBirth.setValue(null);
+        if (btnSave != null) {
+            btnSave.setText("CAP NHAT"); // Dùng tiếng Việt không dấu
         }
 
-        // Xử lý ComboBox ApartmentId
-        // Đảm bảo getApartmentId > 0 (vì nó là int)
-        if (resident.getApartmentId() > 0) {
-            // Integer.valueOf() là an toàn vì getApartmentId là int
-            cbApartmentId.getSelectionModel().select(Integer.valueOf(resident.getApartmentId()));
+        // --- SECTION A: STRING FIELDS ---
+        try {
+            if (txtFullName != null) {
+                txtFullName.setText(resident.getFullName() != null ? resident.getFullName() : "");
+            }
+            if (txtIdCard != null) {
+                txtIdCard.setText(resident.getIdCardNumber() != null ? resident.getIdCardNumber() : "");
+            }
+            if (txtPhoneNumber != null) {
+                txtPhoneNumber.setText(resident.getPhoneNumber() != null ? resident.getPhoneNumber() : "");
+            }
+        } catch (Exception e) {
+            System.err.println("!!! ERROR A: STRING FIELDS FAILED");
+            e.printStackTrace();
+            throw new RuntimeException("ERROR A: STRING FIELDS FAILED", e); // Ném lỗi rõ ràng
         }
 
-        // Xử lý ComboBox Relationship
-        if (resident.getRelationship() != null) {
-            cbRelationship.getSelectionModel().select(resident.getRelationship());
-        } else {
-            cbRelationship.getSelectionModel().clearSelection(); // Xóa lựa chọn nếu null
+        // --- SECTION B: DATE PICKER ---
+        try {
+            if (dpDateOfBirth != null) {
+                Date dob = resident.getDateOfBirth();
+
+                // Đảm bảo dob KHÔNG NULL và CÓ THỂ CHUYỂN ĐỔI.
+                if (dob != null) {
+                    // Cố gắng chuyển đổi
+                    try {
+                        LocalDate localDate = dob.toInstant()
+                                .atZone(ZoneId.systemDefault()).toLocalDate();
+                        dpDateOfBirth.setValue(localDate);
+                    } catch (Exception dateEx) {
+                        // Nếu chuyển đổi thất bại (dữ liệu không hợp lệ), đặt giá trị null
+                        System.err.println("CANH BAO: Ngay sinh khong hop le trong DB. Dat gia tri null. " + dateEx.getMessage());
+                        dpDateOfBirth.setValue(null);
+                    }
+                } else {
+                    // Nếu dob là NULL, đặt giá trị null
+                    dpDateOfBirth.setValue(null);
+                }
+            }
+        } catch (Exception e) {
+            System.err.println("!!! ERROR B: DATE PICKER FAILED (Sau Fix)");
+            e.printStackTrace();
+            throw new RuntimeException("ERROR B: DATE PICKER FAILED (Sau Fix)", e);
+        }
+
+        // --- SECTION C: APARTMENT COMBOBOX ---
+        try {
+            if (cbApartmentId != null && resident.getApartmentId() > 0) {
+                Integer selectedApartmentId = Integer.valueOf(resident.getApartmentId());
+                if (cbApartmentId.getItems() != null && cbApartmentId.getItems().contains(selectedApartmentId)) {
+                    cbApartmentId.getSelectionModel().select(selectedApartmentId);
+                } else {
+                    cbApartmentId.getSelectionModel().clearSelection();
+                }
+            }
+        } catch (Exception e) {
+            System.err.println("!!! ERROR C: APARTMENT COMBOBOX FAILED");
+            e.printStackTrace();
+            throw new RuntimeException("ERROR C: APARTMENT COMBOBOX FAILED", e); // Ném lỗi rõ ràng
+        }
+
+        // --- SECTION D: RELATIONSHIP COMBOBOX ---
+        try {
+            if (cbRelationship != null && resident.getRelationship() != null) {
+                String selectedRelationship = resident.getRelationship();
+                if (cbRelationship.getItems() != null && cbRelationship.getItems().contains(selectedRelationship)) {
+                    cbRelationship.getSelectionModel().select(selectedRelationship);
+                } else {
+                    cbRelationship.getSelectionModel().clearSelection();
+                }
+            }
+        } catch (Exception e) {
+            System.err.println("!!! ERROR D: RELATIONSHIP COMBOBOX FAILED");
+            e.printStackTrace();
+            throw new RuntimeException("ERROR D: RELATIONSHIP COMBOBOX FAILED", e); // Ném lỗi rõ ràng
         }
     }
 

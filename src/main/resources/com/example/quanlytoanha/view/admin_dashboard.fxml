@@ -25,7 +25,7 @@
 
             <Button fx:id="btnQuanLyTaiKhoan"
 
-                    text="👤 Quản Lý Tài Khoản Người Dùng"
+                    text="👤 Quản Lý Hồ Sơ Cư Dân"
             />
 
             <Button text="📋 Xem Danh Sách Cư Dân Chi Tiết"/>

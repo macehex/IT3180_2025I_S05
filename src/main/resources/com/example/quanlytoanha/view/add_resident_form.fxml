@@ -16,7 +16,7 @@
           fx:controller="com.example.quanlytoanha.controller.AddResidentController">
     <padding><Insets bottom="20.0" left="20.0" right="20.0" top="20.0" /></padding>
 
-    <Label text="THÊM CƯ DÂN MỚI" GridPane.columnIndex="0" GridPane.columnSpan="2" GridPane.rowIndex="0">
+    <Label fx:id="titleLabel" text="THÊM CƯ DÂN MỚI" GridPane.columnIndex="0" GridPane.columnSpan="2" GridPane.rowIndex="0">
         <font><Font size="16.0" /></font>
     </Label>
 
@@ -44,5 +44,3 @@
     </HBox>
 
 </GridPane>
-
-
