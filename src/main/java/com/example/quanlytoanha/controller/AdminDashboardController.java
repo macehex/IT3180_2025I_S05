@@ -98,8 +98,30 @@ public class AdminDashboardController {
     // LƯU Ý: Đã bỏ @FXML khỏi tất cả các hàm này
     // ====================================================================
 
+    /**
+     * Xử lý sự kiện khi nhấn nút "Quản Lý Tài Khoản" (Mở màn hình UserManagement).
+     */
     private void handleQuanLyTaiKhoan() {
-        showAlert(Alert.AlertType.INFORMATION, "Thông báo", "Chức năng Quản lý Tài khoản chưa được triển khai.");
+        try {
+            // *** ĐẢM BẢO TÊN FILE FXML NÀY ĐÚNG VỚI TÊN FILE CỦA BẠN (ví dụ: UserManagement.fxml) ***
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/example/quanlytoanha/view/UserManagement.fxml"));
+            Parent root = loader.load();
+
+            Stage quanLyStage = new Stage();
+            quanLyStage.setTitle("Quản Lý Hồ Sơ Cư Dân");
+            quanLyStage.initModality(Modality.WINDOW_MODAL);
+
+            // Thiết lập cửa sổ cha là chủ sở hữu
+            Stage currentStage = (Stage) btnQuanLyTaiKhoan.getScene().getWindow();
+            quanLyStage.initOwner(currentStage);
+
+            quanLyStage.setScene(new Scene(root));
+            quanLyStage.show(); // Dùng show() để cửa sổ Dashboard vẫn mở
+
+        } catch (IOException e) {
+            e.printStackTrace();
+            showAlert(Alert.AlertType.ERROR, "Lỗi Giao diện", "Không thể tải màn hình Quản lý Tài khoản. Vui lòng kiểm tra file FXML.");
+        }
     }
 
     private void handleQuanLyHoaDon() {

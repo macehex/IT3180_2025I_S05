@@ -3,8 +3,9 @@ package com.example.quanlytoanha.dao;
 
 import com.example.quanlytoanha.model.Resident;
 import com.example.quanlytoanha.utils.DatabaseConnection; // Lớp tiện ích hiện có
-
+import com.example.quanlytoanha.model.Role;
 import java.sql.*;
+import java.util.Date; // Cần thiết cho DateOfBirth
 
 public class ResidentDAO {
 
@@ -156,5 +157,71 @@ public class ResidentDAO {
         resident.setRelationship(relationship);
 
         return resident;
+    }
+
+    /**
+     * Phương thức mới: Lấy Resident đầy đủ từ DB để nạp vào form Edit.
+     * Thực hiện JOIN giữa bảng users và residents để có đủ thông tin.
+     * @param userId ID của người dùng.
+     * @return Đối tượng Resident hoàn chỉnh hoặc null nếu không tìm thấy.
+     */
+    public Resident getResidentByUserId(int userId) throws SQLException {
+        Resident resident = null;
+
+        // Truy vấn JOIN: Lấy tất cả cột từ users (u) và residents (r)
+        String SQL = "SELECT u.*, r.* FROM users u " +
+                "JOIN residents r ON u.user_id = r.user_id " +
+                "WHERE u.user_id = ?";
+
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(SQL)) {
+
+            pstmt.setInt(1, userId);
+            try (ResultSet rs = pstmt.executeQuery()) {
+                if (rs.next()) {
+                    System.out.println("DAO DEBUG: Đã tìm thấy bản ghi cho User ID: " + userId);
+
+                    // Khởi tạo đối tượng bằng constructor rỗng
+                    resident = new Resident();
+
+                    // --- 1. ÁNH XẠ DỮ LIỆU USER (TỪ BẢNG 'users') ---
+                    try {
+                        resident.setUserId(rs.getInt("user_id"));
+                        resident.setUsername(rs.getString("username"));
+                        resident.setEmail(rs.getString("email"));
+                        resident.setFullName(rs.getString("full_name"));
+
+                        // Ánh xạ Role
+                        int roleId = rs.getInt("role_id");
+                        resident.setRole(Role.fromId(roleId));
+
+                        // CÁC TRƯỜNG THỜI GIAN/THAM SỐ CÓ THỂ NULL (RẤT DỄ GÂY LỖI NẾU KHÔNG XỬ LÝ)
+                        resident.setCreatedAt(rs.getTimestamp("created_at"));
+                        resident.setLastLogin(rs.getTimestamp("last_login"));
+                        resident.setPhoneNumber(rs.getString("phone_number"));
+
+                        // --- 2. ÁNH XẠ DỮ LIỆU RESIDENT (TỪ BẢNG 'residents') ---
+                        resident.setResidentId(rs.getInt("resident_id"));
+                        resident.setApartmentId(rs.getInt("apartment_id"));
+
+                        // Xử lý DateOfBirth (DÙNG rs.getDate() trả về java.util.Date)
+                        resident.setDateOfBirth(rs.getDate("date_of_birth"));
+
+                        resident.setIdCardNumber(rs.getString("id_card_number"));
+                        resident.setRelationship(rs.getString("relationship"));
+
+                    } catch (Exception e) {
+                        // Nếu có lỗi, in ra ngoại lệ thực sự và ném lại SQL Exception
+                        System.err.println("LỖI ÁNH XẠ DỮ LIỆU RESIDENT:");
+                        e.printStackTrace();
+                        // Ném lại ngoại lệ để tầng Controller xử lý và hiển thị lỗi
+                        throw new SQLException("Lỗi ánh xạ dữ liệu: " + e.getMessage(), e);
+                    }
+
+                    // Không cần dòng "TẠO ĐỐI TƯỢNG RESIDENT BẰNG CONSTRUCTOR" cũ nữa
+                }
+                return resident;
+            }
+        }
     }
 }
