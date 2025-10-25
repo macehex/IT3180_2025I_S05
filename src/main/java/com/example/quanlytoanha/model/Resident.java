@@ -18,6 +18,9 @@ public class Resident extends User {
     private Date dateOfBirth;
     private String idCardNumber;
     private String relationship; // (Quan hệ với chủ hộ)
+    private String status; // Trạng thái cư dân
+    private Date moveInDate; // Ngày vào ở
+    private Date moveOutDate; // Ngày chuyển đi
     // private List<Vehicle> vehicles; // Có thể thêm sau
 
     // Constructor
@@ -33,6 +36,25 @@ public class Resident extends User {
         this.dateOfBirth = dateOfBirth;
         this.idCardNumber = idCardNumber;
         this.relationship = relationship;
+        this.status = "RESIDING"; // Mặc định
+    }
+    
+    // Constructor đầy đủ
+    public Resident(int userId, String username, String email, String fullName, Role role, Timestamp createdAt, Timestamp lastLogin, String phoneNumber,
+                    int residentId, int apartmentId, Date dateOfBirth, String idCardNumber, String relationship, String status, Date moveInDate, Date moveOutDate) {
+
+        // Gọi constructor của lớp cha (User)
+        super(userId, username, email, fullName, role, createdAt, lastLogin, phoneNumber);
+
+        // Gán các trường của riêng lớp Resident
+        this.residentId = residentId;
+        this.apartmentId = apartmentId;
+        this.dateOfBirth = dateOfBirth;
+        this.idCardNumber = idCardNumber;
+        this.relationship = relationship;
+        this.status = status;
+        this.moveInDate = moveInDate;
+        this.moveOutDate = moveOutDate;
     }
 
     /**
@@ -97,5 +119,29 @@ public class Resident extends User {
 
     public void setRelationship(String relationship) {
         this.relationship = relationship;
+    }
+    
+    public String getStatus() {
+        return status;
+    }
+    
+    public void setStatus(String status) {
+        this.status = status;
+    }
+    
+    public Date getMoveInDate() {
+        return moveInDate;
+    }
+    
+    public void setMoveInDate(Date moveInDate) {
+        this.moveInDate = moveInDate;
+    }
+    
+    public Date getMoveOutDate() {
+        return moveOutDate;
+    }
+    
+    public void setMoveOutDate(Date moveOutDate) {
+        this.moveOutDate = moveOutDate;
     }
 }

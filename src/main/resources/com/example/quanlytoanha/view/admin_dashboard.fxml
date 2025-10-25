@@ -4,16 +4,17 @@
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.text.Font?>
 
-<VBox alignment="CENTER" prefHeight="300.0" prefWidth="400.0" spacing="20.0" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1">
+<VBox alignment="CENTER" prefHeight="300.0" prefWidth="500.0" spacing="20.0" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.quanlytoanha.controller.AdminDashboardController">
     <children>
-        <Label text="ADMIN DASHBOARD">
+        <Label text="🏢 ADMIN DASHBOARD">
             <font>
-                <Font name="System Bold" size="24.0" />
+                <Font name="System Bold" size="28.0" />
             </font>
         </Label>
-        <Label text="Bạn đã đăng nhập với vai trò Quản Trị Viên." />
+        <Label fx:id="lblWelcome" text="Xin chào, Admin" />
+        <Label text="Đang chuyển đến giao diện quản lý cư dân..." textFill="#7f8c8d" />
     </children>
     <padding>
-        <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
+        <Insets bottom="30.0" left="30.0" right="30.0" top="30.0" />
     </padding>
 </VBox>
