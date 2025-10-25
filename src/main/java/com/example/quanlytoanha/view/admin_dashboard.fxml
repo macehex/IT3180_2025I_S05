@@ -28,7 +28,10 @@
                     text="👤 Quản Lý Tài Khoản Người Dùng"
             />
 
-            <Button text="📋 Xem Danh Sách Cư Dân Chi Tiết"/>
+            <Button fx:id="btnXemDanhSachCuDan"
+                    onAction="#handleOpenResidentList"
+                    text="📋 Xem Danh Sách Cư Dân Chi Tiết"
+            />
 
             <Label text="QUẢN LÝ VẬN HÀNH TÒA NHÀ" style="-fx-font-weight: bold;">
                 <VBox.margin>

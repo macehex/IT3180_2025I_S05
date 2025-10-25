@@ -5,6 +5,8 @@ import com.example.quanlytoanha.model.ResidentPOJO;
 import com.example.quanlytoanha.utils.DatabaseConnection; // Lớp tiện ích hiện có
 
 import java.sql.*;
+import java.util.ArrayList;
+import java.util.List;
 
 public class ResidentDAO {
 
@@ -92,6 +94,195 @@ public class ResidentDAO {
             int affectedRows = pstmt.executeUpdate();
             return affectedRows > 0;
 
+        }
+    }
+
+    /**
+     * Lấy danh sách tất cả cư dân với thông tin đầy đủ từ database.
+     * Bao gồm thông tin từ bảng residents và users.
+     * @return Danh sách ResidentPOJO với thông tin đầy đủ
+     */
+    public List<ResidentPOJO> getAllResidents() throws SQLException {
+        List<ResidentPOJO> residents = new ArrayList<>();
+        
+        String SQL = """
+            SELECT r.resident_id, r.apartment_id, r.user_id, r.full_name, 
+                   r.date_of_birth, r.id_card_number, r.relationship, r.status, r.move_in_date,
+                   u.phone_number, u.email
+            FROM residents r
+            LEFT JOIN users u ON r.user_id = u.user_id
+            ORDER BY r.resident_id
+            """;
+        
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(SQL);
+             ResultSet rs = pstmt.executeQuery()) {
+            
+            while (rs.next()) {
+                ResidentPOJO resident = new ResidentPOJO();
+                resident.setResidentId(rs.getInt("resident_id"));
+                resident.setApartmentId(rs.getInt("apartment_id"));
+                
+                int userId = rs.getInt("user_id");
+                if (!rs.wasNull()) {
+                    resident.setUserId(userId);
+                }
+                
+                resident.setFullName(rs.getString("full_name"));
+                
+                Date dateOfBirth = rs.getDate("date_of_birth");
+                if (dateOfBirth != null) {
+                    resident.setDateOfBirth(dateOfBirth);
+                }
+                
+                resident.setIdCardNumber(rs.getString("id_card_number"));
+                resident.setRelationship(rs.getString("relationship"));
+                resident.setStatus(rs.getString("status"));
+                
+                Date moveInDate = rs.getDate("move_in_date");
+                if (moveInDate != null) {
+                    resident.setMoveInDate(moveInDate);
+                }
+                
+                // Thêm thông tin từ bảng users
+                String phoneNumber = rs.getString("phone_number");
+                String email = rs.getString("email");
+                
+                // Tạo một lớp mở rộng để chứa thông tin bổ sung
+                ExtendedResidentPOJO extendedResident = new ExtendedResidentPOJO(resident);
+                extendedResident.setPhoneNumber(phoneNumber);
+                extendedResident.setEmail(email);
+                
+                residents.add(extendedResident);
+            }
+        }
+        
+        return residents;
+    }
+
+    /**
+     * Tìm kiếm cư dân theo các tiêu chí.
+     * @param name Tên cư dân (có thể null)
+     * @param apartmentId ID căn hộ (có thể null)
+     * @param status Trạng thái (có thể null)
+     * @return Danh sách cư dân phù hợp
+     */
+    public List<ResidentPOJO> searchResidents(String name, Integer apartmentId, String status) throws SQLException {
+        List<ResidentPOJO> residents = new ArrayList<>();
+        
+        StringBuilder SQL = new StringBuilder("""
+            SELECT r.resident_id, r.apartment_id, r.user_id, r.full_name, 
+                   r.date_of_birth, r.id_card_number, r.relationship, r.status, r.move_in_date,
+                   u.phone_number, u.email
+            FROM residents r
+            LEFT JOIN users u ON r.user_id = u.user_id
+            WHERE 1=1
+            """);
+        
+        List<Object> parameters = new ArrayList<>();
+        
+        if (name != null && !name.trim().isEmpty()) {
+            SQL.append(" AND LOWER(r.full_name) LIKE LOWER(?)");
+            parameters.add("%" + name.trim() + "%");
+        }
+        
+        if (apartmentId != null) {
+            SQL.append(" AND r.apartment_id = ?");
+            parameters.add(apartmentId);
+        }
+        
+        if (status != null && !status.trim().isEmpty()) {
+            SQL.append(" AND r.status = ?");
+            parameters.add(status.trim());
+        }
+        
+        SQL.append(" ORDER BY r.resident_id");
+        
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(SQL.toString())) {
+            
+            // Set parameters
+            for (int i = 0; i < parameters.size(); i++) {
+                pstmt.setObject(i + 1, parameters.get(i));
+            }
+            
+            try (ResultSet rs = pstmt.executeQuery()) {
+                while (rs.next()) {
+                    ResidentPOJO resident = new ResidentPOJO();
+                    resident.setResidentId(rs.getInt("resident_id"));
+                    resident.setApartmentId(rs.getInt("apartment_id"));
+                    
+                    int userId = rs.getInt("user_id");
+                    if (!rs.wasNull()) {
+                        resident.setUserId(userId);
+                    }
+                    
+                    resident.setFullName(rs.getString("full_name"));
+                    
+                    Date dateOfBirth = rs.getDate("date_of_birth");
+                    if (dateOfBirth != null) {
+                        resident.setDateOfBirth(dateOfBirth);
+                    }
+                    
+                    resident.setIdCardNumber(rs.getString("id_card_number"));
+                    resident.setRelationship(rs.getString("relationship"));
+                    resident.setStatus(rs.getString("status"));
+                    
+                    Date moveInDate = rs.getDate("move_in_date");
+                    if (moveInDate != null) {
+                        resident.setMoveInDate(moveInDate);
+                    }
+                    
+                    // Thêm thông tin từ bảng users
+                    String phoneNumber = rs.getString("phone_number");
+                    String email = rs.getString("email");
+                    
+                    // Tạo một lớp mở rộng để chứa thông tin bổ sung
+                    ExtendedResidentPOJO extendedResident = new ExtendedResidentPOJO(resident);
+                    extendedResident.setPhoneNumber(phoneNumber);
+                    extendedResident.setEmail(email);
+                    
+                    residents.add(extendedResident);
+                }
+            }
+        }
+        
+        return residents;
+    }
+
+    /**
+     * Lớp mở rộng ResidentPOJO để chứa thông tin từ bảng users
+     */
+    public static class ExtendedResidentPOJO extends ResidentPOJO {
+        private String phoneNumber;
+        private String email;
+        
+        public ExtendedResidentPOJO(ResidentPOJO resident) {
+            this.setResidentId(resident.getResidentId());
+            this.setApartmentId(resident.getApartmentId());
+            this.setUserId(resident.getUserId());
+            this.setFullName(resident.getFullName());
+            this.setDateOfBirth(resident.getDateOfBirth());
+            this.setIdCardNumber(resident.getIdCardNumber());
+            this.setRelationship(resident.getRelationship());
+            this.setStatus(resident.getStatus());
+            this.setMoveInDate(resident.getMoveInDate());
+        }
+        
+        public String getPhoneNumber() {
+            return phoneNumber;
+        }
+        
+        public void setPhoneNumber(String phoneNumber) {
+            this.phoneNumber = phoneNumber;
+        }
+        
+        public String getEmail() {
+            return email;
+        }
+        
+        public void setEmail(String email) {
+            this.email = email;
         }
     }
 }

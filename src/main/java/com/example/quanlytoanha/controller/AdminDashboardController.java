@@ -23,6 +23,8 @@ public class AdminDashboardController {
     @FXML private Button btnQuanLyHoaDon;
     @FXML private Button btnTaoThongBao;
     @FXML private Button btnXemYeuCauDichVu;
+    @FXML private Button btnXemDanhSachCuDan;
+    @FXML private Button btnLogout;
 
     /**
      * Phương thức được gọi tự động sau khi FXML được tải.
@@ -96,6 +98,62 @@ public class AdminDashboardController {
     @FXML
     private void handleXemYeuCauDichVu() {
         showAlert(Alert.AlertType.INFORMATION, "Thông báo", "Chức năng Xem Yêu cầu Dịch vụ chưa được triển khai.");
+    }
+
+    /**
+     * Xử lý sự kiện khi Ban Quản Trị nhấn nút "Xem Danh Sách Cư Dân".
+     * Mở cửa sổ resident_list.fxml.
+     */
+    @FXML
+    private void handleOpenResidentList() {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/example/quanlytoanha/view/resident_list.fxml"));
+            Parent root = loader.load();
+
+            Stage residentListStage = new Stage();
+            residentListStage.setTitle("Quản lý cư dân - Hệ thống quản lý tòa nhà");
+            residentListStage.initModality(Modality.WINDOW_MODAL);
+
+            // Thiết lập cửa sổ cha là chủ sở hữu
+            Stage currentStage = (Stage) btnXemDanhSachCuDan.getScene().getWindow();
+            residentListStage.initOwner(currentStage);
+
+            residentListStage.setScene(new Scene(root, 1000, 700));
+            residentListStage.setResizable(true);
+            residentListStage.showAndWait();
+
+        } catch (IOException e) {
+            e.printStackTrace();
+            showAlert(Alert.AlertType.ERROR, "Lỗi Giao diện", "Không thể tải màn hình danh sách cư dân. Vui lòng kiểm tra lại file FXML.");
+        }
+    }
+
+    /**
+     * Xử lý sự kiện khi nhấn nút "Đăng xuất".
+     */
+    @FXML
+    private void handleLogout() {
+        try {
+            // Xóa session
+            SessionManager.getInstance().logout();
+            
+            // Đóng cửa sổ hiện tại
+            Stage currentStage = (Stage) btnLogout.getScene().getWindow();
+            currentStage.close();
+            
+            // Mở lại màn hình login
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/example/quanlytoanha/view/login.fxml"));
+            Parent root = loader.load();
+            
+            Stage loginStage = new Stage();
+            loginStage.setTitle("Quản lý Tòa nhà - Đăng nhập");
+            loginStage.setScene(new Scene(root, 400, 300));
+            loginStage.show();
+            
+        } catch (IOException e) {
+            e.printStackTrace();
+            showAlert(Alert.AlertType.ERROR, "Lỗi", "Không thể quay lại màn hình đăng nhập.");
+        }
     }
 
     // Phương thức tiện ích (Đảm bảo chỉ có một hàm này ở đây)
