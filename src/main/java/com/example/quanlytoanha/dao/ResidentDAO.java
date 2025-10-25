@@ -1,23 +1,12 @@
-// Vị trí: src/main/java/com/example/quanlytoanha/dao/ResidentDAO.java
+
 package com.example.quanlytoanha.dao;
 
 import com.example.quanlytoanha.model.Resident;
-import com.example.quanlytoanha.model.Role;
-import com.example.quanlytoanha.utils.DatabaseConnection;
+import com.example.quanlytoanha.utils.DatabaseConnection; // Lớp tiện ích hiện có
 
 import java.sql.*;
-import java.util.ArrayList;
-import java.util.List;
 
-/**
- * DAO để truy vấn dữ liệu cư dân từ database
- * (ĐÃ GỘP TÍNH NĂNG TỪ 2 BRANCH)
- */
 public class ResidentDAO {
-
-    // ====================================================================
-    // --- CÁC PHƯƠNG THỨC TỪ 'topic/login-logout' (Create/Validate) ---
-    // ====================================================================
 
     /**
      * Kiểm tra Số căn cước (idCardNumber) đã tồn tại chưa trong DB.
@@ -73,7 +62,8 @@ public class ResidentDAO {
             pstmt.setInt(1, resident.getApartmentId());
 
             // 2. userId (Có thể NULL)
-            if (resident.getUserId() > 0) {
+            // (Lưu ý: Bạn nên dùng UserDAO với Transaction để đảm bảo userId được tạo)
+            if (resident.getUserId() > 0) { // SỬA: Bỏ kiểm tra != null vì getUserId() là int
                 pstmt.setInt(2, resident.getUserId());
             } else {
                 pstmt.setNull(2, java.sql.Types.INTEGER);
@@ -95,240 +85,75 @@ public class ResidentDAO {
             // 6. relationship
             pstmt.setString(6, resident.getRelationship());
 
+            // 7. status <-- BỊ XÓA (XÓA CẢ DÒNG pstmt.setString(7, ...))
+
+            // 8. moveInDate <-- BỊ XÓA (XÓA CẢ DÒNG pstmt.setDate(8, ...))
+
             int affectedRows = pstmt.executeUpdate();
             return affectedRows > 0;
+
         }
     }
 
-
-    // ====================================================================
-    // --- CÁC PHƯƠNG THỨC TỪ 'feature/view-filter' (Read/Search/Stats) ---
-    // --- Đây là phiên bản được chọn để giữ lại ---
-    // ====================================================================
-
     /**
-     * Lấy danh sách tất cả cư dân trong hệ thống
-     * (GIỮ PHIÊN BẢN CỦA 'feature/view-filter' VÌ CHI TIẾT HƠN)
-     * @return Danh sách tất cả cư dân
+     * Lấy tất cả thông tin Resident (bao gồm cả thông tin Users liên quan).
+     * @return List<Resident>
      */
-    public List<Resident> getAllResidents() {
-        List<Resident> residents = new ArrayList<>();
-        String sql = """
-            SELECT r.resident_id, r.apartment_id, r.user_id, r.full_name, r.date_of_birth, 
-                   r.id_card_number, r.relationship, r.status, r.move_in_date, r.move_out_date,
-                   u.username, u.email, u.phone_number, u.created_at, u.last_login, u.role_id,
-                   a.area, owner.full_name as owner_name
-            FROM residents r
-            JOIN users u ON r.user_id = u.user_id
-            LEFT JOIN apartments a ON r.apartment_id = a.apartment_id
-            LEFT JOIN users owner ON a.owner_id = owner.user_id
-            ORDER BY r.full_name
-            """;
-        
+    public java.util.List<Resident> getAllResidents() throws SQLException {
+        java.util.List<Resident> residents = new java.util.ArrayList<>();
+
+        // SỬ DỤNG LỆNH JOIN để lấy thông tin từ cả users và residents
+        String SQL = "SELECT u.user_id, u.username, u.email, u.full_name, u.role_id, u.created_at, u.last_login, u.phone_number, " +
+                "r.resident_id, r.apartment_id, r.date_of_birth, r.id_card_number, r.relationship " +
+                "FROM users u JOIN residents r ON u.user_id = r.user_id";
+
         try (Connection conn = DatabaseConnection.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql);
-             ResultSet rs = stmt.executeQuery()) {
-            
+             PreparedStatement pstmt = conn.prepareStatement(SQL);
+             ResultSet rs = pstmt.executeQuery()) {
+
+            // Lặp qua kết quả và tạo đối tượng Resident
             while (rs.next()) {
+                // Bạn cần một phương thức utility để ánh xạ ResultSet sang Resident
                 Resident resident = mapResultSetToResident(rs);
                 residents.add(resident);
             }
-            
-        } catch (SQLException e) {
-            System.err.println("Lỗi khi lấy danh sách cư dân: " + e.getMessage());
-            e.printStackTrace();
         }
-        
         return residents;
     }
-    
-    /**
-     * Tìm kiếm cư dân theo các tiêu chí đơn giản
-     * @param fullName Tên cư dân (có thể null)
-     * @param apartmentId ID căn hộ (có thể null)
-     * @param status Trạng thái (có thể null)
-     * @return Danh sách cư dân thỏa mãn tiêu chí
-     */
-    public List<Resident> searchResidents(String fullName, Integer apartmentId, String status) {
-        List<Resident> residents = new ArrayList<>();
-        StringBuilder sql = new StringBuilder("""
-            SELECT r.resident_id, r.apartment_id, r.user_id, r.full_name, r.date_of_birth, 
-                   r.id_card_number, r.relationship, r.status, r.move_in_date, r.move_out_date,
-                   u.username, u.email, u.phone_number, u.created_at, u.last_login, u.role_id,
-                   a.area, owner.full_name as owner_name
-            FROM residents r
-            JOIN users u ON r.user_id = u.user_id
-            LEFT JOIN apartments a ON r.apartment_id = a.apartment_id
-            LEFT JOIN users owner ON a.owner_id = owner.user_id
-            WHERE 1=1
-            """);
-        
-        List<Object> parameters = new ArrayList<>();
-        
-        // Thêm các điều kiện tìm kiếm
-        if (fullName != null && !fullName.trim().isEmpty()) {
-            sql.append(" AND r.full_name LIKE ?");
-            parameters.add("%" + fullName.trim() + "%");
-        }
-        
-        if (apartmentId != null) {
-            sql.append(" AND r.apartment_id = ?");
-            parameters.add(apartmentId);
-        }
-        
-        if (status != null && !status.trim().isEmpty()) {
-            sql.append(" AND r.status = ?");
-            parameters.add(status.trim());
-        }
-        
-        sql.append(" ORDER BY r.full_name");
-        
-        try (Connection conn = DatabaseConnection.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql.toString())) {
-            
-            // Set parameters
-            for (int i = 0; i < parameters.size(); i++) {
-                stmt.setObject(i + 1, parameters.get(i));
-            }
-            
-            try (ResultSet rs = stmt.executeQuery()) {
-                while (rs.next()) {
-                    Resident resident = mapResultSetToResident(rs);
-                    residents.add(resident);
-                }
-            }
-            
-        } catch (SQLException e) {
-            System.err.println("Lỗi khi tìm kiếm cư dân: " + e.getMessage());
-            e.printStackTrace();
-        }
-        
-        return residents;
-    }
-    
-    /**
-     * Lấy thông tin chi tiết của một cư dân theo ID
-     * @param residentId ID của cư dân
-     * @return Thông tin cư dân hoặc null nếu không tìm thấy
-     */
-    public Resident getResidentById(int residentId) {
-        String sql = """
-            SELECT r.resident_id, r.apartment_id, r.user_id, r.full_name, r.date_of_birth, 
-                   r.id_card_number, r.relationship, r.status, r.move_in_date, r.move_out_date,
-                   u.username, u.email, u.phone_number, u.created_at, u.last_login, u.role_id,
-                   a.area, owner.full_name as owner_name
-            FROM residents r
-            JOIN users u ON r.user_id = u.user_id
-            LEFT JOIN apartments a ON r.apartment_id = a.apartment_id
-            LEFT JOIN users owner ON a.owner_id = owner.user_id
-            WHERE r.resident_id = ?
-            """;
-        
-        try (Connection conn = DatabaseConnection.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
-            
-            stmt.setInt(1, residentId);
-            
-            try (ResultSet rs = stmt.executeQuery()) {
-                if (rs.next()) {
-                    return mapResultSetToResident(rs);
-                }
-            }
-            
-        } catch (SQLException e) {
-            System.err.println("Lỗi khi lấy thông tin cư dân: " + e.getMessage());
-            e.printStackTrace();
-        }
-        
-        return null;
-    }
-    
-    /**
-     * Đếm tổng số cư dân trong hệ thống
-     * @return Tổng số cư dân
-     */
-    public int getTotalResidentCount() {
-        String sql = "SELECT COUNT(*) FROM residents";
-        
-        try (Connection conn = DatabaseConnection.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql);
-             ResultSet rs = stmt.executeQuery()) {
-            
-            if (rs.next()) {
-                return rs.getInt(1);
-            }
-            
-        } catch (SQLException e) {
-            System.err.println("Lỗi khi đếm số cư dân: " + e.getMessage());
-            e.printStackTrace();
-        }
-        
-        return 0;
-    }
-    
-    /**
-     * Đếm số cư dân theo trạng thái
-     * @param status Trạng thái cần đếm
-     * @return Số cư dân có trạng thái đó
-     */
-    public int getResidentCountByStatus(String status) {
-        String sql = "SELECT COUNT(*) FROM residents WHERE status = ?";
-        
-        try (Connection conn = DatabaseConnection.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
-            
-            stmt.setString(1, status);
-            
-            try (ResultSet rs = stmt.executeQuery()) {
-                if (rs.next()) {
-                    return rs.getInt(1);
-                }
-            }
-            
-        } catch (SQLException e) {
-            System.err.println("Lỗi khi đếm cư dân theo trạng thái: " + e.getMessage());
-            e.printStackTrace();
-        }
-        
-        return 0;
-    }
-    
-    /**
-     * Chuyển đổi ResultSet thành đối tượng Resident
-     * (GIỮ PHIÊN BẢN CỦA 'feature/view-filter' VÌ CHI TIẾT HƠN)
-     */
+
+    // Phương thức giả định để ánh xạ dữ liệu (Bạn cần tự triển khai chi tiết)
     private Resident mapResultSetToResident(ResultSet rs) throws SQLException {
-        // Lấy thông tin từ bảng users
+        // Lấy thông tin User
         int userId = rs.getInt("user_id");
         String username = rs.getString("username");
         String email = rs.getString("email");
-        String phoneNumber = rs.getString("phone_number");
         String fullName = rs.getString("full_name");
-        Timestamp createdAt = rs.getTimestamp("created_at");
-        Timestamp lastLogin = rs.getTimestamp("last_login");
-        int roleId = rs.getInt("role_id");
-        
-        // Lấy thông tin từ bảng residents
+        // Giả định bạn có Role.getRoleById(int)
+        // Role role = Role.getRoleById(rs.getInt("role_id"));
+
+        // Lấy thông tin Resident
         int residentId = rs.getInt("resident_id");
         int apartmentId = rs.getInt("apartment_id");
-        Date dateOfBirth = rs.getDate("date_of_birth");
+        java.util.Date dateOfBirth = rs.getDate("date_of_birth");
         String idCardNumber = rs.getString("id_card_number");
         String relationship = rs.getString("relationship");
-        String status = rs.getString("status");
-        Date moveInDate = rs.getDate("move_in_date");
-        Date moveOutDate = rs.getDate("move_out_date");
-        
-        // Tạo đối tượng Resident
-        Role role = Role.fromId(roleId);
-        Resident resident = new Resident(userId, username, email, fullName, role, 
-                                        createdAt, lastLogin, phoneNumber,
-                                        residentId, apartmentId, dateOfBirth, 
-                                        idCardNumber, relationship, status, moveInDate, moveOutDate);
-        
-        // Thêm các thuộc tính JOIN (từ 'feature/view-filter')
-        // (Giả sử bạn đã thêm setter cho các trường này trong model 'Resident')
-        // resident.setApartmentArea(rs.getDouble("area"));
-        // resident.setOwnerName(rs.getString("owner_name"));
+
+        // TẠO OBJECT RESIDENT
+        // Resident resident = new Resident(userId, username, email, fullName, role, ...);
+        // Do constructor của bạn có nhiều tham số, cách dễ nhất là dùng setter (yêu cầu constructor rỗng)
+        Resident resident = new Resident();
+        resident.setUserId(userId);
+        resident.setUsername(username);
+        resident.setEmail(email);
+        resident.setFullName(fullName);
+        // resident.setRole(role);
+        resident.setPhoneNumber(rs.getString("phone_number"));
+
+        resident.setResidentId(residentId);
+        resident.setApartmentId(apartmentId);
+        resident.setDateOfBirth(dateOfBirth);
+        resident.setIdCardNumber(idCardNumber);
+        resident.setRelationship(relationship);
 
         return resident;
     }
