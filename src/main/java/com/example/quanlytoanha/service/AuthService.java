@@ -52,6 +52,15 @@ public class AuthService {
             List<Permission> permissions = permissionDAO.getPermissionsByRoleId(user.getRole().getRoleId());
             user.setPermissions(permissions); // (Hàm này ta đã định nghĩa ở User.java)
 
+
+            // === START DEBUG TẠM THỜI ===
+            System.out.println("DEBUG: Role ID đang được nạp: " + user.getRole().getRoleId());
+            System.out.println("DEBUG: Số lượng quyền được nạp: " + permissions.size());
+            System.out.println("DEBUG: Danh sách quyền nạp: " + user.getPermissions()); // <-- Xem tập hợp (Set) được lưu
+            System.out.println("DEBUG: Kiểm tra quyền 'CREATE_RESIDENT': " + user.hasPermission("CREATE_RESIDENT"));
+            // === END DEBUG TẠM THỜI ===
+
+
             // 6. Trả về đối tượng User đầy đủ thông tin
             return user;
         } else {

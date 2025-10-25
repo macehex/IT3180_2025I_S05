@@ -4,7 +4,7 @@ package com.example.quanlytoanha.model;
 import java.sql.Timestamp;
 import java.util.Date;
 // Giả sử bạn có cả các model khác như Vehicle, Apartment
-// import java.util.List;
+import java.util.List;
 
 /**
  * Đại diện cho Cư dân. Kế thừa từ User và thêm các thông tin
@@ -19,6 +19,11 @@ public class Resident extends User {
     private String idCardNumber;
     private String relationship; // (Quan hệ với chủ hộ)
     // private List<Vehicle> vehicles; // Có thể thêm sau
+
+    public Resident() {
+        super(); // Gọi constructor rỗng của lớp cha (User)
+        // Bạn có thể gán các giá trị mặc định cho các trường của Resident ở đây nếu cần
+    }
 
     // Constructor
     public Resident(int userId, String username, String email, String fullName, Role role, Timestamp createdAt, Timestamp lastLogin, String phoneNumber,
