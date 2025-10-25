@@ -9,7 +9,6 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
-import javafx.scene.control.ButtonType; // Import còn thiếu từ branch 'feature/view-filter'
 import javafx.scene.control.Label;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
@@ -17,7 +16,7 @@ import java.io.IOException;
 
 public class AdminDashboardController {
 
-    // --- LẤY TỪ BRANCH 'topic/login-logout' (Vì FXML phức tạp hơn) ---
+    // Khai báo các thành phần FXML của Dashboard (Admin Dashboard FXML)
     @FXML private Button btnThemCuDan;
     @FXML private Label lblWelcome;
     @FXML private Button btnQuanLyTaiKhoan;
@@ -25,10 +24,9 @@ public class AdminDashboardController {
     @FXML private Button btnTaoThongBao;
     @FXML private Button btnXemYeuCauDichVu;
     @FXML private Button btnLogout;
-    
     /**
      * Phương thức được gọi tự động sau khi FXML được tải.
-     * GIỮ PHIÊN BẢN TỪ 'topic/login-logout' VÌ CÓ KIỂM TRA QUYỀN
+     * Dùng để khởi tạo giao diện, kiểm tra quyền VÀ BỔ SUNG LISTENER.
      */
     @FXML
     public void initialize() {
@@ -64,11 +62,13 @@ public class AdminDashboardController {
                 btnXemYeuCauDichVu.setOnAction(event -> handleXemYeuCauDichVu());
             }
 
+            // TODO: (Nếu cần) Thêm logic kiểm tra quyền cho các nút khác ở đây
         }
     }
 
     /**
-     * GIỮ PHIÊN BẢN TỪ 'topic/login-logout'
+     * Xử lý sự kiện khi Ban Quản Trị nhấn nút "Thêm Cư Dân".
+     * LƯU Ý: Đã bỏ @FXML vì nó được gọi từ Listener trong initialize().
      */
     private void handleOpenAddResidentForm() {
         try {
@@ -94,42 +94,8 @@ public class AdminDashboardController {
     }
 
     // ====================================================================
-    // --- PHẦN LOGOUT: GIỮ PHIÊN BẢN TỪ 'feature/view-filter' VÌ TỐT HƠN ---
-    // ====================================================================
-
-    /**
-     * Xử lý đăng xuất.
-     * (LẤY TỪ 'feature/view-filter' VÌ CÓ HỘP THOẠI XÁC NHẬN VÀ TÁI SỬ DỤNG STAGE)
-     */
-    @FXML
-    private void handleLogout() {
-        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
-        alert.setTitle("Xác nhận");
-        alert.setHeaderText("Bạn có chắc chắn muốn đăng xuất?");
-        
-        if (alert.showAndWait().orElse(ButtonType.CANCEL) == ButtonType.OK) {
-            SessionManager.getInstance().logout();
-            
-            try {
-                // Quay về màn hình đăng nhập
-                FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/example/quanlytoanha/view/login.fxml"));
-                Parent root = loader.load();
-                
-                // Tái sử dụng Stage hiện tại (tốt hơn là đóng/mở)
-                Stage stage = (Stage) btnLogout.getScene().getWindow();
-                stage.setScene(new Scene(root));
-                stage.setTitle("Đăng nhập - Hệ thống quản lý tòa nhà");
-                
-            } catch (IOException e) {
-                e.printStackTrace();
-                // Sửa lại cú pháp gọi showAlert cho đúng với phiên bản của 'topic/login-logout'
-                showAlert(Alert.AlertType.ERROR, "Lỗi", "Không thể quay về màn hình đăng nhập!");
-            }
-        }
-    }
-
-    // ====================================================================
-    // --- CÁC PHƯƠNG THỨC MẪU (STUBS) TỪ 'topic/login-logout' ---
+    // PHƯƠNG THỨC MẪU (STUBS) AN TOÀN CHO CÁC NÚT CHƯA LÀM
+    // LƯU Ý: Đã bỏ @FXML khỏi tất cả các hàm này
     // ====================================================================
 
     private void handleQuanLyTaiKhoan() {
@@ -147,11 +113,28 @@ public class AdminDashboardController {
     private void handleXemYeuCauDichVu() {
         showAlert(Alert.AlertType.INFORMATION, "Thông báo", "Chức năng Xem Yêu cầu Dịch vụ chưa được triển khai.");
     }
+    @FXML
+    private void handleLogout() {
+        SessionManager.getInstance().logout();
 
-    /**
-     * Hiển thị thông báo.
-     * GIỮ PHIÊN BẢN TỪ 'topic/login-logout'
-     */
+        // 2. Đóng cửa sổ Dashboard hiện tại
+        Stage currentStage = (Stage) btnLogout.getScene().getWindow();
+        currentStage.close();
+
+        // 3. Mở lại cửa sổ Login (copy code từ lớp Main.java)
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/example/quanlytoanha/view/login.fxml"));
+            Parent root = loader.load();
+
+            Stage loginStage = new Stage();
+            loginStage.setTitle("Quản lý Tòa nhà - Đăng nhập");
+            loginStage.setScene(new Scene(root, 400, 300));
+            loginStage.show();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+    // Phương thức tiện ích (Đảm bảo chỉ có một hàm này ở đây)
     private void showAlert(Alert.AlertType type, String title, String message) {
         Alert alert = new Alert(type);
         alert.setTitle(title);
