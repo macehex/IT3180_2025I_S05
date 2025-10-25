@@ -22,6 +22,16 @@ public class Transaction {
         this.billId = billId;
     }
 
+    // Convenience constructor for creating new transactions
+    public Transaction(LocalDateTime timestamp, double amount, String description,
+                      String status, String paymentMethod) {
+        this.timestamp = timestamp;
+        this.amount = amount;
+        this.description = description;
+        this.status = status;
+        this.paymentMethod = paymentMethod;
+    }
+
     // Default constructor
     public Transaction() {
     }

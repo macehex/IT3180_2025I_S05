@@ -2,16 +2,39 @@
 package com.example.quanlytoanha.dao;
 
 import com.example.quanlytoanha.model.Invoice;
+import com.example.quanlytoanha.model.InvoiceDetail;
 import com.example.quanlytoanha.model.InvoiceDetail; // Cần cho hàm create
 import com.example.quanlytoanha.utils.DatabaseConnection;
 
 import java.sql.*;
+import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Date; // java.util.Date
 
 public class InvoiceDAO {
+    private static InvoiceDAO instance;
 
+    private InvoiceDAO() {}
+
+    public static InvoiceDAO getInstance() {
+        if (instance == null) {
+            instance = new InvoiceDAO();
+        }
+        return instance;
+    }
+
+    public List<Invoice> getUnpaidInvoices(int residentId) {
+        Map<Integer, Invoice> invoices = new HashMap<>();
+
+        String sql = "SELECT i.*, id.invoice_detail_id, id.name, id.amount as detail_amount " +
+                    "FROM invoices i " +
+                    "LEFT JOIN invoicedetails id ON i.invoice_id = id.invoice_id " +
+                    "JOIN residents r ON i.apartment_id = r.apartment_id " +
+                    "WHERE r.user_id = ? AND i.status = 'UNPAID' " +
+                    "ORDER BY i.due_date";
     /**
      * Lấy danh sách hóa đơn CHƯA THANH TOÁN sắp đến hạn, bao gồm owner_id.
      * @param daysBefore Số ngày trước hạn (ví dụ: 3)
@@ -31,11 +54,51 @@ public class InvoiceDAO {
         """;
 
         try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+            pstmt.setInt(1, residentId);
+            ResultSet rs = pstmt.executeQuery();
              // Chú ý cách xử lý interval an toàn hơn
              PreparedStatement stmt = conn.prepareStatement(sql.replace("?", String.valueOf(daysBefore)))) {
 
             ResultSet rs = stmt.executeQuery();
             while (rs.next()) {
+                int invoiceId = rs.getInt("invoice_id");
+                final ResultSet finalRs = rs;
+
+                // Get or create invoice
+                Invoice invoice = invoices.computeIfAbsent(invoiceId, k -> {
+                    Invoice newInvoice = new Invoice();
+                    try {
+                        newInvoice.setInvoiceId(invoiceId);
+                        newInvoice.setApartmentId(finalRs.getInt("apartment_id"));
+                        newInvoice.setTotalAmount(finalRs.getDouble("total_amount"));
+                        newInvoice.setDueDate(finalRs.getDate("due_date").toLocalDate());
+                        newInvoice.setStatus(finalRs.getString("status"));
+                    } catch (SQLException e) {
+                        e.printStackTrace();
+                    }
+                    return newInvoice;
+                });
+
+                // Add invoice detail if it exists
+                int detailId = rs.getInt("invoice_detail_id");
+                if (!rs.wasNull()) {
+                    InvoiceDetail detail = new InvoiceDetail(
+                        detailId,
+                        invoiceId,
+                        rs.getString("name"),
+                        rs.getDouble("detail_amount")
+                    );
+                    invoice.getDetails().add(detail);
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return new ArrayList<>(invoices.values());
+    }
                 invoices.add(mapResultSetToInvoiceBase(rs)); // Dùng hàm map mới
             }
         }
@@ -112,32 +175,7 @@ public class InvoiceDAO {
             return true;
 
         } catch (SQLException e) {
-            if (conn != null) conn.rollback(); // Hoàn tác nếu có lỗi
-            throw e; // Ném lỗi ra ngoài
-        } finally {
-            // Đóng tài nguyên cẩn thận
-            if (stmtDetail != null) try { stmtDetail.close(); } catch (SQLException e) { /* ignore */ }
-            if (stmtInvoice != null) try { stmtInvoice.close(); } catch (SQLException e) { /* ignore */ }
-            if (conn != null) {
-                try {
-                    conn.setAutoCommit(true);
-                    conn.close();
-                } catch (SQLException e) { /* ignore */ }
-            }
         }
-    }
 
-    /**
-     * Hàm tiện ích mới: Ánh xạ ResultSet thành đối tượng Invoice (chỉ thông tin cơ bản).
-     */
-    private Invoice mapResultSetToInvoiceBase(ResultSet rs) throws SQLException {
-        Invoice inv = new Invoice();
-        inv.setInvoiceId(rs.getInt("invoice_id"));
-        inv.setApartmentId(rs.getInt("apartment_id"));
-        inv.setTotalAmount(rs.getBigDecimal("total_amount"));
-        inv.setDueDate(rs.getDate("due_date"));
-        inv.setOwnerId(rs.getInt("owner_id")); // Lấy owner_id từ kết quả JOIN
-        // Không lấy details ở đây
-        return inv;
     }
 }

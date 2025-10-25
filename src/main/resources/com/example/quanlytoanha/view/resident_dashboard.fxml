@@ -18,9 +18,9 @@
     <center>
         <ScrollPane fitToWidth="true">
             <VBox spacing="20" style="-fx-padding: 20;">
-                <!-- Bills Section -->
+                <!-- Invoices Section -->
                 <VBox>
-                    <HBox fx:id="billsTilePane" spacing="20" alignment="CENTER_LEFT">
+                    <HBox fx:id="invoiceTilePane" spacing="20" alignment="CENTER_LEFT">
                         <!-- Tiles will be added here programmatically -->
                     </HBox>
                 </VBox>
@@ -31,9 +31,8 @@
                         <padding>
                             <Insets top="10" right="10" bottom="10" left="10"/>
                         </padding>
-                        <ComboBox fx:id="billSelector" promptText="Select Bill" maxWidth="Infinity"/>
-                        <TextField fx:id="amountField" promptText="Amount"/>
-                        <ComboBox fx:id="paymentMethodSelector" promptText="Payment Method" maxWidth="Infinity"/>
+                        <ComboBox fx:id="invoiceSelector" promptText="Select Invoice" maxWidth="Infinity"/>
+                        <TextField fx:id="amountField" promptText="Amount" editable="false"/>
                         <Button text="Pay Now" onAction="#handlePayment"
                                 style="-fx-background-color: #2196F3; -fx-text-fill: white;"
                                 maxWidth="Infinity"/>
@@ -58,7 +57,6 @@
                                 <TableColumn fx:id="descriptionColumn" text="Description" prefWidth="300"/>
                                 <TableColumn fx:id="amountColumn" text="Amount" prefWidth="150"/>
                                 <TableColumn fx:id="statusColumn" text="Status" prefWidth="100"/>
-                                <TableColumn fx:id="paymentMethodColumn" text="Payment Method" prefWidth="150"/>
                             </columns>
                         </TableView>
                     </VBox>
