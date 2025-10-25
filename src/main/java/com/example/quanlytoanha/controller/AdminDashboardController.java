@@ -23,7 +23,7 @@ public class AdminDashboardController {
     @FXML private Button btnQuanLyHoaDon;
     @FXML private Button btnTaoThongBao;
     @FXML private Button btnXemYeuCauDichVu;
-
+    @FXML private Button btnLogout;
     /**
      * Phương thức được gọi tự động sau khi FXML được tải.
      * Dùng để khởi tạo giao diện, kiểm tra quyền VÀ BỔ SUNG LISTENER.
@@ -113,7 +113,27 @@ public class AdminDashboardController {
     private void handleXemYeuCauDichVu() {
         showAlert(Alert.AlertType.INFORMATION, "Thông báo", "Chức năng Xem Yêu cầu Dịch vụ chưa được triển khai.");
     }
+    @FXML
+    private void handleLogout() {
+        SessionManager.getInstance().logout();
 
+        // 2. Đóng cửa sổ Dashboard hiện tại
+        Stage currentStage = (Stage) btnLogout.getScene().getWindow();
+        currentStage.close();
+
+        // 3. Mở lại cửa sổ Login (copy code từ lớp Main.java)
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/example/quanlytoanha/view/login.fxml"));
+            Parent root = loader.load();
+
+            Stage loginStage = new Stage();
+            loginStage.setTitle("Quản lý Tòa nhà - Đăng nhập");
+            loginStage.setScene(new Scene(root, 400, 300));
+            loginStage.show();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
     // Phương thức tiện ích (Đảm bảo chỉ có một hàm này ở đây)
     private void showAlert(Alert.AlertType type, String title, String message) {
         Alert alert = new Alert(type);
