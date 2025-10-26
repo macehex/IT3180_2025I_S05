@@ -24,7 +24,7 @@ public class NotificationService {
     private final DateTimeFormatter logTimestampFormat;
 
     public NotificationService() {
-        this.invoiceDAO = new InvoiceDAO();
+        this.invoiceDAO = InvoiceDAO.getInstance();
         this.notificationDAO = new NotificationDAO();
         this.dateFormat = new SimpleDateFormat("dd/MM/yyyy");
         this.logTimestampFormat = DateTimeFormatter.ofPattern("HH:mm:ss dd/MM/yyyy"); // Định dạng cho log

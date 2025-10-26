@@ -126,11 +126,10 @@ public class FinancialDAO {
 
                 // Nếu chưa có hóa đơn này trong Map, tạo mới
                 if (!invoiceMap.containsKey(invoiceId)) {
-                    Invoice invoice = new Invoice(
-                            invoiceId,
-                            rs.getBigDecimal("total_amount"),
-                            rs.getDate("due_date")
-                    );
+                    Invoice invoice = new Invoice();
+                    invoice.setInvoiceId(invoiceId);
+                    invoice.setTotalAmount(rs.getBigDecimal("total_amount"));
+                    invoice.setDueDate(rs.getDate("due_date"));
                     invoiceMap.put(invoiceId, invoice);
                 }
 

@@ -42,6 +42,10 @@ public class Main extends Application {
         primaryStage.show();
     }
 
+    public static void main(String[] args) {
+        launch(args);
+    }
+
     /**
      * Phương thức này hiển thị màn hình Dashboard.
      * Sẽ được gọi khi Đăng nhập thành công.
