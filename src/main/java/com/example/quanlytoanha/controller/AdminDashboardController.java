@@ -137,6 +137,18 @@ public class AdminDashboardController {
     private void handleXemYeuCauDichVu() {
         showAlert(Alert.AlertType.INFORMATION, "Thông báo", "Chức năng Xem Yêu cầu Dịch vụ chưa được triển khai.");
     }
+    @FXML
+    private void handleLogout() {
+        SessionManager.getInstance().logout();
+
+        // 2. Đóng cửa sổ Dashboard hiện tại
+        Stage currentStage = (Stage) btnLogout.getScene().getWindow();
+        currentStage.close();
+
+        // 3. Mở lại cửa sổ Login (copy code từ lớp Main.java)
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/example/quanlytoanha/view/login.fxml"));
+            Parent root = loader.load();
 
     /**
      * Xử lý sự kiện khi Ban Quản Trị nhấn nút "Xem Danh Sách Cư Dân".
@@ -187,13 +199,10 @@ public class AdminDashboardController {
             loginStage.setTitle("Quản lý Tòa nhà - Đăng nhập");
             loginStage.setScene(new Scene(root, 400, 300));
             loginStage.show();
-            
         } catch (IOException e) {
             e.printStackTrace();
-            showAlert(Alert.AlertType.ERROR, "Lỗi", "Không thể quay lại màn hình đăng nhập.");
         }
     }
-
     // Phương thức tiện ích (Đảm bảo chỉ có một hàm này ở đây)
     private void showAlert(Alert.AlertType type, String title, String message) {
         Alert alert = new Alert(type);

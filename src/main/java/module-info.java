@@ -9,6 +9,7 @@ module com.example.quanlytoanha {
     requires java.desktop;
     requires spring.security.core;
 
+
     opens com.example.quanlytoanha to javafx.fxml;
     opens com.example.quanlytoanha.controller to javafx.fxml;
     opens com.example.quanlytoanha.model to javafx.base;

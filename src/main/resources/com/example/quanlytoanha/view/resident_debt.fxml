@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.cell.PropertyValueFactory?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
+
+<BorderPane prefHeight="600.0" prefWidth="800.0" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.quanlytoanha.controller.AccountantDashboardController">
+    <padding>
+        <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
+    </padding>
+    <top>
+        <VBox spacing="10.0" BorderPane.alignment="CENTER">
+            <children>
+                <Label text="Báo cáo Công nợ">
+                    <font>
+                        <Font name="System Bold" size="24.0" />
+                    </font>
+                </Label>
+                <GridPane hgap="10.0" vgap="5.0">
+                    <padding>
+                        <Insets bottom="10.0" top="10.0" />
+                    </padding>
+                    <children>
+                        <Label text="Tổng nợ chưa thanh toán:" GridPane.rowIndex="0" />
+                        <Label fx:id="lblTotalDebt" text="0 VNĐ" style="-fx-font-weight: bold; -fx-text-fill: red;" GridPane.columnIndex="1" GridPane.rowIndex="0" />
+
+                        <Label text="Tổng nợ quá hạn:" GridPane.rowIndex="1" />
+                        <Label fx:id="lblTotalOverdue" text="0 VNĐ" style="-fx-font-weight: bold; -fx-text-fill: darkred;" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+
+                        <Label text="Tổng hóa đơn chưa trả:" GridPane.rowIndex="2" />
+                        <Label fx:id="lblUnpaidInvoices" text="0 hóa đơn" style="-fx-font-weight: bold;" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+                    </children>
+                </GridPane>
+                <Label text="Chi tiết công nợ theo căn hộ:">
+                    <font>
+                        <Font name="System Bold" size="16.0" />
+                    </font>
+                </Label>
+            </children>
+        </VBox>
+    </top>
+    <center>
+        <TableView fx:id="debtTable" prefHeight="400.0" BorderPane.alignment="CENTER">
+            <columns>
+                <TableColumn prefWidth="70.0" text="Căn hộ ID">
+                    <cellValueFactory><PropertyValueFactory property="apartmentId" /></cellValueFactory>
+                </TableColumn>
+                <TableColumn prefWidth="150.0" text="Tên chủ hộ">
+                    <cellValueFactory><PropertyValueFactory property="ownerName" /></cellValueFactory>
+                </TableColumn>
+                <TableColumn prefWidth="120.0" text="Số điện thoại">
+                    <cellValueFactory><PropertyValueFactory property="phoneNumber" /></cellValueFactory>
+                </TableColumn>
+                <TableColumn prefWidth="100.0" text="Số HĐ nợ">
+                    <cellValueFactory><PropertyValueFactory property="unpaidCount" /></cellValueFactory>
+                </TableColumn>
+                <TableColumn prefWidth="150.0" text="Tổng nợ (VNĐ)">
+                    <cellValueFactory><PropertyValueFactory property="totalDue" /></cellValueFactory>
+                </TableColumn>
+                <TableColumn prefWidth="150.0" text="Hạn trả sớm nhất">
+                    <cellValueFactory><PropertyValueFactory property="earliestDueDate" /></cellValueFactory>
+                </TableColumn>
+            </columns>
+            <BorderPane.margin>
+                <Insets top="10.0" />
+            </BorderPane.margin>
+        </TableView>
+    </center>
+</BorderPane>
