@@ -16,7 +16,7 @@
           fx:controller="com.example.quanlytoanha.controller.AddResidentController">
     <padding><Insets bottom="20.0" left="20.0" right="20.0" top="20.0" /></padding>
 
-    <Label text="TẠO HỒ SƠ CƯ DÂN MỚI" GridPane.columnIndex="0" GridPane.columnSpan="2" GridPane.rowIndex="0">
+    <Label fx:id="titleLabel" text="THÊM CƯ DÂN MỚI" GridPane.columnIndex="0" GridPane.columnSpan="2" GridPane.rowIndex="0">
         <font><Font size="16.0" /></font>
     </Label>
 
@@ -32,10 +32,13 @@
     <Label text="4. Ngày sinh:" GridPane.columnIndex="0" GridPane.rowIndex="4" />
     <DatePicker fx:id="dpDateOfBirth" promptText="Chọn ngày" GridPane.columnIndex="1" GridPane.rowIndex="4" />
 
-    <Label text="5. Mối quan hệ:" GridPane.columnIndex="0" GridPane.rowIndex="5" />
-    <ComboBox fx:id="cbRelationship" promptText="Chọn mối quan hệ" GridPane.columnIndex="1" GridPane.rowIndex="5" />
+    <Label text="5. Số điện thoại" GridPane.columnIndex="0" GridPane.rowIndex="5"/>
+    <TextField fx:id="txtPhoneNumber" promptText="VD: 0901234567" GridPane.columnIndex="1" GridPane.rowIndex="5"/>
 
-    <HBox alignment="CENTER_RIGHT" spacing="10" GridPane.columnIndex="1" GridPane.rowIndex="6" >
+    <Label text="6. Mối quan hệ:" GridPane.columnIndex="0" GridPane.rowIndex="6" />
+    <ComboBox fx:id="cbRelationship" promptText="Chọn mối quan hệ" GridPane.columnIndex="1" GridPane.rowIndex="6" />
+
+    <HBox alignment="CENTER_RIGHT" spacing="10" GridPane.columnIndex="1" GridPane.rowIndex="7" >
         <Button fx:id="btnSave" text="Lưu Hồ Sơ" onAction="#handleSaveButtonAction" />
         <Button text="Hủy Bỏ" onAction="#handleCancelButtonAction" />
     </HBox>

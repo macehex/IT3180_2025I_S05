@@ -19,19 +19,16 @@
             <Label text="QUẢN LÝ TÀI KHOẢN VÀ CƯ DÂN" style="-fx-font-weight: bold;" />
 
             <Button fx:id="btnThemCuDan"
-                    onAction="#handleOpenAddResidentForm"
+
                     text="➕ Thêm Hồ Sơ Cư Dân Mới"
             />
 
             <Button fx:id="btnQuanLyTaiKhoan"
-                    onAction="#handleQuanLyTaiKhoan"
-                    text="👤 Quản Lý Tài Khoản Người Dùng"
+
+                    text="👤 Quản Lý Hồ Sơ Cư Dân"
             />
 
-            <Button fx:id="btnXemDanhSachCuDan"
-                    onAction="#handleOpenResidentList"
-                    text="📋 Xem Danh Sách Cư Dân Chi Tiết"
-            />
+            <Button text="📋 Xem Danh Sách Cư Dân Chi Tiết"/>
 
             <Label text="QUẢN LÝ VẬN HÀNH TÒA NHÀ" style="-fx-font-weight: bold;">
                 <VBox.margin>
@@ -40,32 +37,21 @@
             </Label>
 
             <Button fx:id="btnQuanLyHoaDon"
-                    onAction="#handleQuanLyHoaDon"
+
                     text="💰 Quản Lý Hóa Đơn &amp; Công Nợ"
             />
 
             <Button fx:id="btnTaoThongBao"
-                    onAction="#handleTaoThongBao"
+
                     text="📢 Tạo &amp; Gửi Thông Báo Chung"
             />
 
             <Button fx:id="btnXemYeuCauDichVu"
-                    onAction="#handleXemYeuCauDichVu"
+
                     text="🛠️ Xem &amp; Xử Lý Yêu Cầu Dịch Vụ"
             />
 
             <Button text="🏠 Quản Lý Tài Sản &amp; Thiết Bị Chung"/>
-
-            <!-- Logout button -->
-            <Button fx:id="btnLogout"
-                    onAction="#handleLogout"
-                    text="🚪 Đăng xuất"
-                    style="-fx-background-color: #dc3545; -fx-text-fill: white; -fx-font-weight: bold;"
-            >
-                <VBox.margin>
-                    <Insets top="20.0" />
-                </VBox.margin>
-            </Button>
 
         </children>
     </VBox>

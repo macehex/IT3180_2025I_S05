@@ -20,6 +20,11 @@ public class Resident extends User {
     private String relationship; // (Quan hệ với chủ hộ)
     // private List<Vehicle> vehicles; // Có thể thêm sau
 
+    public Resident() {
+        super(); // Gọi constructor rỗng của lớp cha (User)
+        // Bạn có thể gán các giá trị mặc định cho các trường của Resident ở đây nếu cần
+    }
+
     // Constructor
     public Resident(int userId, String username, String email, String fullName, Role role, Timestamp createdAt, Timestamp lastLogin, String phoneNumber,
                     int residentId, int apartmentId, Date dateOfBirth, String idCardNumber, String relationship) {
