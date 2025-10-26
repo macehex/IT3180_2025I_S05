@@ -42,6 +42,10 @@ dependencies {
     implementation("org.springframework.security:spring-security-core:6.5.5")
     testImplementation("org.junit.jupiter:junit-jupiter-api:${junitVersion}")
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:${junitVersion}")
+    testImplementation("org.junit.jupiter:junit-jupiter-api:5.10.0") // JUnit 5 API
+    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.10.0") // JUnit 5 Engine
+    testImplementation("org.mockito:mockito-core:5.5.0")         // Mockito core
+    testImplementation("org.mockito:mockito-junit-jupiter:5.5.0") // Tích hợp Mockito với JUnit 5
 }
 
 tasks.withType<Test> {
