@@ -135,7 +135,11 @@ public class AdminDashboardController {
             Parent root = loader.load();
             Stage loginStage = new Stage();
             loginStage.setTitle("Quản lý Tòa nhà - Đăng nhập");
-            loginStage.setScene(new Scene(root, 400, 300));
+            loginStage.setScene(new Scene(root, 450, 500));
+            loginStage.setResizable(true);
+            loginStage.setMinWidth(450);
+            loginStage.setMinHeight(500);
+            loginStage.setMaximized(true); // Set full screen
             loginStage.show();
 
         } catch (IOException e) {
