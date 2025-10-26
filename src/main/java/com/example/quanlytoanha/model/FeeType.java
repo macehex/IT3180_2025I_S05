@@ -1,34 +1,41 @@
+// Vị trí: src/main/java/com/example/quanlytoanha/model/FeeType.java
 package com.example.quanlytoanha.model;
 
 import java.math.BigDecimal;
 
 public class FeeType {
-    private int id;
+    private int feeId; // Đã đổi tên từ 'id' -> 'feeId' để khớp với 'fee_id'
     private String feeName;
     private BigDecimal unitPrice;
     private String unit;
     private String description;
     private boolean isActive;
 
-    // Constructor rỗng (cần cho JavaFX)
+    // --- CÁC TRƯỜNG MỚI ĐƯỢC THÊM ---
+    private boolean isDefault; // TRUE = mặc định, FALSE = tùy chọn
+    private String pricingModel; // 'FIXED' hoặc 'PER_SQM'
+
+    // Constructor rỗng
     public FeeType() {
     }
 
     // Constructor đầy đủ (dùng khi tạo đối tượng từ CSDL)
-    public FeeType(int id, String feeName, BigDecimal unitPrice, String unit, String description, boolean isActive) {
-        this.id = id;
+    // Đã cập nhật constructor này để bao gồm các trường mới
+    public FeeType(int feeId, String feeName, BigDecimal unitPrice, String unit, String description, boolean isActive, boolean isDefault, String pricingModel) {
+        this.feeId = feeId;
         this.feeName = feeName;
         this.unitPrice = unitPrice;
         this.unit = unit;
         this.description = description;
         this.isActive = isActive;
+        this.isDefault = isDefault;
+        this.pricingModel = pricingModel;
     }
 
     // --- Getters and Setters cho tất cả các trường ---
-    // (Bắt buộc phải có đủ để PropertyValueFactory của JavaFX hoạt động)
 
-    public int getId() { return id; }
-    public void setId(int id) { this.id = id; }
+    public int getFeeId() { return feeId; } // Đã đổi tên
+    public void setFeeId(int feeId) { this.feeId = feeId; } // Đã đổi tên
 
     public String getFeeName() { return feeName; }
     public void setFeeName(String feeName) { this.feeName = feeName; }
@@ -44,4 +51,11 @@ public class FeeType {
 
     public boolean isActive() { return isActive; }
     public void setActive(boolean active) { isActive = active; }
+
+    // --- GETTER/SETTER CHO CÁC TRƯỜNG MỚI ---
+    public boolean isDefault() { return isDefault; }
+    public void setDefault(boolean aDefault) { isDefault = aDefault; }
+
+    public String getPricingModel() { return pricingModel; }
+    public void setPricingModel(String pricingModel) { this.pricingModel = pricingModel; }
 }

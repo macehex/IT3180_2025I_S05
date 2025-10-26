@@ -41,6 +41,7 @@
                         <Insets bottom="10.0" />
                     </VBox.margin>
                 </HBox>
+
                 <TabPane tabClosingPolicy="UNAVAILABLE" VBox.vgrow="ALWAYS">
                     <tabs>
                         <Tab text="Báo cáo Công nợ">
@@ -69,15 +70,6 @@
                                                         <Label text="Tổng hóa đơn chưa trả:" GridPane.rowIndex="2" />
                                                         <Label fx:id="lblUnpaidInvoices" style="-fx-font-weight: bold;" text="0 hóa đơn" GridPane.columnIndex="1" GridPane.rowIndex="2" />
                                                     </children>
-                                                    <columnConstraints>
-                                                        <ColumnConstraints />
-                                                        <ColumnConstraints />
-                                                    </columnConstraints>
-                                                    <rowConstraints>
-                                                        <RowConstraints />
-                                                        <RowConstraints />
-                                                        <RowConstraints />
-                                                    </rowConstraints>
                                                 </GridPane>
                                                 <Label text="Chi tiết công nợ theo căn hộ:">
                                                     <font>
@@ -91,34 +83,22 @@
                                         <TableView fx:id="debtTable" prefHeight="400.0" BorderPane.alignment="CENTER">
                                             <columns>
                                                 <TableColumn prefWidth="70.0" text="Căn hộ ID">
-                                                    <cellValueFactory>
-                                                        <PropertyValueFactory property="apartmentId" />
-                                                    </cellValueFactory>
+                                                    <cellValueFactory><PropertyValueFactory property="apartmentId" /></cellValueFactory>
                                                 </TableColumn>
                                                 <TableColumn prefWidth="150.0" text="Tên chủ hộ">
-                                                    <cellValueFactory>
-                                                        <PropertyValueFactory property="ownerName" />
-                                                    </cellValueFactory>
+                                                    <cellValueFactory><PropertyValueFactory property="ownerName" /></cellValueFactory>
                                                 </TableColumn>
                                                 <TableColumn prefWidth="120.0" text="Số điện thoại">
-                                                    <cellValueFactory>
-                                                        <PropertyValueFactory property="phoneNumber" />
-                                                    </cellValueFactory>
+                                                    <cellValueFactory><PropertyValueFactory property="phoneNumber" /></cellValueFactory>
                                                 </TableColumn>
                                                 <TableColumn prefWidth="100.0" text="Số HĐ nợ">
-                                                    <cellValueFactory>
-                                                        <PropertyValueFactory property="unpaidCount" />
-                                                    </cellValueFactory>
+                                                    <cellValueFactory><PropertyValueFactory property="unpaidCount" /></cellValueFactory>
                                                 </TableColumn>
                                                 <TableColumn prefWidth="150.0" text="Tổng nợ (VNĐ)">
-                                                    <cellValueFactory>
-                                                        <PropertyValueFactory property="totalDue" />
-                                                    </cellValueFactory>
+                                                    <cellValueFactory><PropertyValueFactory property="totalDue" /></cellValueFactory>
                                                 </TableColumn>
                                                 <TableColumn prefWidth="150.0" text="Hạn trả sớm nhất">
-                                                    <cellValueFactory>
-                                                        <PropertyValueFactory property="earliestDueDate" />
-                                                    </cellValueFactory>
+                                                    <cellValueFactory><PropertyValueFactory property="earliestDueDate" /></cellValueFactory>
                                                 </TableColumn>
                                             </columns>
                                             <BorderPane.margin>
@@ -151,10 +131,13 @@
                                         </HBox>
                                         <TableView fx:id="feeTable" VBox.vgrow="ALWAYS">
                                             <columns>
-                                                <TableColumn fx:id="colFeeName" prefWidth="250.0" text="Tên loại phí (Phí quản lý, Phí nước...)" />
-                                                <TableColumn fx:id="colFeePrice" prefWidth="150.0" text="Đơn giá (VNĐ)" />
-                                                <TableColumn fx:id="colFeeUnit" prefWidth="100.0" text="Đơn vị (m², m³, xe)" />
-                                                <TableColumn fx:id="colFeeDesc" prefWidth="300.0" text="Mô tả" />
+                                                <TableColumn fx:id="colFeeName" prefWidth="200.0" text="Tên loại phí" />
+                                                <TableColumn fx:id="colFeePrice" prefWidth="120.0" text="Đơn giá (VNĐ)" />
+                                                <TableColumn fx:id="colFeeUnit" prefWidth="80.0" text="Đơn vị" />
+
+                                                <TableColumn fx:id="colFeeIsDefault" prefWidth="100.0" text="Mặc định" />
+                                                <TableColumn fx:id="colFeePricingModel" prefWidth="120.0" text="Hình thức tính" />
+                                                <TableColumn fx:id="colFeeDesc" prefWidth="230.0" text="Mô tả" />
                                             </columns>
                                         </TableView>
                                     </children>

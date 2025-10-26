@@ -5,7 +5,7 @@ import com.example.quanlytoanha.model.DebtReport;
 import com.example.quanlytoanha.model.ApartmentDebt;
 import com.example.quanlytoanha.model.Invoice;
 import com.example.quanlytoanha.model.InvoiceDetail;
-import com.example.quanlytoanha.utils.DatabaseConnection; // Lớp kết nối của bạn
+import com.example.quanlytoanha.utils.DatabaseConnection;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -17,11 +17,13 @@ import java.util.Map;
 
 public class FinancialDAO {
 
+    // ... (Hàm getDebtStatistics() và getDebtListByApartment() không thay đổi) ...
+
     /**
      * Lấy dữ liệu thống kê công nợ tổng quan.
      */
     public DebtReport getDebtStatistics() {
-        // Câu SQL này dùng Common Table Expressions (CTE) để tính toán
+        // (Không thay đổi code ở đây)
         String sql = """
             WITH UnpaidInvoices AS (
                 SELECT 
@@ -40,14 +42,13 @@ public class FinancialDAO {
             FROM UnpaidInvoices;
         """;
 
-        DebtReport report = new DebtReport(); // Khởi tạo report rỗng
+        DebtReport report = new DebtReport();
 
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql);
              ResultSet rs = stmt.executeQuery()) {
 
             if (rs.next()) {
-                // (Bạn cần thêm setter cho DebtReport)
                 report.setTotalUnpaidInvoices(rs.getInt("total_unpaid_invoices"));
                 report.setTotalOverdueInvoices(rs.getInt("total_overdue_invoices"));
                 report.setTotalDebtAmount(rs.getBigDecimal("total_debt_amount"));
@@ -63,6 +64,7 @@ public class FinancialDAO {
      * Lấy danh sách công nợ chi tiết theo từng căn hộ.
      */
     public List<ApartmentDebt> getDebtListByApartment() {
+        // (Không thay đổi code ở đây)
         List<ApartmentDebt> debtList = new ArrayList<>();
         String sql = """
             SELECT 
@@ -86,7 +88,6 @@ public class FinancialDAO {
 
             while (rs.next()) {
                 ApartmentDebt debt = new ApartmentDebt();
-                // (Bạn cần thêm setter cho ApartmentDebt)
                 debt.setApartmentId(rs.getInt("apartment_id"));
                 debt.setOwnerName(rs.getString("owner_name"));
                 debt.setPhoneNumber(rs.getString("phone_number"));
@@ -101,14 +102,18 @@ public class FinancialDAO {
         return debtList;
     }
 
+
+    /**
+     * Lấy chi tiết hóa đơn chưa thanh toán cho một căn hộ (Đã cập nhật)
+     */
     public List<Invoice> getUnpaidInvoiceDetails(int apartmentId) {
-        // Map để nhóm các chi tiết vào đúng hóa đơn
         Map<Integer, Invoice> invoiceMap = new HashMap<>();
 
+        // THAY ĐỔI 1: Thêm 'd.fee_id' vào câu SQL
         String sql = """
         SELECT 
             i.invoice_id, i.total_amount, i.due_date,
-            d.name, d.amount
+            d.fee_id, d.name, d.amount 
         FROM invoices i
         LEFT JOIN invoicedetails d ON i.invoice_id = d.invoice_id
         WHERE i.apartment_id = ? AND i.status = 'UNPAID'
@@ -124,18 +129,20 @@ public class FinancialDAO {
             while (rs.next()) {
                 int invoiceId = rs.getInt("invoice_id");
 
-                // Nếu chưa có hóa đơn này trong Map, tạo mới
                 if (!invoiceMap.containsKey(invoiceId)) {
-                    Invoice invoice = new Invoice();
-                    invoice.setInvoiceId(invoiceId);
-                    invoice.setTotalAmount(rs.getBigDecimal("total_amount"));
-                    invoice.setDueDate(rs.getDate("due_date"));
+                    Invoice invoice = new Invoice(
+                            invoiceId,
+                            rs.getBigDecimal("total_amount"),
+                            rs.getDate("due_date")
+                    );
                     invoiceMap.put(invoiceId, invoice);
                 }
 
-                // Lấy hóa đơn từ Map và thêm chi tiết vào
                 Invoice currentInvoice = invoiceMap.get(invoiceId);
+
+                // THAY ĐỔI 2: Sử dụng constructor mới của InvoiceDetail (với 3 tham số)
                 InvoiceDetail detail = new InvoiceDetail(
+                        rs.getInt("fee_id"), // <-- Thêm tham số này
                         rs.getString("name"),
                         rs.getBigDecimal("amount")
                 );

@@ -5,14 +5,23 @@ import com.example.quanlytoanha.model.Invoice;
 import com.example.quanlytoanha.model.InvoiceDetail;
 import com.example.quanlytoanha.utils.DatabaseConnection;
 
+import java.math.BigDecimal;
 import java.sql.*;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.math.BigDecimal;
 
+/**
+ * LƯU Ý QUAN TRỌNG:
+ * File này giả định rằng bạn đã sửa file model 'Invoice.java'
+ * để bao gồm các trường/hàm sau:
+ * - public Invoice() { ... } (Constructor rỗng)
+ * - private int apartmentId; (và getter/setter)
+ * - private int ownerId; (và getter/setter)
+ * - private String status; (và getter/setter)
+ */
 public class InvoiceDAO {
     private static InvoiceDAO instance;
 
@@ -25,15 +34,125 @@ public class InvoiceDAO {
         return instance;
     }
 
+    // -----------------------------------------------------------------
+    // --- CÁC HÀM MỚI CHO NGHIỆP VỤ "TẠO HÓA ĐƠN HÀNG LOẠT" ---
+    // (Dùng cho InvoiceGenerationService)
+    // -----------------------------------------------------------------
+
+    /**
+     * KIỂM TRA: Hóa đơn cho căn hộ/tháng này đã tồn tại chưa?
+     */
+    public boolean checkIfInvoiceExists(int apartmentId, LocalDate billingMonth) {
+        String sql = """
+            SELECT 1 FROM invoices 
+            WHERE apartment_id = ? 
+              AND EXTRACT(MONTH FROM issued_date) = ? 
+              AND EXTRACT(YEAR FROM issued_date) = ?
+            LIMIT 1
+            """;
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setInt(1, apartmentId);
+            stmt.setInt(2, billingMonth.getMonthValue());
+            stmt.setInt(3, billingMonth.getYear());
+
+            try (ResultSet rs = stmt.executeQuery()) {
+                return rs.next(); // Trả về true nếu tìm thấy (đã tồn tại)
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            return true; // An toàn là trên hết, giả sử là đã tồn tại nếu có lỗi
+        }
+    }
+
+    /**
+     * TẠO HÓA ĐƠN CHA: Tạo 1 hóa đơn mới với tổng tiền = 0
+     * @return Đối tượng Invoice chứa ID mới
+     */
+    public Invoice createInvoiceHeader(int apartmentId, LocalDate billingMonth) {
+        LocalDate issuedDate = LocalDate.now();
+        LocalDate dueDate = issuedDate.withDayOfMonth(15).plusMonths(1); // Hạn là ngày 15 tháng sau
+
+        String sql = "INSERT INTO invoices (apartment_id, issued_date, due_date, status, total_amount) VALUES (?, ?, ?, 'UNPAID', 0)";
+
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+
+            stmt.setInt(1, apartmentId);
+            stmt.setDate(2, java.sql.Date.valueOf(issuedDate));
+            stmt.setDate(3, java.sql.Date.valueOf(dueDate));
+
+            int affectedRows = stmt.executeUpdate();
+            if (affectedRows == 0) return null;
+
+            try (ResultSet generatedKeys = stmt.getGeneratedKeys()) {
+                if (generatedKeys.next()) {
+                    int newInvoiceId = generatedKeys.getInt(1);
+                    return new Invoice(newInvoiceId, BigDecimal.ZERO, java.sql.Date.valueOf(dueDate));
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null; // Trả về null nếu thất bại
+    }
+
+    /**
+     * THÊM CHI TIẾT: Thêm 1 dòng chi tiết phí vào hóa đơn cha
+     */
+    public void addInvoiceDetail(int invoiceId, int feeId, String feeName, BigDecimal amount) {
+        String sql = "INSERT INTO invoicedetails (invoice_id, fee_id, name, amount) VALUES (?, ?, ?, ?)";
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setInt(1, invoiceId);
+            stmt.setInt(2, feeId);
+            stmt.setString(3, feeName);
+            stmt.setBigDecimal(4, amount);
+            stmt.executeUpdate();
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * CẬP NHẬT TỔNG TIỀN: Cập nhật tổng tiền cho Hóa đơn cha sau khi đã thêm hết chi tiết
+     */
+    public void updateInvoiceTotal(int invoiceId, BigDecimal totalAmount) {
+        String sql = "UPDATE invoices SET total_amount = ? WHERE invoice_id = ?";
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setBigDecimal(1, totalAmount);
+            stmt.setInt(2, invoiceId);
+            stmt.executeUpdate();
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+
+    // -----------------------------------------------------------------
+    // --- CÁC HÀM CŨ CỦA BẠN (CHO NGHIỆP VỤ CƯ DÂN/NHẮC NỢ) ---
+    // (Đã sửa lỗi)
+    // -----------------------------------------------------------------
+
+    /**
+     * Lấy các hóa đơn chưa thanh toán cho 1 Cư dân (ĐÃ SỬA LỖI)
+     */
     public List<Invoice> getUnpaidInvoices(int residentId) {
         Map<Integer, Invoice> invoices = new HashMap<>();
 
-        String sql = "SELECT i.*, id.invoice_detail_id, id.name, id.amount as detail_amount " +
-                    "FROM invoices i " +
-                    "LEFT JOIN invoicedetails id ON i.invoice_id = id.invoice_id " +
-                    "JOIN residents r ON i.apartment_id = r.apartment_id " +
-                    "WHERE r.user_id = ? AND i.status = 'UNPAID' " +
-                    "ORDER BY i.due_date";
+        // SỬA LỖI 1: Lấy 'id.fee_id' thay vì 'id.invoice_detail_id'
+        String sql = "SELECT i.*, id.fee_id, id.name, id.amount as detail_amount " +
+                "FROM invoices i " +
+                "LEFT JOIN invoicedetails id ON i.invoice_id = id.invoice_id " +
+                "JOIN residents r ON i.apartment_id = r.apartment_id " +
+                "WHERE r.user_id = ? AND i.status = 'UNPAID' " +
+                "ORDER BY i.due_date";
 
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
@@ -45,13 +164,13 @@ public class InvoiceDAO {
                 int invoiceId = rs.getInt("invoice_id");
                 final ResultSet finalRs = rs;
 
-                // Get or create invoice
+                // Giả định Model Invoice.java đã được sửa
                 Invoice invoice = invoices.computeIfAbsent(invoiceId, k -> {
-                    Invoice newInvoice = new Invoice();
+                    Invoice newInvoice = new Invoice(); // Giả định constructor rỗng
                     try {
                         newInvoice.setInvoiceId(invoiceId);
                         newInvoice.setApartmentId(finalRs.getInt("apartment_id"));
-                        newInvoice.setTotalAmount(finalRs.getDouble("total_amount"));
+                        newInvoice.setTotalAmount(finalRs.getBigDecimal("total_amount")); // Sửa: getBigDecimal
                         newInvoice.setDueDate(finalRs.getDate("due_date"));
                         newInvoice.setStatus(finalRs.getString("status"));
                     } catch (SQLException e) {
@@ -61,15 +180,15 @@ public class InvoiceDAO {
                 });
 
                 // Add invoice detail if it exists
-                int detailId = rs.getInt("invoice_detail_id");
+                int feeId = rs.getInt("fee_id");
                 if (!rs.wasNull()) {
+                    // SỬA LỖI 2: Gọi đúng constructor 3 tham số của InvoiceDetail
                     InvoiceDetail detail = new InvoiceDetail(
-                        detailId,
-                        invoiceId,
-                        rs.getString("name"),
-                        rs.getDouble("detail_amount")
+                            feeId,
+                            rs.getString("name"),
+                            rs.getBigDecimal("detail_amount") // Sửa: getBigDecimal
                     );
-                    invoice.getDetails().add(detail);
+                    invoice.addDetail(detail); // (Giả định hàm addDetail tồn tại)
                 }
             }
         } catch (SQLException e) {
@@ -80,20 +199,18 @@ public class InvoiceDAO {
     }
 
     /**
-     * Lấy danh sách hóa đơn CHƯA THANH TOÁN sắp đến hạn, bao gồm owner_id.
-     * @param daysBefore Số ngày trước hạn (ví dụ: 3)
-     * @return Danh sách hóa đơn thỏa mãn.
-     * @throws SQLException
+     * Lấy danh sách hóa đơn CHƯA THANH TOÁN sắp đến hạn (ĐÃ SỬA LỖI SQL)
      */
     public List<Invoice> findUpcomingDueInvoices(int daysBefore) throws SQLException {
         List<Invoice> invoices = new ArrayList<>();
-        // SỬA SQL: Thêm JOIN apartments và lấy a.owner_id
+
+        // SỬA LỖI SQL: Dùng 'make_interval' cho PostgreSQL
         String sql = "SELECT i.invoice_id, i.apartment_id, i.total_amount, i.due_date, a.owner_id " +
-                    "FROM invoices i " +
-                    "JOIN apartments a ON i.apartment_id = a.apartment_id " +
-                    "WHERE i.status = 'UNPAID' " +
-                    "AND i.due_date BETWEEN CURRENT_DATE AND CURRENT_DATE + INTERVAL ? DAY " +
-                    "ORDER BY i.due_date";
+                "FROM invoices i " +
+                "JOIN apartments a ON i.apartment_id = a.apartment_id " +
+                "WHERE i.status = 'UNPAID' " +
+                "AND i.due_date BETWEEN CURRENT_DATE AND (CURRENT_DATE + make_interval(days => ?)) " +
+                "ORDER BY i.due_date";
 
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -109,13 +226,10 @@ public class InvoiceDAO {
     }
 
     /**
-     * Lấy danh sách hóa đơn CHƯA THANH TOÁN đã quá hạn, bao gồm owner_id.
-     * @return Danh sách hóa đơn thỏa mãn.
-     * @throws SQLException
+     * Lấy danh sách hóa đơn CHƯA THANH TOÁN đã quá hạn (Không lỗi)
      */
     public List<Invoice> findOverdueInvoices() throws SQLException {
         List<Invoice> invoices = new ArrayList<>();
-        // SỬA SQL: Thêm JOIN apartments và lấy a.owner_id
         String sql = """
             SELECT i.invoice_id, i.apartment_id, i.total_amount, i.due_date, a.owner_id
             FROM invoices i
@@ -129,15 +243,14 @@ public class InvoiceDAO {
              ResultSet rs = stmt.executeQuery()) {
 
             while (rs.next()) {
-                invoices.add(mapResultSetToInvoiceBase(rs)); // Dùng hàm map mới
+                invoices.add(mapResultSetToInvoiceBase(rs));
             }
         }
         return invoices;
     }
 
     /**
-     * Tạo hóa đơn MỚI và các chi tiết của nó trong cùng 1 GIAO DỊCH (Transaction).
-     * (Hàm này giữ nguyên từ trước, đã đúng)
+     * Tạo hóa đơn MỚI và các chi tiết của nó (ĐÃ SỬA LỖI SQL)
      */
     public boolean createInvoiceWithDetails(Invoice invoice, List<InvoiceDetail> details) throws SQLException {
         Connection conn = null;
@@ -145,7 +258,9 @@ public class InvoiceDAO {
         PreparedStatement stmtDetail = null;
 
         String sqlInvoice = "INSERT INTO invoices (apartment_id, total_amount, due_date, status) VALUES (?, ?, ?, 'UNPAID') RETURNING invoice_id";
-        String sqlDetail = "INSERT INTO invoicedetails (invoice_id, name, amount) VALUES (?, ?, ?)";
+
+        // SỬA LỖI SQL: Thêm cột 'fee_id'
+        String sqlDetail = "INSERT INTO invoicedetails (invoice_id, fee_id, name, amount) VALUES (?, ?, ?, ?)";
 
         try {
             conn = DatabaseConnection.getConnection();
@@ -153,7 +268,7 @@ public class InvoiceDAO {
 
             // 1. Tạo Hóa đơn (Invoice)
             stmtInvoice = conn.prepareStatement(sqlInvoice);
-            stmtInvoice.setInt(1, invoice.getApartmentId()); // Đã có trong model Invoice mới
+            stmtInvoice.setInt(1, invoice.getApartmentId()); // Giả định Invoice.java có hàm này
             stmtInvoice.setBigDecimal(2, invoice.getTotalAmount());
             stmtInvoice.setDate(3, new java.sql.Date(invoice.getDueDate().getTime()));
 
@@ -167,8 +282,9 @@ public class InvoiceDAO {
             stmtDetail = conn.prepareStatement(sqlDetail);
             for (InvoiceDetail detail : details) {
                 stmtDetail.setInt(1, newInvoiceId);
-                stmtDetail.setString(2, detail.getName());
-                stmtDetail.setBigDecimal(3, detail.getAmount());
+                stmtDetail.setInt(2, detail.getFeeId()); // SỬA LỖI: Thêm fee_id
+                stmtDetail.setString(3, detail.getName());
+                stmtDetail.setBigDecimal(4, detail.getAmount());
                 stmtDetail.addBatch(); // Thêm vào lô
             }
 
@@ -201,10 +317,7 @@ public class InvoiceDAO {
     }
 
     /**
-     * Update the status of an invoice (e.g., from 'UNPAID' to 'PAID')
-     * @param invoiceId The ID of the invoice to update
-     * @param status The new status for the invoice
-     * @return true if the update was successful, false otherwise
+     * Cập nhật trạng thái hóa đơn (Không lỗi)
      */
     public boolean updateInvoiceStatus(int invoiceId, String status) {
         String sql = "UPDATE invoices SET status = ? WHERE invoice_id = ?";
@@ -223,10 +336,11 @@ public class InvoiceDAO {
     }
 
     /**
-     * Helper method to map ResultSet to Invoice object
+     * Hàm tiện ích: Ánh xạ ResultSet thành Invoice
+     * (Giả định Model Invoice.java đã được sửa)
      */
     private Invoice mapResultSetToInvoiceBase(ResultSet rs) throws SQLException {
-        Invoice invoice = new Invoice();
+        Invoice invoice = new Invoice(); // Giả định constructor rỗng
         invoice.setInvoiceId(rs.getInt("invoice_id"));
         invoice.setApartmentId(rs.getInt("apartment_id"));
         invoice.setTotalAmount(rs.getBigDecimal("total_amount"));
@@ -235,9 +349,13 @@ public class InvoiceDAO {
         return invoice;
     }
 
+    /**
+     * Lấy chi tiết của một hóa đơn (ĐÃ SỬA LỖI)
+     */
     public List<InvoiceDetail> getInvoiceDetails(int invoiceId) {
         List<InvoiceDetail> details = new ArrayList<>();
-        String sql = "SELECT * FROM invoicedetails WHERE invoice_id = ?";
+        // SỬA LỖI SQL: Lấy các cột cần thiết
+        String sql = "SELECT fee_id, name, amount FROM invoicedetails WHERE invoice_id = ?";
 
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
@@ -246,11 +364,11 @@ public class InvoiceDAO {
             ResultSet rs = pstmt.executeQuery();
 
             while (rs.next()) {
+                // SỬA LỖI: Gọi đúng constructor (3 tham số)
                 InvoiceDetail detail = new InvoiceDetail(
-                    rs.getInt("invoice_detail_id"),
-                    invoiceId,
-                    rs.getString("name"),
-                    rs.getDouble("amount")
+                        rs.getInt("fee_id"),
+                        rs.getString("name"),
+                        rs.getBigDecimal("amount") // Sửa: getBigDecimal
                 );
                 details.add(detail);
             }
