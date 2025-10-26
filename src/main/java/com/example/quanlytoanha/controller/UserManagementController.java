@@ -50,6 +50,11 @@ public class UserManagementController {
 
         // 2. Tải dữ liệu ban đầu
         loadResidentData();
+        // DÒNG CODE TẠM THỜI ĐỂ BUỘC NÚT HIỂN THỊ
+        if (btnEditResident != null) {
+            btnEditResident.setVisible(true);
+            btnEditResident.setManaged(true);
+        }
     }
 
     /**
@@ -79,16 +84,30 @@ public class UserManagementController {
         Resident selectedResident = residentTable.getSelectionModel().getSelectedItem();
 
         if (selectedResident != null) {
+            int userId = selectedResident.getUserId();
+
+            // --- BƯỚC GỠ LỖI: HIỂN THỊ ID ĐANG ĐƯỢC CHỌN ---
+            // Hãy kiểm tra console, nếu dòng này in ra '0' thì lỗi là do nạp dữ liệu bảng
+            System.out.println("DEBUG: User ID được chọn từ bảng: " + userId);
+
+            // --- BƯỚC 1: KIỂM TRA ID HỢP LỆ ---
+            // Nếu userId là 0 hoặc âm, dừng lại ngay lập tức
+            if (userId <= 0) {
+                showAlert(Alert.AlertType.ERROR, "Lỗi Dữ Liệu", "Hồ sơ cư dân này có User ID không hợp lệ (ID <= 0). Vui lòng kiểm tra dữ liệu gốc.");
+                return;
+            }
+
             try {
-                // 1. Lấy UserID (hoặc ResidentId) và nạp lại Resident đầy đủ từ DB
-                Resident residentToEdit = residentService.getResidentById(selectedResident.getUserId());
+                // 2. Lấy Resident đầy đủ từ DB bằng UserID hợp lệ
+                Resident residentToEdit = residentService.getResidentById(userId);
 
                 if (residentToEdit == null) {
-                    showAlert(Alert.AlertType.ERROR, "Lỗi", "Không tìm thấy hồ sơ cư dân cần chỉnh sửa.");
+                    // Nếu DAO trả về null, có nghĩa là dữ liệu không đồng bộ (User ID có trong bảng nhưng không có hồ sơ Resident tương ứng)
+                    showAlert(Alert.AlertType.ERROR, "Lỗi", "Không tìm thấy hồ sơ cư dân cần chỉnh sửa (Dữ liệu không đồng bộ).");
                     return;
                 }
 
-                // 2. Mở cửa sổ chỉnh sửa ở chế độ Edit
+                // 3. Mở cửa sổ chỉnh sửa ở chế độ Edit
                 openResidentForm(residentToEdit);
 
             } catch (SQLException e) {
@@ -115,14 +134,20 @@ public class UserManagementController {
      */
     private void openResidentForm(Resident residentToEdit) {
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/example/quanlytoanha/view/AddResidentController.fxml"));
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/example/quanlytoanha/view/add_resident_form.fxml"));
+
+            // ⚠️ DÒNG NÀY PHẢI ĐƯỢC GỌI ĐẦU TIÊN
             Parent root = loader.load();
 
             // Lấy Controller của form
             AddResidentController controller = loader.getController();
 
+            // *** GỌI HÀM KHỞI TẠO COMBOBOX MỚI ĐÃ TÁCH LOGIC ***
+            //controller.initComboBoxes(); // <--- Dòng mới được thêm
+
             // Thiết lập chế độ Sửa nếu có đối tượng Resident
             if (residentToEdit != null) {
+                // Phương thức setResident sẽ điền dữ liệu vào các ComboBox đã được init
                 controller.setResident(residentToEdit);
             }
 

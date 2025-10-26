@@ -5,6 +5,7 @@ import com.example.quanlytoanha.dao.ResidentDAO;
 import com.example.quanlytoanha.model.Resident;
 import com.example.quanlytoanha.dao.UserDAO;
 import java.sql.SQLException;
+import com.example.quanlytoanha.model.Role;
 
 public class ResidentService {
 
@@ -14,38 +15,54 @@ public class ResidentService {
 
     /**
      * Phương thức mới: Lấy Resident đầy đủ từ DB để nạp vào form Edit.
-     * @param userId ID của User (Resident)
-     * @return Đối tượng Resident hoàn chỉnh
-     * @throws SQLException Nếu có lỗi DB
      */
     public Resident getResidentById(int userId) throws SQLException {
         // Giả định UserDAO.getUserById() được cấu hình để trả về đối tượng Resident hoàn chỉnh
-        // (bao gồm cả thông tin từ bảng 'residents' và 'users').
-        return (Resident) userDAO.getUserById(userId);
+        return residentDAO.getResidentByUserId(userId);
     }
 
     // ----------------------------------------------------------------------
-    // --- CREATE LOGIC ---
+    // --- CREATE LOGIC (ĐÃ TÍCH HỢP FIX LỖI PASSWORD) ---
     // ----------------------------------------------------------------------
 
     /**
      * Tạo hồ sơ cư dân mới, bao gồm validation nghiệp vụ.
      */
     public boolean createNewResident(Resident resident) throws ValidationException, SQLException {
-        // --- 1. VALIDATION TRƯỜNG BẮT BUỘC ---
+
+        // --- 1. VALIDATION TRƯỜNG BẮT BUỘC (GIỮ NGUYÊN) ---
         if (resident.getFullName() == null || resident.getFullName().trim().isEmpty()) {
             throw new ValidationException("Họ tên cư dân là trường bắt buộc.");
         }
         if (resident.getApartmentId() <= 0) {
             throw new ValidationException("ID Căn hộ là trường bắt buộc và phải hợp lệ.");
         }
-
-        // Giả sử Số điện thoại cũng bắt buộc khi tạo
         if (resident.getPhoneNumber() == null || resident.getPhoneNumber().trim().isEmpty()) {
             throw new ValidationException("Số điện thoại là trường bắt buộc.");
         }
 
-        // --- 2. VALIDATION NGHIỆP VỤ ---
+        // --- 2. XỬ LÝ DỮ LIỆU USER BẮT BUỘC (FIX LỖI RAW PASSWORD NULL) ---
+
+        // TẠO USERNAME TẠM THỜI (để pass ràng buộc NOT NULL/UNIQUE của bảng users)
+        // Mẫu: res[ApartmentID] + [4 số ngẫu nhiên]
+        String tempUsername = "res" + resident.getApartmentId() + (int)(Math.random() * 9000 + 1000);
+        resident.setUsername(tempUsername);
+
+        // GÁN MẬT KHẨU TẠM THỜI (để pass qua hàm hashPassword và ràng buộc NOT NULL)
+        resident.setPassword("123456");
+
+        // GÁN ROLE MẶC ĐỊNH (Role.RESIDENT)
+        // Lưu ý: Cần đảm bảo Role.RESIDENT được định nghĩa trong enum Role của bạn.
+        resident.setRole(Role.RESIDENT);
+
+        // GÁN EMAIL MẶC ĐỊNH (nếu chưa có)
+        // Email là NOT NULL trong DB, nên cần phải có giá trị.
+        if (resident.getEmail() == null || resident.getEmail().trim().isEmpty()) {
+            resident.setEmail(tempUsername + "@temp.com");
+        }
+
+
+        // --- 3. VALIDATION NGHIỆP VỤ (GIỮ NGUYÊN) ---
         if (!residentDAO.isApartmentExist(resident.getApartmentId())) {
             throw new ValidationException("Căn hộ ID " + resident.getApartmentId() + " không tồn tại.");
         }
@@ -58,7 +75,8 @@ public class ResidentService {
             }
         }
 
-        // --- 3. GỌI DAO VÀ THỰC HIỆN LƯU ---
+        // --- 4. GỌI DAO VÀ THỰC HIỆN LƯU ---
+        // userDAO.addResident sẽ thực hiện INSERT vào cả users và residents
         return userDAO.addResident(resident);
     }
 
