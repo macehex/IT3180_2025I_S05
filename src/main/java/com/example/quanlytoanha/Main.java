@@ -31,8 +31,19 @@ public class Main extends Application {
         Parent root = loader.load();
 
         primaryStage.setTitle("Quản lý Tòa nhà - Đăng nhập");
-        primaryStage.setScene(new Scene(root, 400, 300));
+        primaryStage.setScene(new Scene(root, 450, 500));
+        primaryStage.setResizable(true);
+        primaryStage.setMinWidth(450);
+        primaryStage.setMinHeight(500);
+        
+        // Set full screen
+        primaryStage.setMaximized(true);
+        
         primaryStage.show();
+    }
+
+    public static void main(String[] args) {
+        launch(args);
     }
 
     /**

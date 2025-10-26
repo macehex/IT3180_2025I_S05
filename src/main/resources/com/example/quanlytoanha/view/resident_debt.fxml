@@ -72,5 +72,6 @@
                 <Insets top="10.0" />
             </BorderPane.margin>
         </TableView>
+
     </center>
 </BorderPane>

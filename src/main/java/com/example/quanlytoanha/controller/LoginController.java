@@ -24,11 +24,16 @@ public class LoginController {
     @FXML
     private PasswordField txtPassword;
     @FXML
+    private TextField txtPasswordVisible;
+    @FXML
+    private Button btnShowPassword;
+    @FXML
     private Button loginButton;
     @FXML
     private Text errorText;
 
     private AuthService authService;
+    private boolean isPasswordVisible = false;
 
     public LoginController() {
         this.authService = new AuthService(); // Khởi tạo AuthService
@@ -39,9 +44,41 @@ public class LoginController {
      */
     @FXML
     public void initialize() {
+        // Setup password visibility toggle
+        if (btnShowPassword != null && txtPasswordVisible != null) {
+            btnShowPassword.setOnAction(e -> togglePasswordVisibility());
+            
+            // Sync text between both fields
+            txtPassword.textProperty().addListener((obs, oldVal, newVal) -> {
+                txtPasswordVisible.setText(newVal);
+            });
+            txtPasswordVisible.textProperty().addListener((obs, oldVal, newVal) -> {
+                txtPassword.setText(newVal);
+            });
+        }
+        
         // Có thể thêm logic khởi tạo ở đây (ví dụ: đặt giá trị mặc định)
         // txtUsername.setText("admin"); // (Để test cho nhanh)
         // txtPassword.setText("admin123"); // (Để test cho nhanh)
+    }
+    
+    /**
+     * Toggle password visibility
+     */
+    private void togglePasswordVisibility() {
+        isPasswordVisible = !isPasswordVisible;
+        
+        if (isPasswordVisible) {
+            txtPasswordVisible.setText(txtPassword.getText());
+            txtPasswordVisible.setVisible(true);
+            txtPassword.setVisible(false);
+            btnShowPassword.setText("🙈");
+        } else {
+            txtPassword.setText(txtPasswordVisible.getText());
+            txtPassword.setVisible(true);
+            txtPasswordVisible.setVisible(false);
+            btnShowPassword.setText("👁️");
+        }
     }
 
     /**
@@ -52,7 +89,7 @@ public class LoginController {
     private void handleLoginButtonAction() {
         // Lấy dữ liệu từ GIAO DIỆN
         String username = txtUsername.getText();
-        String password = txtPassword.getText();
+        String password = isPasswordVisible ? txtPasswordVisible.getText() : txtPassword.getText();
 
         // 1. Kiểm tra rỗng
         if (username.isEmpty() || password.isEmpty()) {
@@ -114,8 +151,9 @@ public class LoginController {
             // 4. Hiển thị cửa sổ mới
             Stage mainStage = new Stage();
             mainStage.setTitle("Dashboard - " + user.getFullName());
-            mainStage.setScene(new Scene(root, 600, 500)); // Tăng kích thước từ mặc định lên 600x500
+            mainStage.setScene(new Scene(root, 800, 600)); // Kích thước lớn hơn để hiển thị đầy đủ
             mainStage.setResizable(true); // Cho phép resize
+            mainStage.setMaximized(true); // Set full screen
             mainStage.show();
 
         } catch (IOException e) {

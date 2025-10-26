@@ -1,38 +1,128 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import javafx.geometry.Insets?>
-<?import javafx.scene.control.Button?>
-<?import javafx.scene.control.Label?>
-<?import javafx.scene.control.PasswordField?>
-<?import javafx.scene.control.TextField?>
-<?import javafx.scene.layout.GridPane?>
-<?import javafx.scene.layout.VBox?>
-<?import javafx.scene.text.Font?>
-<?import javafx.scene.text.Text?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
+<?import javafx.scene.image.*?>
 
-<VBox alignment="CENTER" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="300.0" prefWidth="400.0" spacing="20.0" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.quanlytoanha.controller.LoginController">
-    <children>
-        <Text strokeType="OUTSIDE" strokeWidth="0.0" text="Đăng Nhập Hệ Thống">
-            <font>
-                <Font name="System Bold" size="24.0" />
-            </font>
-        </Text>
-        <GridPane hgap="10.0" vgap="10.0">
+<BorderPane xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" 
+            fx:controller="com.example.quanlytoanha.controller.LoginController"
+            prefHeight="700.0" prefWidth="1000.0">
+
+   <center>
+      <StackPane>
+         <!-- Background Image Layer -->
+         <Region>
+            <style>
+               -fx-background-image: url('images/image1.jpg');
+               -fx-background-size: cover;
+               -fx-background-position: center center;
+            </style>
+         </Region>
+
+         <!-- Login Form Card - Cố định kích thước, luôn ở giữa -->
+         <VBox alignment="CENTER" spacing="12.0" 
+               style="-fx-background-color: white; -fx-background-radius: 20; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.25), 25, 0, 0, 8);"
+               prefWidth="450.0" prefHeight="450.0" maxWidth="450.0" maxHeight="450.0">
             <children>
-                <Label text="Tên đăng nhập:" GridPane.rowIndex="0" GridPane.columnIndex="0" />
-                <TextField fx:id="txtUsername" promptText="admin" GridPane.rowIndex="0" GridPane.columnIndex="1" />
+               <!-- Header -->
+               <VBox alignment="CENTER" spacing="6.0" style="-fx-padding: 25 40 12 40;">
+                  <children>
+                     <Text text="Hệ thống quản lý chung cư" 
+                           style="-fx-font-size: 24px; -fx-font-weight: bold; -fx-fill: #1e3c72;">
+                        <VBox.margin>
+                           <Insets bottom="10.0" />
+                        </VBox.margin>
+                     </Text>
+                  </children>
+               </VBox>
+               
+               <!-- Sign In Title -->
+               <VBox alignment="CENTER" spacing="6.0" style="-fx-padding: 0 40 15 40;">
+                  <children>
+                     <Text text="Sign In" 
+                           style="-fx-font-size: 28px; -fx-font-weight: bold; -fx-fill: #1e3c72;"/>
+                  </children>
+               </VBox>
 
-                <Label text="Mật khẩu:" GridPane.rowIndex="1" GridPane.columnIndex="0" />
-                <PasswordField fx:id="txtPassword" promptText="admin123" GridPane.rowIndex="1" GridPane.columnIndex="1" />
+               <!-- Success Message Banner (khi logout) -->
+               <HBox alignment="CENTER" style="-fx-padding: 0 40; -fx-background-color: transparent;"
+                     visible="false">
+                  <children>
+                     <VBox alignment="CENTER" spacing="10.0"
+                           style="-fx-background-color: #4CAF50; -fx-background-radius: 10; -fx-padding: 12 20;">
+                        <children>
+                           <Text text="Đã đăng xuất thành công!" 
+                                 style="-fx-font-size: 14px; -fx-fill: white; -fx-font-weight: bold;"/>
+                        </children>
+                     </VBox>
+                  </children>
+               </HBox>
+
+               <!-- Login Form -->
+               <VBox spacing="15.0" style="-fx-padding: 0 40 25 40;" prefWidth="100.0">
+                  <children>
+                     <!-- Username/ID Field -->
+                     <VBox spacing="6.0">
+                        <children>
+                           <TextField fx:id="txtUsername" promptText="001234567869" 
+                                      prefHeight="50.0" prefWidth="370.0"
+                                      style="-fx-background-color: white; -fx-border-color: #2196F3; -fx-border-radius: 8; -fx-background-radius: 8; -fx-padding: 15; -fx-font-size: 14px;"/>
+                        </children>
+                     </VBox>
+
+                     <!-- Password Field -->
+                     <VBox spacing="6.0">
+                        <children>
+                           <HBox alignment="CENTER_LEFT" spacing="0">
+                              <children>
+                                 <StackPane prefHeight="50.0" prefWidth="320.0">
+                                    <PasswordField fx:id="txtPassword" promptText="********" 
+                                                   style="-fx-background-color: white; -fx-border-color: #2196F3; -fx-border-radius: 8 0 0 8; -fx-background-radius: 8 0 0 8; -fx-padding: 15; -fx-font-size: 14px;" 
+                                                   HBox.hgrow="ALWAYS">
+                                    </PasswordField>
+                                    <TextField fx:id="txtPasswordVisible" visible="false" promptText="********"
+                                                style="-fx-background-color: white; -fx-border-color: #2196F3; -fx-border-radius: 8 0 0 8; -fx-background-radius: 8 0 0 8; -fx-padding: 15; -fx-font-size: 14px;"
+                                                HBox.hgrow="ALWAYS">
+                                    </TextField>
+                                 </StackPane>
+                                 <!-- Eye icon button -->
+                                 <Button fx:id="btnShowPassword" text="👁️" prefHeight="50.0" prefWidth="50.0" 
+                                         style="-fx-background-color: white; -fx-border-color: #2196F3; -fx-border-width: 1 1 1 0; -fx-border-radius: 0 8 8 0; -fx-background-radius: 0 8 8 0; -fx-cursor: hand;">
+                                 </Button>
+                              </children>
+                           </HBox>
+                        </children>
+                     </VBox>
+
+                     <!-- Error Message -->
+                     <Text fx:id="errorText" fill="#dc3545" style="-fx-font-size: 13px; -fx-font-weight: bold;"
+                           wrappingWidth="370.0" textAlignment="CENTER">
+                     </Text>
+
+                     <!-- Login Button -->
+                     <Button fx:id="loginButton" mnemonicParsing="false" onAction="#handleLoginButtonAction" 
+                             text="Login" defaultButton="true"
+                             prefHeight="50.0" prefWidth="370.0"
+                             style="-fx-background-color: #1e3c72; -fx-text-fill: white; -fx-font-size: 16px; -fx-font-weight: bold; -fx-background-radius: 8; -fx-cursor: hand;"
+                             VBox.vgrow="NEVER">
+                        <VBox.margin>
+                           <Insets top="12.0" />
+                        </VBox.margin>
+                     </Button>
+                  </children>
+               </VBox>
+
+               <!-- Footer -->
+               <VBox alignment="CENTER" style="-fx-padding: 0 40 25 40;">
+                  <children>
+                     <Text text="© 2025 Hệ thống quản lý chung cư. All rights reserved." 
+                           style="-fx-font-size: 10px; -fx-fill: #999;"/>
+                  </children>
+               </VBox>
             </children>
-            <padding>
-                <Insets left="20.0" right="20.0" />
-            </padding>
-        </GridPane>
-        <Button fx:id="loginButton" mnemonicParsing="false" onAction="#handleLoginButtonAction" text="Đăng nhập" defaultButton="true" />
-        <Text fx:id="errorText" fill="RED" strokeType="OUTSIDE" strokeWidth="0.0" />
-    </children>
-    <padding>
-        <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
-    </padding>
-</VBox>
+         </VBox>
+      </StackPane>
+   </center>
+</BorderPane>

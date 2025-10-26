@@ -64,5 +64,6 @@ public class DataInitializer {
             e.printStackTrace();
             System.err.println("Lỗi khi thêm user: " + e.getMessage());
         }
+
     }
 }

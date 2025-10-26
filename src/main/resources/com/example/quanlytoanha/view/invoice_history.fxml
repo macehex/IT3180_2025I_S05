@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.geometry.Insets?>
+
+<BorderPane xmlns="http://javafx.com/javafx"
+            xmlns:fx="http://javafx.com/fxml"
+            fx:controller="com.example.quanlytoanha.controller.InvoiceHistoryController"
+            prefHeight="800.0" prefWidth="1200.0">
+
+    <center>
+        <ScrollPane fitToWidth="true">
+            <VBox spacing="20" style="-fx-padding: 20;">
+                <!-- Phần Hóa Đơn -->
+                <VBox>
+                    <HBox fx:id="invoiceTilePane" spacing="20" alignment="CENTER_LEFT">
+                        <!-- Các tile sẽ được thêm vào đây bằng code -->
+                    </HBox>
+                </VBox>
+
+                <!-- Phần Thanh Toán Trực Tuyến -->
+                <TitledPane text="Thanh Toán Trực Tuyến" expanded="true">
+                    <VBox spacing="10">
+                        <padding>
+                            <Insets top="10" right="10" bottom="10" left="10"/>
+                        </padding>
+                        <ComboBox fx:id="invoiceSelector" promptText="Chọn hóa đơn" maxWidth="Infinity"/>
+                        <TextField fx:id="amountField" promptText="Số tiền" editable="false"/>
+                        <Button text="Thanh Toán Ngay" onAction="#handlePayment"
+                                style="-fx-background-color: #2196F3; -fx-text-fill: white;"
+                                maxWidth="Infinity"/>
+                    </VBox>
+                </TitledPane>
+
+                <!-- Lịch Sử Giao Dịch -->
+                <TitledPane text="Lịch Sử Giao Dịch" expanded="true">
+                    <VBox spacing="10">
+                        <padding>
+                            <Insets top="10" right="10" bottom="10" left="10"/>
+                        </padding>
+                        <HBox spacing="10" alignment="CENTER_LEFT">
+                            <DatePicker fx:id="fromDate" promptText="Từ ngày"/>
+                            <DatePicker fx:id="toDate" promptText="Đến ngày"/>
+                            <Button text="Lọc" onAction="#filterTransactions"
+                                    style="-fx-background-color: #4CAF50; -fx-text-fill: white;"/>
+                        </HBox>
+                        <TableView fx:id="transactionTable" VBox.vgrow="ALWAYS">
+                            <columns>
+                                <TableColumn fx:id="dateColumn" text="Ngày" prefWidth="150"/>
+                                <TableColumn fx:id="descriptionColumn" text="Mô tả" prefWidth="300"/>
+                                <TableColumn fx:id="amountColumn" text="Số tiền" prefWidth="150"/>
+                                <TableColumn fx:id="statusColumn" text="Trạng thái" prefWidth="100"/>
+                            </columns>
+                        </TableView>
+                    </VBox>
+                </TitledPane>
+
+                <!-- Nút Quay Lại -->
+                <HBox alignment="CENTER">
+                    <Button fx:id="backButton"
+                            onAction="#handleBack"
+                            text="⬅ Quay lại"
+                            style="-fx-font-size: 14px; -fx-background-color: #6c757d; -fx-text-fill: white;"
+                            prefWidth="150"/>
+                </HBox>
+
+            </VBox>
+        </ScrollPane>
+    </center>
+
+</BorderPane>

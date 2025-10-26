@@ -1,7 +1,6 @@
 plugins {
     java
     application
-    id("org.javamodularity.moduleplugin") version "1.8.15"
     id("org.openjfx.javafxplugin") version "0.1.0"
     id("org.beryx.jlink") version "2.25.0"
 }
@@ -16,23 +15,34 @@ repositories {
 val junitVersion = "5.12.1"
 
 java {
+    modularity.inferModulePath.set(true)
     toolchain {
         languageVersion = JavaLanguageVersion.of(21)
     }
 }
 
-tasks.withType<JavaCompile> {
-    options.encoding = "UTF-8"
-}
-
 application {
-    //mainModule.set("com.example.quanlytoanha")
+    mainModule.set("com.example.quanlytoanha")
     mainClass.set("com.example.quanlytoanha.Launcher")
 }
 
 javafx {
     version = "21.0.6"
-    modules = listOf("javafx.controls", "javafx.fxml")
+    modules = listOf("javafx.controls", "javafx.fxml", "javafx.web", "javafx.graphics", "javafx.base")
+}
+
+tasks.withType<JavaCompile> {
+    options.encoding = "UTF-8"
+    options.compilerArgs.add("--enable-preview")
+}
+
+tasks.withType<Test> {
+    useJUnitPlatform()
+    jvmArgs("--enable-preview")
+}
+
+tasks.withType<JavaExec> {
+    jvmArgs("--enable-preview")
 }
 
 dependencies {
@@ -46,10 +56,6 @@ dependencies {
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.10.0") // JUnit 5 Engine
     testImplementation("org.mockito:mockito-core:5.5.0")         // Mockito core
     testImplementation("org.mockito:mockito-junit-jupiter:5.5.0") // Tích hợp Mockito với JUnit 5
-}
-
-tasks.withType<Test> {
-    useJUnitPlatform()
 }
 
 jlink {

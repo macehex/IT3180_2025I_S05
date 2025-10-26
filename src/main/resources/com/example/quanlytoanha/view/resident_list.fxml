@@ -4,24 +4,21 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.text.*?>
-<?import javafx.scene.paint.Color?>
 
 <BorderPane xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" 
             fx:controller="com.example.quanlytoanha.controller.ResidentListController"
-            style="-fx-background-color: #f5f5f5;">
+            style="-fx-background-color: #f8f9fa;">
 
-    <!-- TOP: Header with title and logout -->
+    <!-- TOP: Header with title -->
     <top>
-        <HBox alignment="CENTER_LEFT" spacing="20.0" style="-fx-background-color: white; -fx-padding: 15;">
+        <HBox alignment="CENTER_LEFT" spacing="20.0" 
+              style="-fx-background-color: linear-gradient(to right, #1e3c72 0%, #2a5298 100%); -fx-padding: 20;">
             <children>
-                <HBox spacing="10.0">
-                    <children>
-                        <Label text="🏢" style="-fx-font-size: 24px;"/>
-                        <Label text="Quản lý cư dân - Hệ thống quản lý tòa nhà" style="-fx-font-size: 16px; -fx-font-weight: bold;"/>
-                    </children>
-                </HBox>
+                <Label text="🏢 QUẢN LÝ DANH SÁCH CƯ DÂN" 
+                       style="-fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: white;"/>
                 <Region HBox.hgrow="ALWAYS"/>
-                <Label fx:id="lblWelcome" text="Xin chào, Quản Trị Viên" style="-fx-font-size: 14px;"/>
+                <Label fx:id="lblWelcome" text="Xin chào, Quản Trị Viên" 
+                       style="-fx-text-fill: white; -fx-font-size: 16px; -fx-font-weight: bold;"/>
             </children>
         </HBox>
     </top>
@@ -30,68 +27,81 @@
     <center>
         <VBox spacing="0.0">
             
-            <!-- Header Section with blue background -->
-            <HBox alignment="CENTER_LEFT" style="-fx-background-color: #007bff; -fx-padding: 20;">
-                <children>
-                    <Label text="👤" style="-fx-font-size: 24px; -fx-text-fill: white;"/>
-                    <Label text="QUẢN LÝ CƯ DÂN" style="-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: white;"/>
-                </children>
-            </HBox>
-
             <!-- Search and Filter Section -->
-            <VBox spacing="15.0" style="-fx-background-color: white; -fx-padding: 20;">
+            <VBox spacing="20.0" style="-fx-background-color: white; -fx-padding: 25;">
                 <children>
-                    <!-- Search row -->
-                    <HBox alignment="CENTER_LEFT" spacing="15.0">
-                        <children>
-                            <Label text="🔍" style="-fx-font-size: 16px;"/>
-                            <Label text="Tìm kiếm:" style="-fx-font-size: 14px; -fx-font-weight: bold;"/>
-                        </children>
-                    </HBox>
+                    <!-- Search title -->
+                    <Label text="🔍 Tìm kiếm cư dân" 
+                           style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #1e3c72;">
+                    </Label>
 
                     <!-- Filter controls -->
-                    <HBox spacing="15.0" alignment="CENTER_LEFT">
+                    <GridPane hgap="15.0" vgap="15.0">
+                        <columnConstraints>
+                            <ColumnConstraints hgrow="SOMETIMES" minWidth="200.0" prefWidth="250.0" />
+                            <ColumnConstraints hgrow="SOMETIMES" minWidth="150.0" prefWidth="200.0" />
+                            <ColumnConstraints hgrow="SOMETIMES" minWidth="150.0" prefWidth="200.0" />
+                        </columnConstraints>
+                        <rowConstraints>
+                            <RowConstraints minHeight="40.0" prefHeight="40.0" vgrow="SOMETIMES" />
+                        </rowConstraints>
+                        
                         <children>
-                            <TextField fx:id="txtSearchName" promptText="Tên cư dân..." prefWidth="200.0"/>
-                            <TextField fx:id="txtSearchApartment" promptText="Căn hộ..." prefWidth="150.0"/>
-                            <ComboBox fx:id="cmbStatus" promptText="Trạng thái" prefWidth="150.0"/>
+                            <TextField fx:id="txtSearchName" promptText="Nhập tên cư dân..." 
+                                       style="-fx-background-radius: 8; -fx-padding: 10;"/>
+                            <TextField fx:id="txtSearchApartment" promptText="Nhập số căn hộ..." 
+                                       style="-fx-background-radius: 8; -fx-padding: 10;" GridPane.columnIndex="1"/>
+                            <ComboBox fx:id="cmbStatus" promptText="Chọn trạng thái" 
+                                      style="-fx-background-radius: 8;" GridPane.columnIndex="2"/>
                         </children>
-                    </HBox>
+                    </GridPane>
 
                     <!-- Action buttons -->
-                    <HBox spacing="10.0" alignment="CENTER_LEFT">
+                    <HBox spacing="15.0" alignment="CENTER_LEFT">
                         <children>
-                            <Button fx:id="btnSearch" text="Tìm kiếm" onAction="#handleSearch" 
-                                    style="-fx-background-color: #28a745; -fx-text-fill: white; -fx-font-weight: bold;"/>
-                            <Button fx:id="btnShowAll" text="Hiển thị tất cả" onAction="#handleShowAll" 
-                                    style="-fx-background-color: #007bff; -fx-text-fill: white; -fx-font-weight: bold;"/>
+                            <Button fx:id="btnSearch" text="🔍 Tìm kiếm" onAction="#handleSearch" 
+                                    prefHeight="40.0" prefWidth="150.0"
+                                    style="-fx-background-color: linear-gradient(to right, #1e3c72, #2a5298); -fx-text-fill: white; -fx-font-size: 14px; -fx-font-weight: bold; -fx-background-radius: 8; -fx-padding: 10;"/>
+                            <Button fx:id="btnShowAll" text="🔄 Hiển thị tất cả" onAction="#handleShowAll" 
+                                    prefHeight="40.0" prefWidth="160.0"
+                                    style="-fx-background-color: linear-gradient(to right, #1e3c72, #2a5298); -fx-text-fill: white; -fx-font-size: 14px; -fx-font-weight: bold; -fx-background-radius: 8; -fx-padding: 10;"/>
                         </children>
                     </HBox>
 
                     <!-- Results info -->
-                    <HBox alignment="CENTER_LEFT" spacing="20.0">
+                    <HBox alignment="CENTER_LEFT" spacing="20.0" style="-fx-background-color: #f8f9fa; -fx-padding: 10; -fx-background-radius: 8;">
                         <children>
-                            <Label fx:id="lblResultCount" text="Kết quả: 0" style="-fx-font-size: 14px;"/>
+                            <Label fx:id="lblResultCount" text="Kết quả: 0" 
+                                   style="-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #495057;"/>
                             <Region HBox.hgrow="ALWAYS"/>
                             <Text fx:id="txtStatusMessage" text="Tải dữ liệu thành công" 
-                                  style="-fx-fill: #28a745; -fx-font-size: 14px;"/>
+                                  style="-fx-fill: #28a745; -fx-font-size: 14px; -fx-font-weight: bold;"/>
                         </children>
                     </HBox>
                 </children>
             </VBox>
 
             <!-- Table Section -->
-            <TableView fx:id="tableView" style="-fx-background-color: white;">
+            <TableView fx:id="tableView" 
+                      style="-fx-background-color: white; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 10, 0, 0, 2);">
                 <columns>
-                    <TableColumn fx:id="colId" text="ID" prefWidth="60.0" style="-fx-alignment: CENTER;"/>
-                    <TableColumn fx:id="colFullName" text="Họ tên" prefWidth="150.0"/>
-                    <TableColumn fx:id="colApartment" text="Căn hộ" prefWidth="80.0" style="-fx-alignment: CENTER;"/>
-                    <TableColumn fx:id="colStatus" text="Trạng thái" prefWidth="100.0" style="-fx-alignment: CENTER;"/>
-                    <TableColumn fx:id="colRelationship" text="Quan hệ" prefWidth="100.0" style="-fx-alignment: CENTER;"/>
-                    <TableColumn fx:id="colIdCard" text="CMND/CCCD" prefWidth="120.0" style="-fx-alignment: CENTER;"/>
-                    <TableColumn fx:id="colPhone" text="Số điện thoại" prefWidth="120.0" style="-fx-alignment: CENTER;"/>
-                    <TableColumn fx:id="colEmail" text="Email" prefWidth="180.0"/>
-                    <TableColumn fx:id="colMoveInDate" text="Ngày vào" prefWidth="100.0" style="-fx-alignment: CENTER;"/>
+                    <TableColumn fx:id="colId" text="ID" prefWidth="60.0" 
+                                  style="-fx-alignment: CENTER; -fx-font-weight: bold;"/>
+                    <TableColumn fx:id="colFullName" text="Họ tên" prefWidth="180.0" 
+                                  style="-fx-font-weight: bold;"/>
+                    <TableColumn fx:id="colApartment" text="Căn hộ" prefWidth="100.0" 
+                                  style="-fx-alignment: CENTER;"/>
+                    <TableColumn fx:id="colStatus" text="Trạng thái" prefWidth="120.0" 
+                                  style="-fx-alignment: CENTER;"/>
+                    <TableColumn fx:id="colRelationship" text="Quan hệ" prefWidth="120.0" 
+                                  style="-fx-alignment: CENTER;"/>
+                    <TableColumn fx:id="colIdCard" text="CMND/CCCD" prefWidth="140.0" 
+                                  style="-fx-alignment: CENTER;"/>
+                    <TableColumn fx:id="colPhone" text="Số điện thoại" prefWidth="130.0" 
+                                  style="-fx-alignment: CENTER;"/>
+                    <TableColumn fx:id="colEmail" text="Email" prefWidth="200.0"/>
+                    <TableColumn fx:id="colMoveInDate" text="Ngày vào" prefWidth="120.0" 
+                                  style="-fx-alignment: CENTER;"/>
                 </columns>
             </TableView>
         </VBox>
