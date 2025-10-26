@@ -43,16 +43,17 @@ public class InvoiceDAO {
 
             while (rs.next()) {
                 int invoiceId = rs.getInt("invoice_id");
+                final ResultSet finalRs = rs;
 
                 // Get or create invoice
                 Invoice invoice = invoices.computeIfAbsent(invoiceId, k -> {
                     Invoice newInvoice = new Invoice();
                     try {
                         newInvoice.setInvoiceId(invoiceId);
-                        newInvoice.setApartmentId(rs.getInt("apartment_id"));
-                        newInvoice.setTotalAmount(rs.getBigDecimal("total_amount"));
-                        newInvoice.setDueDate(rs.getDate("due_date"));
-                        newInvoice.setStatus(rs.getString("status"));
+                        newInvoice.setApartmentId(finalRs.getInt("apartment_id"));
+                        newInvoice.setTotalAmount(finalRs.getDouble("total_amount"));
+                        newInvoice.setDueDate(finalRs.getDate("due_date").toLocalDate());
+                        newInvoice.setStatus(finalRs.getString("status"));
                     } catch (SQLException e) {
                         e.printStackTrace();
                     }
@@ -99,7 +100,7 @@ public class InvoiceDAO {
 
             stmt.setInt(1, daysBefore);
             ResultSet rs = stmt.executeQuery();
-            
+
             while (rs.next()) {
                 invoices.add(mapResultSetToInvoiceBase(rs));
             }
@@ -207,15 +208,21 @@ public class InvoiceDAO {
      */
     public boolean updateInvoiceStatus(int invoiceId, String status) {
         String sql = "UPDATE invoices SET status = ? WHERE invoice_id = ?";
-        
+
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
-            
+
             stmt.setString(1, status);
             stmt.setInt(2, invoiceId);
-            
+
             return stmt.executeUpdate() > 0;
             
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+            pstmt.setString(1, status);
+            pstmt.setInt(2, invoiceId);
+
+            return pstmt.executeUpdate() > 0;
         } catch (SQLException e) {
             e.printStackTrace();
             return false;
@@ -233,5 +240,29 @@ public class InvoiceDAO {
         invoice.setDueDate(rs.getDate("due_date"));
         invoice.setOwnerId(rs.getInt("owner_id"));
         return invoice;
+    public List<InvoiceDetail> getInvoiceDetails(int invoiceId) {
+        List<InvoiceDetail> details = new ArrayList<>();
+        String sql = "SELECT * FROM invoicedetails WHERE invoice_id = ?";
+
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+            pstmt.setInt(1, invoiceId);
+            ResultSet rs = pstmt.executeQuery();
+
+            while (rs.next()) {
+                InvoiceDetail detail = new InvoiceDetail(
+                    rs.getInt("invoice_detail_id"),
+                    invoiceId,
+                    rs.getString("name"),
+                    rs.getDouble("amount")
+                );
+                details.add(detail);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return details;
     }
 }

@@ -28,64 +28,64 @@ public class Invoice {
     }
 
     // Getters và Setters
-    public int getInvoiceId() { 
-        return invoiceId; 
-    }
-    
-    public void setInvoiceId(int invoiceId) { 
-        this.invoiceId = invoiceId; 
+    public int getInvoiceId() {
+        return invoiceId;
     }
 
-    public int getApartmentId() { 
-        return apartmentId; 
-    }
-    
-    public void setApartmentId(int apartmentId) { 
-        this.apartmentId = apartmentId; 
+    public void setInvoiceId(int invoiceId) {
+        this.invoiceId = invoiceId;
     }
 
-    public BigDecimal getTotalAmount() { 
-        return totalAmount; 
-    }
-    
-    public void setTotalAmount(BigDecimal totalAmount) { 
-        this.totalAmount = totalAmount; 
-    }
-    
-    public void setTotalAmount(double totalAmount) { 
-        this.totalAmount = BigDecimal.valueOf(totalAmount); 
+    public int getApartmentId() {
+        return apartmentId;
     }
 
-    public Date getDueDate() { 
-        return dueDate; 
-    }
-    
-    public void setDueDate(Date dueDate) { 
-        this.dueDate = dueDate; 
+    public void setApartmentId(int apartmentId) {
+        this.apartmentId = apartmentId;
     }
 
-    public String getStatus() { 
-        return status; 
-    }
-    
-    public void setStatus(String status) { 
-        this.status = status; 
+    public BigDecimal getTotalAmount() {
+        return totalAmount;
     }
 
-    public List<InvoiceDetail> getDetails() { 
-        return details; 
-    }
-    
-    public void setDetails(List<InvoiceDetail> details) { 
-        this.details = details; 
+    public void setTotalAmount(BigDecimal totalAmount) {
+        this.totalAmount = totalAmount;
     }
 
-    public int getOwnerId() { 
-        return ownerId; 
+    public void setTotalAmount(double totalAmount) {
+        this.totalAmount = BigDecimal.valueOf(totalAmount);
     }
-    
-    public void setOwnerId(int ownerId) { 
-        this.ownerId = ownerId; 
+
+    public Date getDueDate() {
+        return dueDate;
+    }
+
+    public void setDueDate(Date dueDate) {
+        this.dueDate = dueDate;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
+
+    public List<InvoiceDetail> getDetails() {
+        return details;
+    }
+
+    public void setDetails(List<InvoiceDetail> details) {
+        this.details = details;
+    }
+
+    public int getOwnerId() {
+        return ownerId;
+    }
+
+    public void setOwnerId(int ownerId) {
+        this.ownerId = ownerId;
     }
 
     // Phương thức tiện ích

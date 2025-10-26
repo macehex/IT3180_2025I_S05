@@ -29,7 +29,7 @@ public class Main extends Application {
     public static void showLoginScene() throws IOException {
         FXMLLoader loader = new FXMLLoader(Main.class.getResource("view/login.fxml"));
         Parent root = loader.load();
-        
+
         primaryStage.setTitle("Quản lý Tòa nhà - Đăng nhập");
         primaryStage.setScene(new Scene(root, 400, 300));
         primaryStage.show();

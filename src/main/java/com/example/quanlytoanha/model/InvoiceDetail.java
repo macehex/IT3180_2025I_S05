@@ -23,40 +23,41 @@ public class InvoiceDetail {
         this.amount = amount;
     }
 
+
     // Getters and Setters
-    public int getInvoiceDetailId() { 
-        return invoiceDetailId; 
-    }
-    
-    public void setInvoiceDetailId(int invoiceDetailId) { 
-        this.invoiceDetailId = invoiceDetailId; 
+    public int getInvoiceDetailId() {
+        return invoiceDetailId;
     }
 
-    public int getInvoiceId() { 
-        return invoiceId; 
-    }
-    
-    public void setInvoiceId(int invoiceId) { 
-        this.invoiceId = invoiceId; 
+    public void setInvoiceDetailId(int invoiceDetailId) {
+        this.invoiceDetailId = invoiceDetailId;
     }
 
-    public String getName() { 
-        return name; 
-    }
-    
-    public void setName(String name) { 
-        this.name = name; 
+    public int getInvoiceId() {
+        return invoiceId;
     }
 
-    public BigDecimal getAmount() { 
-        return amount; 
+    public void setInvoiceId(int invoiceId) {
+        this.invoiceId = invoiceId;
     }
-    
-    public void setAmount(BigDecimal amount) { 
-        this.amount = amount; 
+
+    public String getName() {
+        return name;
     }
-    
-    public void setAmount(double amount) { 
-        this.amount = BigDecimal.valueOf(amount); 
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public BigDecimal getAmount() {
+        return amount;
+    }
+
+    public void setAmount(BigDecimal amount) {
+        this.amount = amount;
+    }
+
+    public void setAmount(double amount) {
+        this.amount = BigDecimal.valueOf(amount);
     }
 }

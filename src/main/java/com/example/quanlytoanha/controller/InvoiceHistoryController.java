@@ -13,6 +13,7 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.HBox;
 import javafx.stage.Stage;
 
+import java.math.BigDecimal;
 import java.net.URL;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -104,8 +105,8 @@ public class InvoiceHistoryController implements Initializable {
         }
 
         try {
-            double amount = Double.parseDouble(amountField.getText());
-            if (amount != selectedInvoice.getTotalAmount().doubleValue()) {
+            BigDecimal amount = new BigDecimal(amountField.getText());
+            if (amount != selectedInvoice.getTotalAmount()) {
                 showAlert(Alert.AlertType.ERROR, "Error", "Payment amount must match invoice amount");
                 return;
             }
