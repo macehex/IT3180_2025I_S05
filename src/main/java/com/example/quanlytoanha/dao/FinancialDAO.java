@@ -110,7 +110,7 @@ public class FinancialDAO {
             i.invoice_id, i.total_amount, i.due_date,
             d.name, d.amount
         FROM invoices i
-        JOIN invoicedetails d ON i.invoice_id = d.invoice_id
+        LEFT JOIN invoicedetails d ON i.invoice_id = d.invoice_id
         WHERE i.apartment_id = ? AND i.status = 'UNPAID'
         ORDER BY i.due_date, i.invoice_id;
     """;
