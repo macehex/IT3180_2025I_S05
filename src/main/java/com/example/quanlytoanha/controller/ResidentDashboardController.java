@@ -53,6 +53,22 @@ public class ResidentDashboardController implements Initializable {
         }
     }
 
+    @FXML
+    private void handleLoginHistoryButton() {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/example/quanlytoanha/view/login_management.fxml"));
+            Parent root = loader.load();
+
+            Stage stage = new Stage();
+            stage.setTitle("Quản lý đăng nhập");
+            stage.setScene(new Scene(root));
+            stage.show();
+
+        } catch (IOException e) {
+            e.printStackTrace();
+            // Optionally, show an error alert to the user
+        }
+    }
     /**
      * Xử lý sự kiện đăng xuất.
      */

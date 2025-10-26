@@ -29,6 +29,7 @@
                         style="-fx-font-size: 16px; -fx-background-color: #007bff; -fx-text-fill: white;"/>
 
                 <Button fx:id="loginHistoryButton"
+                        onAction="#handleLoginHistoryButton"
                         prefHeight="50.0"
                         prefWidth="300.0"
                         text="Quản lý lịch sử đăng nhập"
