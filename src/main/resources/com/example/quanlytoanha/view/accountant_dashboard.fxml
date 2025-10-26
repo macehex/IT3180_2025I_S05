@@ -22,7 +22,7 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<AnchorPane prefHeight="700.0" prefWidth="1000.0" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.quanlytoanha.controller.AccountantDashboardController">
+<AnchorPane prefHeight="700.0" prefWidth="1000.0" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.quanlytoanha.controller.AccountantDashboardController">
     <children>
         <VBox spacing="10.0" AnchorPane.bottomAnchor="10.0" AnchorPane.leftAnchor="10.0" AnchorPane.rightAnchor="10.0" AnchorPane.topAnchor="10.0">
             <children>
@@ -151,10 +151,10 @@
                                         </HBox>
                                         <TableView fx:id="feeTable" VBox.vgrow="ALWAYS">
                                             <columns>
-                                                <TableColumn prefWidth="250.0" text="Tên loại phí (Phí quản lý, Phí nước...)" />
-                                                <TableColumn prefWidth="150.0" text="Đơn giá (VNĐ)" />
-                                                <TableColumn prefWidth="100.0" text="Đơn vị (m², m³, xe)" />
-                                                <TableColumn prefWidth="300.0" text="Mô tả" />
+                                                <TableColumn fx:id="colFeeName" prefWidth="250.0" text="Tên loại phí (Phí quản lý, Phí nước...)" />
+                                                <TableColumn fx:id="colFeePrice" prefWidth="150.0" text="Đơn giá (VNĐ)" />
+                                                <TableColumn fx:id="colFeeUnit" prefWidth="100.0" text="Đơn vị (m², m³, xe)" />
+                                                <TableColumn fx:id="colFeeDesc" prefWidth="300.0" text="Mô tả" />
                                             </columns>
                                         </TableView>
                                     </children>
