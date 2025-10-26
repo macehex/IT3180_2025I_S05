@@ -18,6 +18,7 @@ import java.util.List;
 public class DebtDetailController {
 
     @FXML private VBox mainVBox;
+    @FXML private VBox invoiceVBox;
     @FXML private Label lblHeader;
     @FXML private Label lblSubHeader;
 
@@ -33,6 +34,7 @@ public class DebtDetailController {
 
         // Xóa mọi nội dung cũ (nếu có)
         mainVBox.getChildren().remove(2, mainVBox.getChildren().size());
+        invoiceVBox.getChildren().clear();
 
         // Tạo TitledPane cho mỗi hóa đơn
         for (Invoice invoice : invoiceList) {
@@ -69,6 +71,20 @@ public class DebtDetailController {
 
         // 4. Đổ dữ liệu vào bảng
         detailTable.getItems().setAll(invoice.getDetails());
+
+        int rowCount = invoice.getDetails().size();
+        if (rowCount == 0) {
+            detailTable.setPlaceholder(new Label("Hóa đơn này chưa có chi tiết phí."));
+        }
+
+        // 1. Tính toán chiều cao cần thiết
+        // (Chiều cao 1 dòng * số dòng) + (Chiều cao của Header) + (Padding)
+        // (Giả sử -fx-cell-size là 35px, header ~30px, padding 10px)
+        double tableHeight = (rowCount * 35) + 30 + 10;
+
+        // 2. Đặt chiều cao CỐ ĐỊNH cho TableView
+        // Việc này ngăn TableView bị "nén" (squish)
+        detailTable.setPrefHeight(tableHeight);
 
         // 5. Tạo TitledPane
         TitledPane titledPane = new TitledPane(title, detailTable);
