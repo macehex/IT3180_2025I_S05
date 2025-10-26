@@ -12,51 +12,51 @@
     <center>
         <ScrollPane fitToWidth="true">
             <VBox spacing="20" style="-fx-padding: 20;">
-                <!-- Invoices Section -->
+                <!-- Phần Hóa Đơn -->
                 <VBox>
                     <HBox fx:id="invoiceTilePane" spacing="20" alignment="CENTER_LEFT">
-                        <!-- Tiles will be added here programmatically -->
+                        <!-- Các tile sẽ được thêm vào đây bằng code -->
                     </HBox>
                 </VBox>
 
-                <!-- Online Payment Section -->
-                <TitledPane text="Make a Payment" expanded="true">
+                <!-- Phần Thanh Toán Trực Tuyến -->
+                <TitledPane text="Thanh Toán Trực Tuyến" expanded="true">
                     <VBox spacing="10">
                         <padding>
                             <Insets top="10" right="10" bottom="10" left="10"/>
                         </padding>
-                        <ComboBox fx:id="invoiceSelector" promptText="Select Invoice" maxWidth="Infinity"/>
-                        <TextField fx:id="amountField" promptText="Amount" editable="false"/>
-                        <Button text="Pay Now" onAction="#handlePayment"
+                        <ComboBox fx:id="invoiceSelector" promptText="Chọn hóa đơn" maxWidth="Infinity"/>
+                        <TextField fx:id="amountField" promptText="Số tiền" editable="false"/>
+                        <Button text="Thanh Toán Ngay" onAction="#handlePayment"
                                 style="-fx-background-color: #2196F3; -fx-text-fill: white;"
                                 maxWidth="Infinity"/>
                     </VBox>
                 </TitledPane>
 
-                <!-- Transaction History -->
-                <TitledPane text="Transaction History" expanded="true">
+                <!-- Lịch Sử Giao Dịch -->
+                <TitledPane text="Lịch Sử Giao Dịch" expanded="true">
                     <VBox spacing="10">
                         <padding>
                             <Insets top="10" right="10" bottom="10" left="10"/>
                         </padding>
                         <HBox spacing="10" alignment="CENTER_LEFT">
-                            <DatePicker fx:id="fromDate" promptText="From Date"/>
-                            <DatePicker fx:id="toDate" promptText="To Date"/>
-                            <Button text="Filter" onAction="#filterTransactions"
+                            <DatePicker fx:id="fromDate" promptText="Từ ngày"/>
+                            <DatePicker fx:id="toDate" promptText="Đến ngày"/>
+                            <Button text="Lọc" onAction="#filterTransactions"
                                     style="-fx-background-color: #4CAF50; -fx-text-fill: white;"/>
                         </HBox>
                         <TableView fx:id="transactionTable" VBox.vgrow="ALWAYS">
                             <columns>
-                                <TableColumn fx:id="dateColumn" text="Date" prefWidth="150"/>
-                                <TableColumn fx:id="descriptionColumn" text="Description" prefWidth="300"/>
-                                <TableColumn fx:id="amountColumn" text="Amount" prefWidth="150"/>
-                                <TableColumn fx:id="statusColumn" text="Status" prefWidth="100"/>
+                                <TableColumn fx:id="dateColumn" text="Ngày" prefWidth="150"/>
+                                <TableColumn fx:id="descriptionColumn" text="Mô tả" prefWidth="300"/>
+                                <TableColumn fx:id="amountColumn" text="Số tiền" prefWidth="150"/>
+                                <TableColumn fx:id="statusColumn" text="Trạng thái" prefWidth="100"/>
                             </columns>
                         </TableView>
                     </VBox>
                 </TitledPane>
 
-                <!-- Back Button -->
+                <!-- Nút Quay Lại -->
                 <HBox alignment="CENTER">
                     <Button fx:id="backButton"
                             onAction="#handleBack"

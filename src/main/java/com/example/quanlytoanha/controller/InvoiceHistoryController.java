@@ -47,21 +47,21 @@ public class InvoiceHistoryController implements Initializable {
 
     private void setupTiles() {
         DashboardTile totalDueTile = new DashboardTile(
-            "Total Due",
-            String.format("%.2f VND", invoiceService.getTotalDueAmount(residentId)),
-            "Total amount due"
+                "Tổng Nợ",
+                String.format("%.2f VND", invoiceService.getTotalDueAmount(residentId)),
+                "Tổng số tiền hóa đơn đang chờ thanh toán"
         );
 
         DashboardTile upcomingInvoicesTile = new DashboardTile(
-            "Unpaid Invoices",
-            String.valueOf(invoiceService.getUnpaidInvoicesCount(residentId)),
-            "Invoices pending payment"
+                "Hóa Đơn Chưa Thanh Toán",
+                String.valueOf(invoiceService.getUnpaidInvoicesCount(residentId)),
+                "Hóa đơn đang chờ thanh toán"
         );
 
         DashboardTile lastPaymentTile = new DashboardTile(
-            "Last Payment",
-            invoiceService.getLastPaymentInfo(residentId),
-            "Most recent payment"
+                "Thanh Toán Gần Nhất",
+                invoiceService.getLastPaymentInfo(residentId),
+                "Giao dịch gần đây nhất"
         );
 
         invoiceTilePane.getChildren().addAll(totalDueTile, upcomingInvoicesTile, lastPaymentTile);
@@ -72,6 +72,12 @@ public class InvoiceHistoryController implements Initializable {
         descriptionColumn.setCellValueFactory(new PropertyValueFactory<>("description"));
         amountColumn.setCellValueFactory(new PropertyValueFactory<>("amount"));
         statusColumn.setCellValueFactory(new PropertyValueFactory<>("status"));
+
+        // Set Vietnamese column names
+        dateColumn.setText("Ngày");
+        descriptionColumn.setText("Mô tả");
+        amountColumn.setText("Số tiền");
+        statusColumn.setText("Trạng thái");
     }
 
     private void setupPaymentControls() {
@@ -100,33 +106,33 @@ public class InvoiceHistoryController implements Initializable {
         Invoice selectedInvoice = invoiceSelector.getValue();
 
         if (selectedInvoice == null) {
-            showAlert(Alert.AlertType.ERROR, "Error", "Please select an invoice");
+            showAlert(Alert.AlertType.ERROR, "Lỗi", "Vui lòng chọn hóa đơn");
             return;
         }
 
         try {
             BigDecimal amount = new BigDecimal(amountField.getText());
             if (amount.compareTo(selectedInvoice.getTotalAmount()) != 0) {
-                showAlert(Alert.AlertType.ERROR, "Error", "Payment amount must match invoice amount");
+                showAlert(Alert.AlertType.ERROR, "Lỗi", "Số tiền thanh toán phải khớp với số tiền hóa đơn");
                 return;
             }
 
             Transaction transaction = invoiceService.processPayment(residentId, selectedInvoice, amount);
 
             if (transaction != null) {
-                showAlert(Alert.AlertType.INFORMATION, "Success", "Payment processed successfully");
+                showAlert(Alert.AlertType.INFORMATION, "Thành công", "Thanh toán được xử lý thành công");
                 setupTiles(); // Refresh tiles
                 filterTransactions(); // Refresh transaction table
                 invoiceSelector.getItems().remove(selectedInvoice);
                 amountField.clear();
             } else {
-                showAlert(Alert.AlertType.ERROR, "Error", "Payment processing failed");
+                showAlert(Alert.AlertType.ERROR, "Lỗi", "Xử lý thanh toán thất bại");
             }
 
         } catch (NumberFormatException e) {
-            showAlert(Alert.AlertType.ERROR, "Error", "Invalid amount");
+            showAlert(Alert.AlertType.ERROR, "Lỗi", "Số tiền không hợp lệ");
         } catch (Exception e) {
-            showAlert(Alert.AlertType.ERROR, "Error", "Payment processing failed: " + e.getMessage());
+            showAlert(Alert.AlertType.ERROR, "Lỗi", "Xử lý thanh toán thất bại: " + e.getMessage());
         }
     }
 
@@ -136,7 +142,7 @@ public class InvoiceHistoryController implements Initializable {
         LocalDate to = toDate.getValue();
 
         if (from == null || to == null) {
-            showAlert(Alert.AlertType.ERROR, "Error", "Please select valid dates");
+            showAlert(Alert.AlertType.ERROR, "Lỗi", "Vui lòng chọn ngày hợp lệ");
             return;
         }
 
