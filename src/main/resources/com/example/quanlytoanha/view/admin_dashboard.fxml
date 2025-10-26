@@ -23,41 +23,41 @@
             </HBox>
 
             <!-- Statistics Tiles -->
-            <HBox spacing="20.0" alignment="CENTER" 
+            <HBox spacing="20.0" alignment="CENTER"
                   style="-fx-max-height: 180;">
                <children>
-                  <VBox alignment="CENTER" spacing="10.0" 
+                  <VBox alignment="CENTER" spacing="10.0"
                         style="-fx-background-color: white; -fx-padding: 20; -fx-background-radius: 10; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.15), 10, 0, 0, 3); -fx-min-width: 160; -fx-min-height: 160;">
                      <children>
                         <Label text="👥" style="-fx-font-size: 36px;"/>
-                        <Label text="0" style="-fx-font-size: 32px; -fx-font-weight: bold; -fx-text-fill: #1e3c72;"/>
+                        <Label fx:id="lblTotalResidents" text="0" style="-fx-font-size: 32px; -fx-font-weight: bold; -fx-text-fill: #1e3c72;"/>
                         <Label text="Tổng cư dân" style="-fx-font-size: 13px; -fx-text-fill: #666;"/>
                      </children>
                   </VBox>
-                  
-                  <VBox alignment="CENTER" spacing="10.0" 
+
+                  <VBox alignment="CENTER" spacing="10.0"
                         style="-fx-background-color: white; -fx-padding: 20; -fx-background-radius: 10; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.15), 10, 0, 0, 3); -fx-min-width: 160; -fx-min-height: 160;">
                      <children>
                         <Label text="🏠" style="-fx-font-size: 36px;"/>
-                        <Label text="0" style="-fx-font-size: 32px; -fx-font-weight: bold; -fx-text-fill: #1e3c72;"/>
+                        <Label fx:id="lblTotalApartments" text="0" style="-fx-font-size: 32px; -fx-font-weight: bold; -fx-text-fill: #1e3c72;"/>
                         <Label text="Tổng căn hộ" style="-fx-font-size: 13px; -fx-text-fill: #666;"/>
                      </children>
                   </VBox>
-                  
-                  <VBox alignment="CENTER" spacing="10.0" 
+
+                  <VBox alignment="CENTER" spacing="10.0"
                         style="-fx-background-color: white; -fx-padding: 20; -fx-background-radius: 10; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.15), 10, 0, 0, 3); -fx-min-width: 160; -fx-min-height: 160;">
                      <children>
                         <Label text="💰" style="-fx-font-size: 36px;"/>
-                        <Label text="0" style="-fx-font-size: 32px; -fx-font-weight: bold; -fx-text-fill: #1e3c72;"/>
+                        <Label fx:id="lblTotalDebt" text="0" style="-fx-font-size: 32px; -fx-font-weight: bold; -fx-text-fill: #1e3c72;"/>
                         <Label text="Công nợ (VNĐ)" style="-fx-font-size: 13px; -fx-text-fill: #666;"/>
                      </children>
                   </VBox>
-                  
-                  <VBox alignment="CENTER" spacing="10.0" 
+
+                  <VBox alignment="CENTER" spacing="10.0"
                         style="-fx-background-color: white; -fx-padding: 20; -fx-background-radius: 10; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.15), 10, 0, 0, 3); -fx-min-width: 160; -fx-min-height: 160;">
                      <children>
                         <Label text="📋" style="-fx-font-size: 36px;"/>
-                        <Label text="0" style="-fx-font-size: 32px; -fx-font-weight: bold; -fx-text-fill: #1e3c72;"/>
+                        <Label fx:id="lblTotalUnpaidInvoices" text="0" style="-fx-font-size: 32px; -fx-font-weight: bold; -fx-text-fill: #1e3c72;"/>
                         <Label text="Hóa đơn chưa trả" style="-fx-font-size: 13px; -fx-text-fill: #666;"/>
                      </children>
                   </VBox>
