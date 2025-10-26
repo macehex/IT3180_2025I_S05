@@ -26,6 +26,8 @@ public class ResidentDashboardController implements Initializable {
     @FXML
     private Button loginHistoryButton;
 
+    // --- Nút chung ---
+    @FXML private Button btnLogout;
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         User currentUser = SessionManager.getInstance().getCurrentUser();
@@ -50,4 +52,26 @@ public class ResidentDashboardController implements Initializable {
             // Optionally, show an error alert to the user
         }
     }
+
+    /**
+     * Xử lý sự kiện đăng xuất.
+     */
+    @FXML
+    private void handleLogout() {
+        SessionManager.getInstance().logout();
+        Stage currentStage = (Stage) btnLogout.getScene().getWindow();
+        currentStage.close();
+
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/example/quanlytoanha/view/login.fxml"));
+            Parent root = loader.load();
+            Stage loginStage = new Stage();
+            loginStage.setTitle("Quản lý Tòa nhà - Đăng nhập");
+            loginStage.setScene(new Scene(root, 400, 300));
+            loginStage.show();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
 }
