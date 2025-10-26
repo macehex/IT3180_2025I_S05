@@ -1,121 +1,111 @@
+// Vị trí: src/main/java/com/example/quanlytoanha/controller/AccountantDashboardController.java
 package com.example.quanlytoanha.controller;
 
-// --- Import các lớp cần thiết ---
 import com.example.quanlytoanha.model.ApartmentDebt;
 import com.example.quanlytoanha.model.DebtReport;
+import com.example.quanlytoanha.model.FeeType;
 import com.example.quanlytoanha.model.Invoice;
-import com.example.quanlytoanha.model.User;
+import com.example.quanlytoanha.service.FeeTypeService;
 import com.example.quanlytoanha.service.FinancialService;
-import com.example.quanlytoanha.service.NotificationService; // Service mới
 import com.example.quanlytoanha.session.SessionManager;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.control.*; // Import Alert, Button, Label, TableView, CheckBox, TextArea, TextField
-import javafx.stage.Modality; // Import Modality
+import javafx.scene.control.*;
+import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.stage.Stage;
 
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.util.List;
 
 public class AccountantDashboardController {
 
-    // --- FXML Fields cho Tab Báo cáo ---
-    @FXML private Label lblWelcome; // Thêm label welcome
+    // Thống kê
     @FXML private Label lblTotalDebt;
     @FXML private Label lblTotalOverdue;
     @FXML private Label lblUnpaidInvoices;
+
+    @FXML private Button btnLogout;
+    // Bảng chi tiết
     @FXML private TableView<ApartmentDebt> debtTable;
 
-    // --- FXML Fields cho Tab Tự động hóa ---
-    @FXML private CheckBox chkAutoSendNewInvoice;
-    @FXML private CheckBox chkAutoSendReminder;
-    @FXML private TextField txtDaysBefore;
-    @FXML private CheckBox chkAutoSendOverdue;
-    @FXML private Button btnSendManualReminder;
-    @FXML private TextArea txtAutomationLog;
+    // --- THÊM CÁC TRƯỜNG CỦA TAB 2 ---
+    @FXML private TableView<FeeType> feeTable;
+    @FXML private TableColumn<FeeType, String> colFeeName;
+    @FXML private TableColumn<FeeType, BigDecimal> colFeePrice;
+    @FXML private TableColumn<FeeType, String> colFeeUnit;
+    @FXML private TableColumn<FeeType, String> colFeeDesc;
 
-    // --- Nút chung ---
-    @FXML private Button btnLogout;
+    @FXML private Button btnAddFee;
+    @FXML private Button btnEditFee;
+    @FXML private Button btnDeleteFee;
+    // ---------------------------------
 
-    // --- Services ---
     private FinancialService financialService;
-    private NotificationService notificationService; // Thêm NotificationService
+    private FeeTypeService feeTypeService;
 
     @FXML
     public void initialize() {
-        // Khởi tạo các services
         this.financialService = new FinancialService();
-        this.notificationService = new NotificationService(); // Khởi tạo service mới
-
-        // Cập nhật lời chào
-        User currentUser = SessionManager.getInstance().getCurrentUser();
-        if (currentUser != null) {
-            lblWelcome.setText("Xin chào, " + currentUser.getFullName());
-        }
-
-        // Tải dữ liệu cho Tab Báo cáo
+        this.feeTypeService = new FeeTypeService();
         loadDashboardData();
 
-        // Thêm sự kiện click đúp cho bảng công nợ
+        configureFeeTableColumns(); // <-- Gọi hàm helper mới
+        loadFeeData(); // <-- Gọi hàm load dữ liệu mới
+
+        // Gán sự kiện cho các nút
+        btnAddFee.setOnAction(event -> handleAddFee());
+        btnEditFee.setOnAction(event -> handleEditFee());
+        btnDeleteFee.setOnAction(event -> handleDeleteFee());
+
         debtTable.setOnMouseClicked(event -> {
-            if (event.getClickCount() == 2) {
+            if (event.getClickCount() == 2) { // Chỉ xử lý khi click đúp
                 ApartmentDebt selectedDebt = debtTable.getSelectionModel().getSelectedItem();
                 if (selectedDebt != null) {
                     handleViewDetails(selectedDebt);
                 }
             }
         });
-
-        // Gán sự kiện cho nút Gửi thủ công trong Tab Tự động hóa
-        if (btnSendManualReminder != null) { // Kiểm tra null để an toàn
-            btnSendManualReminder.setOnAction(event -> handleSendManualReminders());
-        }
-
-        // (Tùy chọn) Tạm thời vô hiệu hóa các checkbox cấu hình tự động
-        if (chkAutoSendNewInvoice != null) chkAutoSendNewInvoice.setDisable(true);
-        if (chkAutoSendReminder != null) chkAutoSendReminder.setDisable(true);
-        if (txtDaysBefore != null) txtDaysBefore.setDisable(true);
-        if (chkAutoSendOverdue != null) chkAutoSendOverdue.setDisable(true);
     }
 
-    /**
-     * Tải dữ liệu cho Tab Báo cáo Công nợ.
-     */
     @FXML
     private void loadDashboardData() {
         try {
-            // 1. Tải thống kê
+            // 1. Tải dữ liệu thống kê
             DebtReport report = financialService.generateDebtReport();
+
+            // Định dạng số liệu (Ví dụ đơn giản)
             lblTotalDebt.setText(String.format("%,.0f VNĐ", report.getTotalDebtAmount()));
             lblTotalOverdue.setText(String.format("%,.0f VNĐ", report.getTotalOverdueAmount()));
             lblUnpaidInvoices.setText(report.getTotalUnpaidInvoices() + " hóa đơn");
 
-            // 2. Tải chi tiết vào bảng
+            // 2. Tải dữ liệu chi tiết vào Bảng
             List<ApartmentDebt> debtList = financialService.getDetailedDebtList();
             debtTable.getItems().setAll(debtList);
 
         } catch (SecurityException e) {
             showAlert(Alert.AlertType.ERROR, "Lỗi Phân Quyền", "Bạn không có quyền xem thông tin này.");
         } catch (Exception e) {
-            showAlert(Alert.AlertType.ERROR, "Lỗi Hệ Thống", "Không thể tải dữ liệu báo cáo: " + e.getMessage());
+            showAlert(Alert.AlertType.ERROR, "Lỗi Hệ Thống", "Không thể tải dữ liệu: " + e.getMessage());
             e.printStackTrace();
         }
     }
 
-    /**
-     * Xử lý sự kiện đăng xuất.
-     */
     @FXML
     private void handleLogout() {
         SessionManager.getInstance().logout();
+
+        // 2. Đóng cửa sổ Dashboard hiện tại
         Stage currentStage = (Stage) btnLogout.getScene().getWindow();
         currentStage.close();
 
+        // 3. Mở lại cửa sổ Login (copy code từ lớp Main.java)
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/example/quanlytoanha/view/login.fxml"));
             Parent root = loader.load();
+
             Stage loginStage = new Stage();
             loginStage.setTitle("Quản lý Tòa nhà - Đăng nhập");
             loginStage.setScene(new Scene(root, 400, 300));
@@ -125,90 +115,38 @@ public class AccountantDashboardController {
         }
     }
 
-    /**
-     * Xử lý sự kiện xem chi tiết công nợ khi click đúp.
-     */
     private void handleViewDetails(ApartmentDebt selectedDebt) {
         try {
+            // 1. Lấy dữ liệu chi tiết từ service
             List<Invoice> invoiceList = financialService.getDetailedDebtForApartment(selectedDebt.getApartmentId());
+
             if (invoiceList.isEmpty()) {
                 showAlert(Alert.AlertType.INFORMATION, "Thông báo", "Không tìm thấy chi tiết hóa đơn chưa thanh toán cho căn hộ này.");
                 return;
             }
 
+            // 2. Tải FXML của cửa sổ chi tiết
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/example/quanlytoanha/view/debt_detail_view.fxml"));
             Parent root = loader.load();
+
+            // 3. Lấy controller của cửa sổ mới
             DebtDetailController detailController = loader.getController();
+
+            // 4. TRUYỀN DỮ LIỆU SANG
             detailController.setData(selectedDebt, invoiceList);
 
+            // 5. Hiển thị cửa sổ mới (modal)
             Stage detailStage = new Stage();
             detailStage.setTitle("Chi tiết Công nợ");
-            detailStage.initModality(Modality.APPLICATION_MODAL); // Thêm Modality
-            detailStage.initOwner((Stage) debtTable.getScene().getWindow());
+            detailStage.initOwner((Stage) debtTable.getScene().getWindow()); // Đặt cửa sổ cha
             detailStage.setScene(new Scene(root));
-            detailStage.showAndWait();
+            detailStage.showAndWait(); // Hiển thị và chờ
 
         } catch (SecurityException e) {
             showAlert(Alert.AlertType.ERROR, "Lỗi Phân Quyền", e.getMessage());
         } catch (IOException e) {
             e.printStackTrace();
             showAlert(Alert.AlertType.ERROR, "Lỗi Giao diện", "Không thể tải cửa sổ chi tiết.");
-        } catch (Exception e) { // Bắt lỗi chung
-            showAlert(Alert.AlertType.ERROR, "Lỗi Hệ Thống", "Đã xảy ra lỗi không mong muốn: " + e.getMessage());
-            e.printStackTrace();
-        }
-    }
-
-    /**
-     * Xử lý khi nhấn nút "Gửi nhắc nợ thủ công ngay" trong Tab Tự động hóa.
-     */
-    @FXML
-    private void handleSendManualReminders() {
-        try {
-            int daysBefore = 3; // Giá trị mặc định
-            // Lấy giá trị từ TextField, xử lý nếu không phải số
-            if (txtDaysBefore != null && !txtDaysBefore.getText().trim().isEmpty()) {
-                try {
-                    daysBefore = Integer.parseInt(txtDaysBefore.getText().trim());
-                    if (daysBefore <= 0) daysBefore = 3; // Đảm bảo số dương
-                } catch (NumberFormatException e) {
-                    showAlert(Alert.AlertType.WARNING, "Đầu vào không hợp lệ", "Số ngày báo trước phải là một số nguyên dương. Sử dụng giá trị mặc định là 3.");
-                    daysBefore = 3; // Quay về mặc định nếu nhập sai
-                }
-            }
-
-            // Gọi service để gửi thông báo
-            List<String> upcomingLogs = notificationService.sendUpcomingReminders(daysBefore);
-            List<String> overdueLogs = notificationService.sendOverdueNotifications();
-
-            // Cập nhật log trên giao diện
-            logMessages(upcomingLogs);
-            logMessages(overdueLogs);
-
-            // Hiển thị thông báo kết quả
-            if (upcomingLogs.isEmpty() && overdueLogs.isEmpty()) {
-                showAlert(Alert.AlertType.INFORMATION, "Thông báo", "Không tìm thấy hóa đơn nào cần nhắc nợ hoặc đã quá hạn.");
-            } else {
-                showAlert(Alert.AlertType.INFORMATION, "Thành công", "Đã gửi thông báo nhắc nợ và/hoặc quá hạn.");
-            }
-
-        } catch (SecurityException e) {
-            showAlert(Alert.AlertType.ERROR, "Lỗi Phân Quyền", e.getMessage());
-        } catch (Exception e) { // Bắt lỗi SQL hoặc lỗi khác
-            showAlert(Alert.AlertType.ERROR, "Lỗi Hệ Thống", "Đã xảy ra lỗi khi gửi thông báo: " + e.getMessage());
-            e.printStackTrace();
-        }
-    }
-
-    /**
-     * Thêm các thông báo log vào TextArea.
-     */
-    private void logMessages(List<String> messages) {
-        if (txtAutomationLog != null && messages != null && !messages.isEmpty()) {
-            for (String msg : messages) {
-                // Thêm vào đầu để log mới nhất hiện lên trên
-                txtAutomationLog.insertText(0, msg + "\n");
-            }
         }
     }
 
@@ -218,8 +156,145 @@ public class AccountantDashboardController {
     private void showAlert(Alert.AlertType alertType, String title, String message) {
         Alert alert = new Alert(alertType);
         alert.setTitle(title);
-        alert.setHeaderText(null);
+        alert.setHeaderText(null); // Không có tiêu đề phụ
         alert.setContentText(message);
         alert.showAndWait();
     }
-}
+
+    // --- CÁC HÀM CỦA TAB 2 (QUẢN LÝ PHÍ) ---
+    // (Những hàm này PHẢI nằm BÊN TRONG dấu ngoặc của lớp AccountantDashboardController)
+
+    private void configureFeeTableColumns() {
+        // Tên "feeName", "unitPrice" PHẢI TRÙNG KHỚP với tên thuộc tính
+        // trong file FeeType.java của bạn.
+        colFeeName.setCellValueFactory(new PropertyValueFactory<>("feeName"));
+        colFeePrice.setCellValueFactory(new PropertyValueFactory<>("unitPrice"));
+        colFeeUnit.setCellValueFactory(new PropertyValueFactory<>("unit"));
+        colFeeDesc.setCellValueFactory(new PropertyValueFactory<>("description"));
+    }
+
+    /**
+     * Tải (hoặc tải lại) dữ liệu từ CSDL lên Bảng Quản lý Phí
+     */
+    private void loadFeeData() {
+        try {
+            // 1. Gọi Service để lấy dữ liệu
+            List<FeeType> fees = feeTypeService.getAllFees();
+
+            // 2. Xóa dữ liệu cũ và cập nhật dữ liệu mới lên TableView
+            feeTable.getItems().setAll(fees);
+
+        } catch (SecurityException e) {
+            // Hàm showAlert đã có sẵn trong code của bạn
+            showAlert(Alert.AlertType.ERROR, "Lỗi Phân Quyền", e.getMessage());
+        } catch (Exception e) {
+            showAlert(Alert.AlertType.ERROR, "Lỗi Hệ Thống", "Không thể tải danh sách phí: " + e.getMessage());
+            e.printStackTrace(); // In lỗi ra console để debug
+        }
+    }
+
+    @FXML
+    private void handleAddFee() {
+        // Lấy kết quả (true/false) từ cửa sổ popup
+        // SỬA LỖI TYPO: showFeeDailog -> showFeeEditDialog
+        boolean saveClicked = showFeeEditDialog(null);
+
+        // Chỉ tải lại bảng NẾU người dùng nhấn "Lưu"
+        if (saveClicked) {
+            loadFeeData();
+        }
+    }
+
+    @FXML
+    private void handleEditFee() {
+        FeeType selectedFee = feeTable.getSelectionModel().getSelectedItem();
+        if (selectedFee == null) {
+            showAlert(Alert.AlertType.WARNING, "Chưa chọn", "Vui lòng chọn một loại phí để chỉnh sửa.");
+            return;
+        }
+
+        // Lấy kết quả (true/false) từ cửa sổ popup
+        boolean saveClicked = showFeeEditDialog(selectedFee);
+
+        // Chỉ tải lại bảng NẾU người dùng nhấn "Lưu"
+        if (saveClicked) {
+            loadFeeData();
+        }
+    }
+
+    /**
+     * Xử lý khi nhấn nút "Xóa/Hủy phí"
+     */
+    @FXML
+    private void handleDeleteFee() {
+        FeeType selectedFee = feeTable.getSelectionModel().getSelectedItem();
+
+        if (selectedFee == null) {
+            showAlert(Alert.AlertType.WARNING, "Chưa chọn", "Vui lòng chọn một loại phí để xóa/hủy.");
+            return;
+        }
+
+        // Hiển thị hộp thoại xác nhận (Alert)
+        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+        alert.setTitle("Xác nhận");
+        alert.setHeaderText("Bạn có chắc chắn muốn hủy loại phí này?");
+        alert.setContentText(selectedFee.getFeeName());
+
+        // Chờ người dùng bấm OK hoặc Cancel
+        alert.showAndWait().ifPresent(response -> {
+            if (response == ButtonType.OK) {
+                try {
+                    // Gọi service để cập nhật CSDL
+                    feeTypeService.deactivateFee(selectedFee.getId());
+                    showAlert(Alert.AlertType.INFORMATION, "Thành công", "Đã hủy loại phí thành công.");
+                    loadFeeData(); // Tải lại bảng
+                } catch (SecurityException e) {
+                    showAlert(Alert.AlertType.ERROR, "Lỗi Phân Quyền", e.getMessage());
+                } catch (Exception e) {
+                    showAlert(Alert.AlertType.ERROR, "Lỗi Hệ Thống", "Không thể hủy phí: " + e.getMessage());
+                }
+            }
+        });
+    }
+
+    /**
+     * Mở cửa sổ popup (form) để Thêm hoặc Sửa phí.
+     * @param fee Đối tượng FeeType cần sửa. Nếu là NULL, form sẽ ở chế độ THÊM MỚI.
+     * @return true nếu người dùng nhấn "Lưu", false nếu nhấn "Hủy".
+     */
+    // --- ĐÂY LÀ PHIÊN BẢN ĐÃ SỬA LỖI HOÀN CHỈNH ---
+    private boolean showFeeEditDialog(FeeType fee) {
+        try {
+            // 1. Tải FXML
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/example/quanlytoanha/view/add_fee_form.fxml"));
+            Parent root = loader.load();
+
+            // 2. Lấy Controller của popup
+            AddFeeFormController controller = loader.getController();
+
+            // 3. Tạo Stage (cửa sổ) MỚI
+            Stage dialogStage = new Stage();
+            dialogStage.setTitle(fee == null ? "Thêm phí mới" : "Chỉnh sửa phí");
+            dialogStage.initOwner((Stage) btnAddFee.getScene().getWindow()); // Đặt cửa sổ cha
+            dialogStage.setScene(new Scene(root));
+
+            // 4. Truyền dữ liệu
+            controller.setDialogStage(dialogStage);
+            if (fee != null) {
+                controller.setFeeToEdit(fee); // Bật chế độ Edit
+            }
+
+            // 5. Hiển thị và chờ
+            dialogStage.showAndWait();
+
+            // 6. Hỏi popup xem "Lưu" đã được nhấn chưa?
+            return controller.isSaveClicked();
+
+        } catch (IOException e) {
+            e.printStackTrace();
+            showAlert(Alert.AlertType.ERROR, "Lỗi Giao diện", "Không thể tải cửa sổ form.");
+            return false;
+        }
+    }
+
+} // <-- ĐÂY LÀ DẤU NGOẶC ĐÓNG LỚP CUỐI CÙNG VÀ DUY NHẤT
