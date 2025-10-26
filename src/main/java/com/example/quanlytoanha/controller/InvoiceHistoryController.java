@@ -102,7 +102,7 @@ public class InvoiceHistoryController implements Initializable {
 
         try {
             double amount = Double.parseDouble(amountField.getText());
-            if (amount != selectedInvoice.getTotalAmount()) {
+            if (amount != selectedInvoice.getTotalAmount().doubleValue()) {
                 showAlert(Alert.AlertType.ERROR, "Error", "Payment amount must match invoice amount");
                 return;
             }

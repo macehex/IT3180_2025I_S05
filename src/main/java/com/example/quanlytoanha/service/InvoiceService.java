@@ -31,7 +31,7 @@ public class InvoiceService {
 
     public double getTotalDueAmount(int residentId) {
         return getUnpaidInvoices(residentId).stream()
-                .mapToDouble(Invoice::getTotalAmount)
+                .mapToDouble(invoice -> invoice.getTotalAmount().doubleValue())
                 .sum();
     }
 

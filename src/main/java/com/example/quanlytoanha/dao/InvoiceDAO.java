@@ -3,7 +3,6 @@ package com.example.quanlytoanha.dao;
 
 import com.example.quanlytoanha.model.Invoice;
 import com.example.quanlytoanha.model.InvoiceDetail;
-import com.example.quanlytoanha.model.InvoiceDetail; // Cần cho hàm create
 import com.example.quanlytoanha.utils.DatabaseConnection;
 
 import java.sql.*;
@@ -12,7 +11,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Date; // java.util.Date
+import java.math.BigDecimal;
 
 public class InvoiceDAO {
     private static InvoiceDAO instance;
@@ -35,46 +34,25 @@ public class InvoiceDAO {
                     "JOIN residents r ON i.apartment_id = r.apartment_id " +
                     "WHERE r.user_id = ? AND i.status = 'UNPAID' " +
                     "ORDER BY i.due_date";
-    /**
-     * Lấy danh sách hóa đơn CHƯA THANH TOÁN sắp đến hạn, bao gồm owner_id.
-     * @param daysBefore Số ngày trước hạn (ví dụ: 3)
-     * @return Danh sách hóa đơn thỏa mãn.
-     * @throws SQLException
-     */
-    public List<Invoice> findUpcomingDueInvoices(int daysBefore) throws SQLException {
-        List<Invoice> invoices = new ArrayList<>();
-        // SỬA SQL: Thêm JOIN apartments và lấy a.owner_id
-        String sql = """
-            SELECT i.invoice_id, i.apartment_id, i.total_amount, i.due_date, a.owner_id
-            FROM invoices i
-            JOIN apartments a ON i.apartment_id = a.apartment_id
-            WHERE i.status = 'UNPAID' 
-              AND i.due_date BETWEEN CURRENT_DATE AND CURRENT_DATE + interval '? days'
-            ORDER BY i.due_date; 
-        """;
 
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
 
             pstmt.setInt(1, residentId);
             ResultSet rs = pstmt.executeQuery();
-             // Chú ý cách xử lý interval an toàn hơn
-             PreparedStatement stmt = conn.prepareStatement(sql.replace("?", String.valueOf(daysBefore)))) {
 
-            ResultSet rs = stmt.executeQuery();
             while (rs.next()) {
                 int invoiceId = rs.getInt("invoice_id");
-                final ResultSet finalRs = rs;
 
                 // Get or create invoice
                 Invoice invoice = invoices.computeIfAbsent(invoiceId, k -> {
                     Invoice newInvoice = new Invoice();
                     try {
                         newInvoice.setInvoiceId(invoiceId);
-                        newInvoice.setApartmentId(finalRs.getInt("apartment_id"));
-                        newInvoice.setTotalAmount(finalRs.getDouble("total_amount"));
-                        newInvoice.setDueDate(finalRs.getDate("due_date").toLocalDate());
-                        newInvoice.setStatus(finalRs.getString("status"));
+                        newInvoice.setApartmentId(rs.getInt("apartment_id"));
+                        newInvoice.setTotalAmount(rs.getBigDecimal("total_amount"));
+                        newInvoice.setDueDate(rs.getDate("due_date").toLocalDate());
+                        newInvoice.setStatus(rs.getString("status"));
                     } catch (SQLException e) {
                         e.printStackTrace();
                     }
@@ -99,7 +77,31 @@ public class InvoiceDAO {
 
         return new ArrayList<>(invoices.values());
     }
-                invoices.add(mapResultSetToInvoiceBase(rs)); // Dùng hàm map mới
+
+    /**
+     * Lấy danh sách hóa đơn CHƯA THANH TOÁN sắp đến hạn, bao gồm owner_id.
+     * @param daysBefore Số ngày trước hạn (ví dụ: 3)
+     * @return Danh sách hóa đơn thỏa mãn.
+     * @throws SQLException
+     */
+    public List<Invoice> findUpcomingDueInvoices(int daysBefore) throws SQLException {
+        List<Invoice> invoices = new ArrayList<>();
+        // SỬA SQL: Thêm JOIN apartments và lấy a.owner_id
+        String sql = "SELECT i.invoice_id, i.apartment_id, i.total_amount, i.due_date, a.owner_id " +
+                    "FROM invoices i " +
+                    "JOIN apartments a ON i.apartment_id = a.apartment_id " +
+                    "WHERE i.status = 'UNPAID' " +
+                    "AND i.due_date BETWEEN CURRENT_DATE AND CURRENT_DATE + INTERVAL ? DAY " +
+                    "ORDER BY i.due_date";
+
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setInt(1, daysBefore);
+            ResultSet rs = stmt.executeQuery();
+            
+            while (rs.next()) {
+                invoices.add(mapResultSetToInvoiceBase(rs));
             }
         }
         return invoices;
@@ -152,7 +154,7 @@ public class InvoiceDAO {
             stmtInvoice = conn.prepareStatement(sqlInvoice);
             stmtInvoice.setInt(1, invoice.getApartmentId()); // Đã có trong model Invoice mới
             stmtInvoice.setBigDecimal(2, invoice.getTotalAmount());
-            stmtInvoice.setDate(3, new java.sql.Date(invoice.getDueDate().getTime()));
+            stmtInvoice.setDate(3, java.sql.Date.valueOf(invoice.getDueDate()));
 
             ResultSet rs = stmtInvoice.executeQuery();
             if (!rs.next()) {
@@ -175,7 +177,61 @@ public class InvoiceDAO {
             return true;
 
         } catch (SQLException e) {
+            if (conn != null) {
+                try {
+                    conn.rollback();
+                } catch (SQLException rollbackEx) {
+                    rollbackEx.printStackTrace();
+                }
+            }
+            throw e;
+        } finally {
+            try {
+                if (stmtDetail != null) stmtDetail.close();
+                if (stmtInvoice != null) stmtInvoice.close();
+                if (conn != null) {
+                    conn.setAutoCommit(true);
+                    conn.close();
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
         }
+    }
 
+    /**
+     * Update the status of an invoice (e.g., from 'UNPAID' to 'PAID')
+     * @param invoiceId The ID of the invoice to update
+     * @param status The new status for the invoice
+     * @return true if the update was successful, false otherwise
+     */
+    public boolean updateInvoiceStatus(int invoiceId, String status) {
+        String sql = "UPDATE invoices SET status = ? WHERE invoice_id = ?";
+        
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            
+            stmt.setString(1, status);
+            stmt.setInt(2, invoiceId);
+            
+            return stmt.executeUpdate() > 0;
+            
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    /**
+     * Helper method to map ResultSet to Invoice object
+     */
+    private Invoice mapResultSetToInvoiceBase(ResultSet rs) throws SQLException {
+        Invoice invoice = new Invoice();
+        invoice.setInvoiceId(rs.getInt("invoice_id"));
+        invoice.setApartmentId(rs.getInt("apartment_id"));
+        invoice.setTotalAmount(rs.getBigDecimal("total_amount"));
+        invoice.setDueDate(rs.getDate("due_date").toLocalDate());
+        invoice.setOwnerId(rs.getInt("owner_id"));
+        return invoice;
     }
 }

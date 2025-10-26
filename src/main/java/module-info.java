@@ -7,7 +7,6 @@ module com.example.quanlytoanha {
 
     requires org.controlsfx.controls;
     requires org.kordamp.ikonli.javafx;
-    requires javafx.graphics;
     requires java.sql;
     requires java.desktop;
     requires spring.security.core;
