@@ -7,6 +7,9 @@ import com.example.quanlytoanha.model.FeeType;
 import com.example.quanlytoanha.model.Invoice;
 import com.example.quanlytoanha.service.FeeTypeService;
 import com.example.quanlytoanha.service.FinancialService;
+// --- THAY ĐỔI 1: Đổi tên import ---
+import com.example.quanlytoanha.service.InvoiceGenerationService; // Đổi tên từ InvoiceService
+// ------------------------------
 import com.example.quanlytoanha.session.SessionManager;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -18,55 +21,60 @@ import javafx.stage.Stage;
 
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.time.LocalDate; // <-- THÊM IMPORT NÀY
 import java.util.List;
 
 public class AccountantDashboardController {
 
-    // Thống kê
+    // ... (Các @FXML không thay đổi) ...
     @FXML private Label lblTotalDebt;
     @FXML private Label lblTotalOverdue;
     @FXML private Label lblUnpaidInvoices;
-
     @FXML private Button btnLogout;
-    // Bảng chi tiết
     @FXML private TableView<ApartmentDebt> debtTable;
-
-    // --- CÁC TRƯỜNG CỦA TAB 2 ---
     @FXML private TableView<FeeType> feeTable;
     @FXML private TableColumn<FeeType, String> colFeeName;
     @FXML private TableColumn<FeeType, BigDecimal> colFeePrice;
     @FXML private TableColumn<FeeType, String> colFeeUnit;
     @FXML private TableColumn<FeeType, String> colFeeDesc;
-
-    // --- CÁC CỘT MỚI ĐÃ THÊM ---
-    @FXML private TableColumn<FeeType, Boolean> colFeeIsDefault; // Mới
-    @FXML private TableColumn<FeeType, String> colFeePricingModel; // Mới
-    // -------------------------
-
+    @FXML private TableColumn<FeeType, Boolean> colFeeIsDefault;
+    @FXML private TableColumn<FeeType, String> colFeePricingModel;
     @FXML private Button btnAddFee;
     @FXML private Button btnEditFee;
     @FXML private Button btnDeleteFee;
-    // ---------------------------------
+    @FXML private Button btnGenerateInvoices;
+    @FXML private TextField txtBillingMonth;
+    @FXML private TextField txtBillingYear;
 
     private FinancialService financialService;
     private FeeTypeService feeTypeService;
+    // --- THAY ĐỔI 2: Đổi tên biến ---
+    private InvoiceGenerationService invoiceGenerationService; // Đổi tên từ invoiceService
+    // ----------------------------
 
     @FXML
     public void initialize() {
         this.financialService = new FinancialService();
         this.feeTypeService = new FeeTypeService();
+        // --- THAY ĐỔI 3: Khởi tạo service mới ---
+        this.invoiceGenerationService = new InvoiceGenerationService(); // Đổi tên
+        // ------------------------------------
         loadDashboardData();
 
-        configureFeeTableColumns(); // <-- Gọi hàm helper mới
-        loadFeeData(); // <-- Gọi hàm load dữ liệu mới
+        configureFeeTableColumns();
+        loadFeeData();
 
         // Gán sự kiện cho các nút
         btnAddFee.setOnAction(event -> handleAddFee());
         btnEditFee.setOnAction(event -> handleEditFee());
         btnDeleteFee.setOnAction(event -> handleDeleteFee());
 
+        // --- GÁN SỰ KIỆN CHO NÚT TẠO HÓA ĐƠN ---
+        btnGenerateInvoices.setOnAction(event -> handleGenerateInvoices()); // Đảm bảo dòng này tồn tại
+        // -------------------------------------
+
         debtTable.setOnMouseClicked(event -> {
-            if (event.getClickCount() == 2) { // Chỉ xử lý khi click đúp
+            if (event.getClickCount() == 2) {
                 ApartmentDebt selectedDebt = debtTable.getSelectionModel().getSelectedItem();
                 if (selectedDebt != null) {
                     handleViewDetails(selectedDebt);
@@ -75,9 +83,9 @@ public class AccountantDashboardController {
         });
     }
 
+    // ... (loadDashboardData, handleLogout, handleViewDetails, showAlert không thay đổi) ...
     @FXML
     private void loadDashboardData() {
-        // (Code không thay đổi)
         try {
             DebtReport report = financialService.generateDebtReport();
             lblTotalDebt.setText(String.format("%,.0f VNĐ", report.getTotalDebtAmount()));
@@ -94,18 +102,14 @@ public class AccountantDashboardController {
             e.printStackTrace();
         }
     }
-
     @FXML
     private void handleLogout() {
-        // (Code không thay đổi)
         SessionManager.getInstance().logout();
         Stage currentStage = (Stage) btnLogout.getScene().getWindow();
         currentStage.close();
-
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/example/quanlytoanha/view/login.fxml"));
             Parent root = loader.load();
-
             Stage loginStage = new Stage();
             loginStage.setTitle("Quản lý Tòa nhà - Đăng nhập");
             loginStage.setScene(new Scene(root, 400, 300));
@@ -114,9 +118,7 @@ public class AccountantDashboardController {
             e.printStackTrace();
         }
     }
-
     private void handleViewDetails(ApartmentDebt selectedDebt) {
-        // (Code không thay đổi)
         try {
             List<Invoice> invoiceList = financialService.getDetailedDebtForApartment(selectedDebt.getApartmentId());
             if (invoiceList.isEmpty()) {
@@ -140,9 +142,7 @@ public class AccountantDashboardController {
             showAlert(Alert.AlertType.ERROR, "Lỗi Giao diện", "Không thể tải cửa sổ chi tiết.");
         }
     }
-
     private void showAlert(Alert.AlertType alertType, String title, String message) {
-        // (Code không thay đổi)
         Alert alert = new Alert(alertType);
         alert.setTitle(title);
         alert.setHeaderText(null);
@@ -150,30 +150,18 @@ public class AccountantDashboardController {
         alert.showAndWait();
     }
 
-    // --- CÁC HÀM CỦA TAB 2 (QUẢN LÝ PHÍ) ---
 
-    /**
-     * Cấu hình các cột (ĐÃ CẬP NHẬT)
-     */
+    // --- CÁC HÀM CỦA TAB 2 (QUẢN LÝ PHÍ) ---
+    // ... (configureFeeTableColumns, loadFeeData, handleAddFee, handleEditFee, handleDeleteFee, showFeeEditDialog không thay đổi) ...
     private void configureFeeTableColumns() {
-        // Tên thuộc tính ("feeName", "unitPrice") phải khớp với FeeType.java
         colFeeName.setCellValueFactory(new PropertyValueFactory<>("feeName"));
         colFeePrice.setCellValueFactory(new PropertyValueFactory<>("unitPrice"));
         colFeeUnit.setCellValueFactory(new PropertyValueFactory<>("unit"));
         colFeeDesc.setCellValueFactory(new PropertyValueFactory<>("description"));
-
-        // --- CÁC DÒNG MỚI ĐÃ THÊM ---
-        // "default" khớp với hàm isDefault()
-        // "pricingModel" khớp với hàm getPricingModel()
         colFeeIsDefault.setCellValueFactory(new PropertyValueFactory<>("default"));
         colFeePricingModel.setCellValueFactory(new PropertyValueFactory<>("pricingModel"));
     }
-
-    /**
-     * Tải (hoặc tải lại) dữ liệu
-     */
     private void loadFeeData() {
-        // (Code không thay đổi)
         try {
             List<FeeType> fees = feeTypeService.getAllFees();
             feeTable.getItems().setAll(fees);
@@ -184,19 +172,15 @@ public class AccountantDashboardController {
             e.printStackTrace();
         }
     }
-
     @FXML
     private void handleAddFee() {
-        // (Code không thay đổi)
         boolean saveClicked = showFeeEditDialog(null);
         if (saveClicked) {
             loadFeeData();
         }
     }
-
     @FXML
     private void handleEditFee() {
-        // (Code không thay đổi)
         FeeType selectedFee = feeTable.getSelectionModel().getSelectedItem();
         if (selectedFee == null) {
             showAlert(Alert.AlertType.WARNING, "Chưa chọn", "Vui lòng chọn một loại phí để chỉnh sửa.");
@@ -207,10 +191,8 @@ public class AccountantDashboardController {
             loadFeeData();
         }
     }
-
     @FXML
     private void handleDeleteFee() {
-        // (Code không thay đổi, đã sửa lỗi dùng getFeeId())
         FeeType selectedFee = feeTable.getSelectionModel().getSelectedItem();
         if (selectedFee == null) {
             showAlert(Alert.AlertType.WARNING, "Chưa chọn", "Vui lòng chọn một loại phí để xóa/hủy.");
@@ -223,7 +205,7 @@ public class AccountantDashboardController {
         alert.showAndWait().ifPresent(response -> {
             if (response == ButtonType.OK) {
                 try {
-                    feeTypeService.deactivateFee(selectedFee.getFeeId()); // Dùng getFeeId()
+                    feeTypeService.deactivateFee(selectedFee.getFeeId());
                     showAlert(Alert.AlertType.INFORMATION, "Thành công", "Đã hủy loại phí thành công.");
                     loadFeeData();
                 } catch (SecurityException e) {
@@ -234,9 +216,7 @@ public class AccountantDashboardController {
             }
         });
     }
-
     private boolean showFeeEditDialog(FeeType fee) {
-        // (Code không thay đổi)
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/example/quanlytoanha/view/add_fee_form.fxml"));
             Parent root = loader.load();
@@ -258,4 +238,54 @@ public class AccountantDashboardController {
         }
     }
 
-}
+    // --- HÀM MỚI CHO TAB 3 (TẠO HÓA ĐƠN) ---
+
+    @FXML
+    private void handleGenerateInvoices() {
+        String monthStr = txtBillingMonth.getText();
+        String yearStr = txtBillingYear.getText();
+
+        // 1. Validation (Kiểm tra đầu vào)
+        int month, year;
+        try {
+            month = Integer.parseInt(monthStr);
+            year = Integer.parseInt(yearStr);
+
+            if (month < 1 || month > 12) {
+                showAlert(Alert.AlertType.WARNING, "Lỗi", "Tháng phải là số từ 1 đến 12.");
+                return;
+            }
+            if (year < 2000 || year > 2100) { // Giới hạn năm hợp lý
+                showAlert(Alert.AlertType.WARNING, "Lỗi", "Năm không hợp lệ.");
+                return;
+            }
+        } catch (NumberFormatException e) {
+            showAlert(Alert.AlertType.WARNING, "Lỗi", "Tháng và Năm phải là số.");
+            return;
+        }
+
+        // 2. Tạo ngày đầu tiên của tháng
+        LocalDate billingMonth = LocalDate.of(year, month, 1);
+
+        // 3. Hiển thị xác nhận (Giống như cũ)
+        Alert confirmAlert = new Alert(Alert.AlertType.CONFIRMATION);
+        confirmAlert.setTitle("Xác nhận");
+        confirmAlert.setHeaderText("Bạn sắp tạo hóa đơn cho tháng " + billingMonth.getMonthValue() + "/" + billingMonth.getYear());
+        confirmAlert.setContentText("Hệ thống sẽ tính toán phí cho TẤT CẢ căn hộ.\nQuá trình này có thể mất vài phút.\nBạn có chắc chắn muốn tiếp tục?");
+        confirmAlert.getDialogPane().setMinHeight(150);
+
+        confirmAlert.showAndWait().ifPresent(response -> {
+            if (response == ButtonType.OK) {
+                try {
+                    String result = invoiceGenerationService.generateMonthlyInvoices(billingMonth);
+                    showAlert(Alert.AlertType.INFORMATION, "Hoàn thành", result);
+                    loadDashboardData(); // Tải lại Tab 1
+                } catch (Exception e) {
+                    showAlert(Alert.AlertType.ERROR, "Lỗi nghiêm trọng", "Đã xảy ra lỗi khi tạo hóa đơn: " + e.getMessage());
+                    e.printStackTrace();
+                }
+            }
+        });
+    }
+
+} // <-- Dấu ngoặc cuối cùng của lớp

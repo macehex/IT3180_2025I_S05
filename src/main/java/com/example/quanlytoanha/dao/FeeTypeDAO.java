@@ -106,4 +106,75 @@ public class FeeTypeDAO {
             return false;
         }
     }
+
+    /**
+     * HÀM MỚI: Lấy tất cả các phí mặc định (is_default = TRUE)
+     */
+    public List<FeeType> getAllDefaultFees() {
+        List<FeeType> feeTypes = new ArrayList<>();
+        // Lấy tất cả các phí đang hoạt động VÀ là phí mặc định
+        String sql = "SELECT * FROM fee_types WHERE is_active = TRUE AND is_default = TRUE";
+
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql);
+             ResultSet rs = stmt.executeQuery()) {
+
+            while (rs.next()) {
+                // Sử dụng constructor 8 tham số mà chúng ta đã sửa
+                FeeType fee = new FeeType(
+                        rs.getInt("fee_id"),
+                        rs.getString("fee_name"),
+                        rs.getBigDecimal("unit_price"),
+                        rs.getString("unit"),
+                        rs.getString("description"),
+                        rs.getBoolean("is_active"),
+                        rs.getBoolean("is_default"),
+                        rs.getString("pricing_model")
+                );
+                feeTypes.add(fee);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return feeTypes;
+    }
+
+    /**
+     * HÀM MỚI: Lấy tất cả các phí tùy chọn mà một căn hộ đã đăng ký
+     */
+    public List<FeeType> getOptionalFeesForApartment(int apartmentId) {
+        List<FeeType> feeTypes = new ArrayList<>();
+        // JOIN 2 bảng fee_types và service_registrations
+        String sql = """
+            SELECT ft.* FROM fee_types ft
+            JOIN service_registrations sr ON ft.fee_id = sr.fee_id
+            WHERE sr.apartment_id = ? 
+              AND sr.status = TRUE 
+              AND ft.is_active = TRUE
+            """;
+
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setInt(1, apartmentId);
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    FeeType fee = new FeeType(
+                            rs.getInt("fee_id"),
+                            rs.getString("fee_name"),
+                            rs.getBigDecimal("unit_price"),
+                            rs.getString("unit"),
+                            rs.getString("description"),
+                            rs.getBoolean("is_active"),
+                            rs.getBoolean("is_default"),
+                            rs.getString("pricing_model")
+                    );
+                    feeTypes.add(fee);
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return feeTypes;
+    }
 }

@@ -1,3 +1,4 @@
+// Vị trí: src/main/java/com/example/quanlytoanha/dao/ApartmentDAO.java
 package com.example.quanlytoanha.dao;
 
 import com.example.quanlytoanha.model.Apartment;

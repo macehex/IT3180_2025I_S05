@@ -25,7 +25,7 @@ import java.util.Map;
 public class InvoiceDAO {
     private static InvoiceDAO instance;
 
-    private InvoiceDAO() {}
+    public InvoiceDAO() {}
 
     public static InvoiceDAO getInstance() {
         if (instance == null) {
