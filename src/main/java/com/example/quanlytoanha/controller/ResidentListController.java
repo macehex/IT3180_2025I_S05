@@ -1,22 +1,18 @@
 package com.example.quanlytoanha.controller;
 
 import com.example.quanlytoanha.dao.ResidentDAO;
-import com.example.quanlytoanha.model.ResidentPOJO;
+import com.example.quanlytoanha.model.Resident;
 import com.example.quanlytoanha.session.SessionManager;
 import com.example.quanlytoanha.model.User;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
-import javafx.scene.Parent;
-import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
 
-import java.io.IOException;
 import java.net.URL;
 import java.sql.SQLException;
 import java.text.SimpleDateFormat;
@@ -38,19 +34,19 @@ public class ResidentListController implements Initializable {
     @FXML private Text txtStatusMessage;
 
     // FXML Components - Table
-    @FXML private TableView<ResidentPOJO> tableView;
-    @FXML private TableColumn<ResidentPOJO, Integer> colId;
-    @FXML private TableColumn<ResidentPOJO, String> colFullName;
-    @FXML private TableColumn<ResidentPOJO, Integer> colApartment;
-    @FXML private TableColumn<ResidentPOJO, String> colStatus;
-    @FXML private TableColumn<ResidentPOJO, String> colRelationship;
-    @FXML private TableColumn<ResidentPOJO, String> colIdCard;
-    @FXML private TableColumn<ResidentPOJO, String> colPhone;
-    @FXML private TableColumn<ResidentPOJO, String> colEmail;
-    @FXML private TableColumn<ResidentPOJO, String> colMoveInDate;
+    @FXML private TableView<Resident> tableView;
+    @FXML private TableColumn<Resident, Integer> colId;
+    @FXML private TableColumn<Resident, String> colFullName;
+    @FXML private TableColumn<Resident, Integer> colApartment;
+    @FXML private TableColumn<Resident, String> colStatus;
+    @FXML private TableColumn<Resident, String> colRelationship;
+    @FXML private TableColumn<Resident, String> colIdCard;
+    @FXML private TableColumn<Resident, String> colPhone;
+    @FXML private TableColumn<Resident, String> colEmail;
+    @FXML private TableColumn<Resident, String> colMoveInDate;
 
     // Data
-    private ObservableList<ResidentPOJO> residentList;
+    private ObservableList<Resident> residentList;
     private ResidentDAO residentDAO;
     private SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy");
 
@@ -85,27 +81,21 @@ public class ResidentListController implements Initializable {
         
         // Custom cell factories for phone, email, and move-in date
         colPhone.setCellValueFactory(cellData -> {
-            ResidentPOJO resident = cellData.getValue();
-            if (resident instanceof ResidentDAO.ExtendedResidentPOJO) {
-                return new javafx.beans.property.SimpleStringProperty(
-                    ((ResidentDAO.ExtendedResidentPOJO) resident).getPhoneNumber()
-                );
-            }
-            return new javafx.beans.property.SimpleStringProperty("");
+            Resident resident = cellData.getValue();
+            return new javafx.beans.property.SimpleStringProperty(
+                resident.getPhoneNumber() != null ? resident.getPhoneNumber() : ""
+            );
         });
         
         colEmail.setCellValueFactory(cellData -> {
-            ResidentPOJO resident = cellData.getValue();
-            if (resident instanceof ResidentDAO.ExtendedResidentPOJO) {
-                return new javafx.beans.property.SimpleStringProperty(
-                    ((ResidentDAO.ExtendedResidentPOJO) resident).getEmail()
-                );
-            }
-            return new javafx.beans.property.SimpleStringProperty("");
+            Resident resident = cellData.getValue();
+            return new javafx.beans.property.SimpleStringProperty(
+                resident.getEmail() != null ? resident.getEmail() : ""
+            );
         });
         
         colMoveInDate.setCellValueFactory(cellData -> {
-            ResidentPOJO resident = cellData.getValue();
+            Resident resident = cellData.getValue();
             if (resident.getMoveInDate() != null) {
                 return new javafx.beans.property.SimpleStringProperty(
                     dateFormat.format(resident.getMoveInDate())
@@ -155,7 +145,12 @@ public class ResidentListController implements Initializable {
                 searchStatus = status;
             }
             
-            List<ResidentPOJO> results = residentDAO.searchResidents(name, apartmentId, searchStatus);
+            // Sử dụng phương thức searchResidents thực sự thay vì getAllResidents
+            List<Resident> results = residentDAO.searchResidents(
+                name.isEmpty() ? null : name, 
+                apartmentId, 
+                searchStatus
+            );
             residentList.clear();
             residentList.addAll(results);
             
@@ -176,7 +171,7 @@ public class ResidentListController implements Initializable {
 
     private void loadAllResidents() {
         try {
-            List<ResidentPOJO> residents = residentDAO.getAllResidents();
+            List<Resident> residents = residentDAO.getAllResidents();
             residentList.clear();
             residentList.addAll(residents);
             

@@ -3,8 +3,6 @@ package com.example.quanlytoanha.model;
 
 import java.sql.Timestamp;
 import java.util.Date;
-// Giả sử bạn có cả các model khác như Vehicle, Apartment
-import java.util.List;
 
 /**
  * Đại diện cho Cư dân. Kế thừa từ User và thêm các thông tin
@@ -18,6 +16,8 @@ public class Resident extends User {
     private Date dateOfBirth;
     private String idCardNumber;
     private String relationship; // (Quan hệ với chủ hộ)
+    private String status; // Trạng thái cư dân (RESIDING, MOVED_OUT, TEMPORARY)
+    private Date moveInDate; // Ngày chuyển vào
     // private List<Vehicle> vehicles; // Có thể thêm sau
 
     public Resident() {
@@ -102,5 +102,21 @@ public class Resident extends User {
 
     public void setRelationship(String relationship) {
         this.relationship = relationship;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
+
+    public Date getMoveInDate() {
+        return moveInDate;
+    }
+
+    public void setMoveInDate(Date moveInDate) {
+        this.moveInDate = moveInDate;
     }
 }
