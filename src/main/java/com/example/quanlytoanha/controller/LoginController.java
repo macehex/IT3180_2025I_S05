@@ -114,7 +114,8 @@ public class LoginController {
             // 4. Hiển thị cửa sổ mới
             Stage mainStage = new Stage();
             mainStage.setTitle("Dashboard - " + user.getFullName());
-            mainStage.setScene(new Scene(root));
+            mainStage.setScene(new Scene(root, 600, 500)); // Tăng kích thước từ mặc định lên 600x500
+            mainStage.setResizable(true); // Cho phép resize
             mainStage.show();
 
         } catch (IOException e) {

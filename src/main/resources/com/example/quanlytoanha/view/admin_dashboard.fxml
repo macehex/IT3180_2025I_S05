@@ -19,7 +19,7 @@
 
             <Button fx:id="btnQuanLyTaiKhoan" text="👤 Quản Lý Tài Khoản Người Dùng" />
 
-            <Button text="📋 Xem Danh Sách Cư Dân Chi Tiết" />
+            <Button fx:id="btnXemDanhSachCuDan" text="📋 Xem Danh Sách Cư Dân Chi Tiết" onAction="#handleOpenResidentList" />
 
             <Label style="-fx-font-weight: bold;" text="QUẢN LÝ VẬN HÀNH TÒA NHÀ">
                 <VBox.margin>
