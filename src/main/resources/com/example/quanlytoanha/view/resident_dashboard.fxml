@@ -33,14 +33,14 @@
                         prefHeight="50.0"
                         prefWidth="300.0"
                         text="Quản lý lịch sử đăng nhập"
-                        style="-fx-font-size: 16px; -fx-background-color: #6c757d; -fx-text-fill: white;"/>
+                        style="-fx-font-size: 16px; -fx-background-color: #007bff; -fx-text-fill: white;"/>
 
                 <Button fx:id="btnLogout"
                         onAction="#handleLogout"
                         prefHeight="25.0"
                         prefWidth="100.0"
                         text="Đăng xuất ↪"
-                        style="-fx-font-size: 14px; -fx-background-color: #dc3545; -fx-text-fill: white;"/>
+                        style="-fx-font-size: 14px; -fx-background-color: #6c757d; -fx-text-fill: white;"/>
             </children>
         </VBox>
     </children>

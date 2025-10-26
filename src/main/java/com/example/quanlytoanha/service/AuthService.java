@@ -52,6 +52,16 @@ public class AuthService {
             List<Permission> permissions = permissionDAO.getPermissionsByRoleId(user.getRole().getRoleId());
             user.setPermissions(permissions); // (Hàm này ta đã định nghĩa ở User.java)
 
+            // 6. Cập nhật thời gian đăng nhập cuối cùng
+            boolean lastLoginUpdated = UserDAO.updateLastLogin(user.getUserId());
+            if (lastLoginUpdated) {
+                // Cập nhật thời gian trong đối tượng user hiện tại
+                user.setLastLogin(java.sql.Timestamp.from(java.time.Instant.now()));
+                System.out.println("DEBUG: Đã cập nhật last_login cho user " + user.getUsername());
+            } else {
+                System.out.println("WARNING: Không thể cập nhật last_login cho user " + user.getUsername());
+            }
+
 
             // === START DEBUG TẠM THỜI ===
             System.out.println("DEBUG: Role ID đang được nạp: " + user.getRole().getRoleId());

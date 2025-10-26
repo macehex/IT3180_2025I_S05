@@ -5,11 +5,13 @@ import com.example.quanlytoanha.model.Transaction;
 import com.example.quanlytoanha.service.InvoiceService;
 import com.example.quanlytoanha.session.SessionManager;
 import com.example.quanlytoanha.ui.DashboardTile;
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.HBox;
+import javafx.stage.Stage;
 
 import java.net.URL;
 import java.time.LocalDate;
@@ -19,6 +21,7 @@ import java.util.ResourceBundle;
 
 public class InvoiceHistoryController implements Initializable {
     private final InvoiceService invoiceService = InvoiceService.getInstance();
+    public Button backButton;
     private int residentId;
 
     @FXML private HBox invoiceTilePane;
@@ -147,5 +150,12 @@ public class InvoiceHistoryController implements Initializable {
         alert.setHeaderText(null);
         alert.setContentText(content);
         alert.showAndWait();
+    }
+
+    @FXML
+    private void handleBack() {
+        // Close (kill) the current Login Management window
+        Stage stage = (Stage) backButton.getScene().getWindow();
+        stage.close();
     }
 }

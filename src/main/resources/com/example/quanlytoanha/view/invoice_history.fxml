@@ -55,6 +55,16 @@
                         </TableView>
                     </VBox>
                 </TitledPane>
+
+                <!-- Back Button -->
+                <HBox alignment="CENTER">
+                    <Button fx:id="backButton"
+                            onAction="#handleBack"
+                            text="⬅ Quay lại"
+                            style="-fx-font-size: 14px; -fx-background-color: #6c757d; -fx-text-fill: white;"
+                            prefWidth="150"/>
+                </HBox>
+
             </VBox>
         </ScrollPane>
     </center>

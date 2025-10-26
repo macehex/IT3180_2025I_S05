@@ -11,6 +11,7 @@ import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.Region;
 
+import javafx.stage.Stage;
 import java.time.format.DateTimeFormatter;
 
 public class ResidentLoginHistoryAndManagementController {
@@ -86,11 +87,12 @@ public class ResidentLoginHistoryAndManagementController {
         }
     }
 
+
     @FXML
     private void handleBack() {
-        // TODO: Navigate back to the Resident Dashboard
-        // Example: SceneController.switchTo("/com/example/quanlytoanha/view/resident_dashboard.fxml");
-        showAlert(Alert.AlertType.INFORMATION, "Quay lại", "Trở về trang chính (chưa được cài đặt).");
+        // Close (kill) the current Login Management window
+        Stage stage = (Stage) backButton.getScene().getWindow();
+        stage.close();
     }
 
     private void loadLoginHistory() {

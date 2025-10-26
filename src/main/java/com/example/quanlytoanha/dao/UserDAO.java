@@ -341,4 +341,27 @@ public class UserDAO {
             return false;
         }
     }
+
+    /**
+     * Cập nhật thời gian đăng nhập cuối cùng của người dùng.
+     * @param userId ID của người dùng
+     * @return true nếu cập nhật thành công, false nếu thất bại
+     */
+    public static boolean updateLastLogin(int userId) {
+        String sql = "UPDATE users SET last_login = ? WHERE user_id = ?";
+        
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            
+            pstmt.setTimestamp(1, Timestamp.from(Instant.now()));
+            pstmt.setInt(2, userId);
+            
+            int rowsAffected = pstmt.executeUpdate();
+            return rowsAffected > 0;
+            
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
 }
