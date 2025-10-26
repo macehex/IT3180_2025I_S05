@@ -4,6 +4,7 @@ import com.example.quanlytoanha.dao.InvoiceDAO;
 import com.example.quanlytoanha.dao.TransactionDAO;
 import com.example.quanlytoanha.model.Invoice;
 import com.example.quanlytoanha.model.Transaction;
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -39,7 +40,7 @@ public class InvoiceService {
         return transactionDAO.getTransactions(residentId, fromDate, toDate);
     }
 
-    public Transaction processPayment(int residentId, Invoice invoice, double amount) {
+    public Transaction processPayment(int residentId, Invoice invoice, BigDecimal amount) {
         // Create and save the transaction
         Transaction transaction = transactionDAO.createTransaction(residentId, invoice.getInvoiceId(), amount);
 

@@ -52,7 +52,7 @@ public class InvoiceDAO {
                         newInvoice.setInvoiceId(invoiceId);
                         newInvoice.setApartmentId(finalRs.getInt("apartment_id"));
                         newInvoice.setTotalAmount(finalRs.getDouble("total_amount"));
-                        newInvoice.setDueDate(finalRs.getDate("due_date").toLocalDate());
+                        newInvoice.setDueDate(finalRs.getDate("due_date"));
                         newInvoice.setStatus(finalRs.getString("status"));
                     } catch (SQLException e) {
                         e.printStackTrace();
@@ -216,13 +216,6 @@ public class InvoiceDAO {
             stmt.setInt(2, invoiceId);
 
             return stmt.executeUpdate() > 0;
-            
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
-
-            pstmt.setString(1, status);
-            pstmt.setInt(2, invoiceId);
-
-            return pstmt.executeUpdate() > 0;
         } catch (SQLException e) {
             e.printStackTrace();
             return false;
@@ -240,6 +233,8 @@ public class InvoiceDAO {
         invoice.setDueDate(rs.getDate("due_date"));
         invoice.setOwnerId(rs.getInt("owner_id"));
         return invoice;
+    }
+
     public List<InvoiceDetail> getInvoiceDetails(int invoiceId) {
         List<InvoiceDetail> details = new ArrayList<>();
         String sql = "SELECT * FROM invoicedetails WHERE invoice_id = ?";

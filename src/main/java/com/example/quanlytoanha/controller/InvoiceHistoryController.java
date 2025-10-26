@@ -33,7 +33,7 @@ public class InvoiceHistoryController implements Initializable {
     @FXML private TableView<Transaction> transactionTable;
     @FXML private TableColumn<Transaction, LocalDateTime> dateColumn;
     @FXML private TableColumn<Transaction, String> descriptionColumn;
-    @FXML private TableColumn<Transaction, Double> amountColumn;
+    @FXML private TableColumn<Transaction, BigDecimal> amountColumn;
     @FXML private TableColumn<Transaction, String> statusColumn;
 
     @Override
@@ -106,7 +106,7 @@ public class InvoiceHistoryController implements Initializable {
 
         try {
             BigDecimal amount = new BigDecimal(amountField.getText());
-            if (amount != selectedInvoice.getTotalAmount()) {
+            if (amount.compareTo(selectedInvoice.getTotalAmount()) != 0) {
                 showAlert(Alert.AlertType.ERROR, "Error", "Payment amount must match invoice amount");
                 return;
             }

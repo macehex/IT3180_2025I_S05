@@ -1,17 +1,18 @@
 package com.example.quanlytoanha.model;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 public class Transaction {
     private int transactionId;
-    private double amount;
+    private BigDecimal amount;
     private String description;
     private LocalDateTime timestamp;
     private String status;
     private String paymentMethod;
     private int billId;
 
-    public Transaction(int transactionId, double amount, String description, LocalDateTime timestamp,
+    public Transaction(int transactionId, BigDecimal amount, String description, LocalDateTime timestamp,
                       String status, String paymentMethod, int billId) {
         this.transactionId = transactionId;
         this.amount = amount;
@@ -23,7 +24,7 @@ public class Transaction {
     }
 
     // Convenience constructor for creating new transactions
-    public Transaction(LocalDateTime timestamp, double amount, String description,
+    public Transaction(LocalDateTime timestamp, BigDecimal amount, String description,
                       String status, String paymentMethod) {
         this.timestamp = timestamp;
         this.amount = amount;
@@ -38,7 +39,7 @@ public class Transaction {
 
     // Getters
     public int getTransactionId() { return transactionId; }
-    public double getAmount() { return amount; }
+    public BigDecimal getAmount() { return amount; }
     public String getDescription() { return description; }
     public LocalDateTime getTimestamp() { return timestamp; }
     public String getStatus() { return status; }
@@ -47,7 +48,7 @@ public class Transaction {
 
     // Setters
     public void setTransactionId(int transactionId) { this.transactionId = transactionId; }
-    public void setAmount(double amount) { this.amount = amount; }
+    public void setAmount(BigDecimal amount) { this.amount = amount; }
     public void setDescription(String description) { this.description = description; }
     public void setTimestamp(LocalDateTime timestamp) { this.timestamp = timestamp; }
     public void setStatus(String status) { this.status = status; }

@@ -3,6 +3,7 @@ package com.example.quanlytoanha.dao;
 import com.example.quanlytoanha.model.Transaction;
 import com.example.quanlytoanha.utils.DatabaseConnection;
 
+import java.math.BigDecimal;
 import java.sql.*;
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -37,7 +38,7 @@ public class TransactionDAO {
             while (rs.next()) {
                 Transaction transaction = new Transaction(
                     rs.getInt("transaction_id"),
-                    rs.getDouble("amount"),
+                    rs.getBigDecimal("amount"),
                     "Payment for invoice #" + rs.getInt("invoice_id"),
                     rs.getTimestamp("transaction_date").toLocalDateTime(),
                     "COMPLETED",
@@ -52,7 +53,7 @@ public class TransactionDAO {
         return transactions;
     }
 
-    public Transaction createTransaction(int payerUserId, int invoiceId, double amount) {
+    public Transaction createTransaction(int payerUserId, int invoiceId, BigDecimal amount) {
         String sql = "INSERT INTO transactions (invoice_id, payer_user_id, amount, transaction_date) " +
                     "VALUES (?, ?, ?, ?) RETURNING transaction_id";
 
@@ -62,7 +63,7 @@ public class TransactionDAO {
             LocalDate transactionDate = LocalDate.now();
             pstmt.setInt(1, invoiceId);
             pstmt.setInt(2, payerUserId);
-            pstmt.setDouble(3, amount);
+            pstmt.setBigDecimal(3, amount);
             pstmt.setDate(4, Date.valueOf(transactionDate));
 
             ResultSet rs = pstmt.executeQuery();
@@ -95,7 +96,7 @@ public class TransactionDAO {
             ResultSet rs = pstmt.executeQuery();
 
             if (rs.next()) {
-                double amount = rs.getDouble("amount");
+                BigDecimal amount = rs.getBigDecimal("amount");
                 LocalDate date = rs.getDate("transaction_date").toLocalDate();
                 return String.format("%.2f VND (%s)", amount, date);
             }
