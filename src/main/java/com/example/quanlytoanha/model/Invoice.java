@@ -1,6 +1,6 @@
 package com.example.quanlytoanha.model;
 
-import java.time.LocalDate;
+import java.util.Date;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
@@ -9,7 +9,7 @@ public class Invoice {
     private int invoiceId;
     private int apartmentId;
     private BigDecimal totalAmount;
-    private LocalDate dueDate;
+    private Date dueDate;
     private String status;
     private List<InvoiceDetail> details;
     private int ownerId; // ID của chủ căn hộ (Lấy từ bảng apartments)
@@ -18,7 +18,7 @@ public class Invoice {
         this.details = new ArrayList<>();
     }
 
-    public Invoice(int invoiceId, int apartmentId, BigDecimal totalAmount, LocalDate dueDate, String status) {
+    public Invoice(int invoiceId, int apartmentId, BigDecimal totalAmount, Date dueDate, String status) {
         this.invoiceId = invoiceId;
         this.apartmentId = apartmentId;
         this.totalAmount = totalAmount;
@@ -56,11 +56,11 @@ public class Invoice {
         this.totalAmount = BigDecimal.valueOf(totalAmount); 
     }
 
-    public LocalDate getDueDate() { 
+    public Date getDueDate() { 
         return dueDate; 
     }
     
-    public void setDueDate(LocalDate dueDate) { 
+    public void setDueDate(Date dueDate) { 
         this.dueDate = dueDate; 
     }
 

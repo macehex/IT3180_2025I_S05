@@ -51,7 +51,7 @@ public class InvoiceDAO {
                         newInvoice.setInvoiceId(invoiceId);
                         newInvoice.setApartmentId(rs.getInt("apartment_id"));
                         newInvoice.setTotalAmount(rs.getBigDecimal("total_amount"));
-                        newInvoice.setDueDate(rs.getDate("due_date").toLocalDate());
+                        newInvoice.setDueDate(rs.getDate("due_date"));
                         newInvoice.setStatus(rs.getString("status"));
                     } catch (SQLException e) {
                         e.printStackTrace();
@@ -154,7 +154,7 @@ public class InvoiceDAO {
             stmtInvoice = conn.prepareStatement(sqlInvoice);
             stmtInvoice.setInt(1, invoice.getApartmentId()); // Đã có trong model Invoice mới
             stmtInvoice.setBigDecimal(2, invoice.getTotalAmount());
-            stmtInvoice.setDate(3, java.sql.Date.valueOf(invoice.getDueDate()));
+            stmtInvoice.setDate(3, new java.sql.Date(invoice.getDueDate().getTime()));
 
             ResultSet rs = stmtInvoice.executeQuery();
             if (!rs.next()) {
@@ -230,7 +230,7 @@ public class InvoiceDAO {
         invoice.setInvoiceId(rs.getInt("invoice_id"));
         invoice.setApartmentId(rs.getInt("apartment_id"));
         invoice.setTotalAmount(rs.getBigDecimal("total_amount"));
-        invoice.setDueDate(rs.getDate("due_date").toLocalDate());
+        invoice.setDueDate(rs.getDate("due_date"));
         invoice.setOwnerId(rs.getInt("owner_id"));
         return invoice;
     }

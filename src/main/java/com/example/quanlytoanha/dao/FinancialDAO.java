@@ -129,7 +129,7 @@ public class FinancialDAO {
                     Invoice invoice = new Invoice();
                     invoice.setInvoiceId(invoiceId);
                     invoice.setTotalAmount(rs.getBigDecimal("total_amount"));
-                    invoice.setDueDate(rs.getDate("due_date").toLocalDate());
+                    invoice.setDueDate(rs.getDate("due_date"));
                     invoiceMap.put(invoiceId, invoice);
                 }
 
