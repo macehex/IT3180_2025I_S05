@@ -29,6 +29,7 @@ public class ResidentService {
      * Tạo hồ sơ cư dân mới, bao gồm validation nghiệp vụ.
      */
     public boolean createNewResident(Resident resident) throws ValidationException, SQLException {
+        String idCard = resident.getIdCardNumber();
 
         // --- 1. VALIDATION TRƯỜNG BẮT BUỘC (GIỮ NGUYÊN) ---
         if (resident.getFullName() == null || resident.getFullName().trim().isEmpty()) {
@@ -44,8 +45,16 @@ public class ResidentService {
         // --- 2. XỬ LÝ DỮ LIỆU USER BẮT BUỘC (FIX LỖI RAW PASSWORD NULL) ---
 
         // TẠO USERNAME TẠM THỜI (để pass ràng buộc NOT NULL/UNIQUE của bảng users)
-        // Mẫu: res[ApartmentID] + [4 số ngẫu nhiên]
-        String tempUsername = "res" + resident.getApartmentId() + (int)(Math.random() * 9000 + 1000);
+        String tempUsername;
+        if (idCard != null && idCard.trim().length() >= 6) {
+            // Lấy 6 ký tự cuối
+            String lastSixDigits = idCard.trim().substring(idCard.trim().length() - 6);
+            tempUsername = "res" + resident.getApartmentId() + lastSixDigits;
+        } else {
+            // Fallback: Nếu idCard không hợp lệ, dùng 4 số ngẫu nhiên như cũ
+            System.err.println("Cảnh báo: ID Card không hợp lệ hoặc quá ngắn, sử dụng username ngẫu nhiên."); // Ghi log cảnh báo
+            tempUsername = "res" + resident.getApartmentId() + (int)(Math.random() * 9000 + 1000);
+        }
         resident.setUsername(tempUsername);
 
         // GÁN MẬT KHẨU TẠM THỜI (để pass qua hàm hashPassword và ràng buộc NOT NULL)
@@ -67,7 +76,6 @@ public class ResidentService {
             throw new ValidationException("Căn hộ ID " + resident.getApartmentId() + " không tồn tại.");
         }
 
-        String idCard = resident.getIdCardNumber();
         if (idCard != null && !idCard.trim().isEmpty()) {
             resident.setIdCardNumber(idCard.trim());
             if (!residentDAO.isIdCardUnique(resident.getIdCardNumber())) {
