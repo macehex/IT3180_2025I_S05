@@ -1,10 +1,11 @@
+// Vị trí: src/main/java/com/example/quanlytoanha/controller/InvoiceHistoryController.java
 package com.example.quanlytoanha.controller;
 
 import com.example.quanlytoanha.model.Invoice;
 import com.example.quanlytoanha.model.Transaction;
 import com.example.quanlytoanha.service.InvoiceService;
 import com.example.quanlytoanha.session.SessionManager;
-import com.example.quanlytoanha.ui.DashboardTile;
+import com.example.quanlytoanha.ui.DashboardTile; // Đảm bảo import đúng
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
@@ -19,6 +20,11 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.ResourceBundle;
+import javafx.scene.control.ListCell;
+import javafx.scene.control.ListView;
+import javafx.util.Callback;
+import java.text.SimpleDateFormat;
+import java.util.stream.Collectors;
 
 public class InvoiceHistoryController implements Initializable {
     private final InvoiceService invoiceService = InvoiceService.getInstance();
@@ -36,44 +42,74 @@ public class InvoiceHistoryController implements Initializable {
     @FXML private TableColumn<Transaction, BigDecimal> amountColumn;
     @FXML private TableColumn<Transaction, String> statusColumn;
 
+    private DashboardTile totalDueTile;
+    private DashboardTile unpaidInvoicesTile;
+    private DashboardTile lastPaymentTile;
+    private final SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy");
+
     @Override
     public void initialize(URL location, ResourceBundle resources) {
+        // Lấy userId từ SessionManager (Cần đảm bảo SessionManager hoạt động đúng)
+        // Nếu SessionManager chưa sẵn sàng, bạn có thể cần cơ chế khác để lấy residentId
         residentId = SessionManager.getInstance().getCurrentUser().getUserId();
-        setupTiles();
+        setupTiles(); // Tạo và thêm Tile lần đầu
         setupTransactionTable();
         setupPaymentControls();
-        loadData();
+        loadData(); // Tải dữ liệu bảng giao dịch lần đầu
     }
 
     private void setupTiles() {
-        DashboardTile totalDueTile = new DashboardTile(
+        // Tạo các đối tượng Tile
+        totalDueTile = new DashboardTile(
                 "Tổng Nợ",
-                String.format("%.2f VND", invoiceService.getTotalDueAmount(residentId)),
+                "Loading...",
                 "Tổng số tiền hóa đơn đang chờ thanh toán"
         );
-
-        DashboardTile upcomingInvoicesTile = new DashboardTile(
+        unpaidInvoicesTile = new DashboardTile(
                 "Hóa Đơn Chưa Thanh Toán",
-                String.valueOf(invoiceService.getUnpaidInvoicesCount(residentId)),
+                "Loading...",
                 "Hóa đơn đang chờ thanh toán"
         );
-
-        DashboardTile lastPaymentTile = new DashboardTile(
+        lastPaymentTile = new DashboardTile(
                 "Thanh Toán Gần Nhất",
-                invoiceService.getLastPaymentInfo(residentId),
+                "Loading...",
                 "Giao dịch gần đây nhất"
         );
 
-        invoiceTilePane.getChildren().addAll(totalDueTile, upcomingInvoicesTile, lastPaymentTile);
+        // Xóa các Tile cũ (nếu có) và thêm các Tile mới
+        invoiceTilePane.getChildren().clear();
+        invoiceTilePane.getChildren().addAll(totalDueTile, unpaidInvoicesTile, lastPaymentTile);
+
+        // Nạp dữ liệu lần đầu cho Tile
+        refreshTiles();
+        
+    }
+
+    /**
+     * Lấy dữ liệu mới nhất và cập nhật nội dung các Tile đã có.
+     */
+    private void refreshTiles() {
+        if (totalDueTile != null) {
+            // SỬA: Gọi hàm setValue() của DashboardTile
+            totalDueTile.setValue(String.format("%,.0f VND", invoiceService.getTotalDueAmount(residentId)));
+        }
+        if (unpaidInvoicesTile != null) {
+            // SỬA: Gọi hàm setValue()
+            unpaidInvoicesTile.setValue(String.valueOf(invoiceService.getUnpaidInvoicesCount(residentId)));
+        }
+        if (lastPaymentTile != null) {
+            // SỬA: Gọi hàm setValue()
+            lastPaymentTile.setValue(invoiceService.getLastPaymentInfo(residentId));
+        }
     }
 
     private void setupTransactionTable() {
+        // Cấu hình các cột (Giữ nguyên)
         dateColumn.setCellValueFactory(new PropertyValueFactory<>("timestamp"));
         descriptionColumn.setCellValueFactory(new PropertyValueFactory<>("description"));
         amountColumn.setCellValueFactory(new PropertyValueFactory<>("amount"));
         statusColumn.setCellValueFactory(new PropertyValueFactory<>("status"));
 
-        // Set Vietnamese column names
         dateColumn.setText("Ngày");
         descriptionColumn.setText("Mô tả");
         amountColumn.setText("Số tiền");
@@ -81,58 +117,90 @@ public class InvoiceHistoryController implements Initializable {
     }
 
     private void setupPaymentControls() {
+        // Đặt ngày mặc định (Giữ nguyên)
         fromDate.setValue(LocalDate.now().minusMonths(1));
         toDate.setValue(LocalDate.now());
 
-        // Load invoices into invoice selector
+        // Load hóa đơn chưa trả vào ComboBox
         List<Invoice> invoices = invoiceService.getUnpaidInvoices(residentId);
-        invoiceSelector.getItems().addAll(invoices);
+        invoiceSelector.getItems().setAll(invoices); // Dùng setAll để cập nhật thay vì addAll
 
-        // Update amount field when invoice is selected
+        // Cấu hình hiển thị ComboBox (Giữ nguyên)
+        Callback<ListView<Invoice>, ListCell<Invoice>> cellFactory = lv -> new ListCell<Invoice>() {
+            @Override
+            protected void updateItem(Invoice item, boolean empty) {
+                super.updateItem(item, empty);
+                if (empty || item == null) {
+                    setText(null);
+                } else {
+                    String detailNames = "(Chưa có chi tiết)"; // Mặc định
+                    if (item.getDetails() != null && !item.getDetails().isEmpty()) {
+                        detailNames = item.getDetails().stream()
+                                .map(detail -> detail.getName())
+                                .collect(Collectors.joining(", "));
+                    }
+                    setText(String.format("HĐ #%d - %s - Hạn: %s - Tổng: %,.0f VNĐ",
+                            item.getInvoiceId(),
+                            detailNames,
+                            item.getDueDate() != null ? dateFormat.format(item.getDueDate()) : "N/A",
+                            item.getTotalAmount() != null ? item.getTotalAmount() : BigDecimal.ZERO
+                    ));
+                }
+            }
+        };
+        invoiceSelector.setCellFactory(cellFactory);
+        invoiceSelector.setButtonCell(cellFactory.call(null));
+
+        // Cập nhật số tiền khi chọn hóa đơn (Giữ nguyên)
         invoiceSelector.setOnAction(event -> {
             Invoice selectedInvoice = invoiceSelector.getValue();
             if (selectedInvoice != null) {
-                amountField.setText(String.valueOf(selectedInvoice.getTotalAmount()));
+                // Định dạng số tiền có dấu phẩy
+                amountField.setText(String.format("%,.0f", selectedInvoice.getTotalAmount()));
+            } else {
+                amountField.clear();
             }
         });
     }
 
     private void loadData() {
-        filterTransactions();
+        filterTransactions(); // Tải bảng giao dịch
     }
 
     @FXML
     private void handlePayment() {
         Invoice selectedInvoice = invoiceSelector.getValue();
-
         if (selectedInvoice == null) {
-            showAlert(Alert.AlertType.ERROR, "Lỗi", "Vui lòng chọn hóa đơn");
+            showAlert(Alert.AlertType.ERROR, "Lỗi", "Vui lòng chọn hóa đơn để thanh toán.");
             return;
         }
 
         try {
-            BigDecimal amount = new BigDecimal(amountField.getText());
-            if (amount.compareTo(selectedInvoice.getTotalAmount()) != 0) {
-                showAlert(Alert.AlertType.ERROR, "Lỗi", "Số tiền thanh toán phải khớp với số tiền hóa đơn");
-                return;
-            }
+            // Lấy lại số tiền từ hóa đơn để tránh người dùng sửa TextField
+            BigDecimal amountToPay = selectedInvoice.getTotalAmount();
+            // (Bạn có thể cho phép thanh toán một phần nếu muốn, logic sẽ phức tạp hơn)
 
-            Transaction transaction = invoiceService.processPayment(residentId, selectedInvoice, amount);
+            // Gọi service xử lý thanh toán
+            Transaction transaction = invoiceService.processPayment(residentId, selectedInvoice, amountToPay);
 
             if (transaction != null) {
-                showAlert(Alert.AlertType.INFORMATION, "Thành công", "Thanh toán được xử lý thành công");
-                setupTiles(); // Refresh tiles
-                filterTransactions(); // Refresh transaction table
-                invoiceSelector.getItems().remove(selectedInvoice);
-                amountField.clear();
+                showAlert(Alert.AlertType.INFORMATION, "Thành công", "Thanh toán cho hóa đơn #" + selectedInvoice.getInvoiceId() + " thành công!");
+
+                refreshTiles(); // Chỉ cập nhật dữ liệu Tile
+
+                filterTransactions(); // Tải lại bảng giao dịch
+
+                // Cập nhật lại ComboBox
+                invoiceSelector.getItems().remove(selectedInvoice); // Xóa hóa đơn đã thanh toán
+                invoiceSelector.getSelectionModel().clearSelection(); // Bỏ chọn
+                amountField.clear(); // Xóa số tiền
             } else {
-                showAlert(Alert.AlertType.ERROR, "Lỗi", "Xử lý thanh toán thất bại");
+                showAlert(Alert.AlertType.ERROR, "Lỗi", "Xử lý thanh toán thất bại. Vui lòng thử lại.");
             }
 
-        } catch (NumberFormatException e) {
-            showAlert(Alert.AlertType.ERROR, "Lỗi", "Số tiền không hợp lệ");
-        } catch (Exception e) {
-            showAlert(Alert.AlertType.ERROR, "Lỗi", "Xử lý thanh toán thất bại: " + e.getMessage());
+        } catch (Exception e) { // Bắt lỗi chung
+            showAlert(Alert.AlertType.ERROR, "Lỗi", "Đã xảy ra lỗi khi xử lý thanh toán: " + e.getMessage());
+            e.printStackTrace();
         }
     }
 
@@ -142,16 +210,25 @@ public class InvoiceHistoryController implements Initializable {
         LocalDate to = toDate.getValue();
 
         if (from == null || to == null) {
-            showAlert(Alert.AlertType.ERROR, "Lỗi", "Vui lòng chọn ngày hợp lệ");
+            showAlert(Alert.AlertType.ERROR, "Lỗi", "Vui lòng chọn cả ngày bắt đầu và ngày kết thúc.");
+            return;
+        }
+        if (from.isAfter(to)) {
+            showAlert(Alert.AlertType.ERROR, "Lỗi", "Ngày bắt đầu không được sau ngày kết thúc.");
             return;
         }
 
-        List<Transaction> transactions = invoiceService.getTransactions(residentId, from, to);
-        transactionTable.getItems().clear();
-        transactionTable.getItems().addAll(transactions);
+        try { // Thêm try-catch nếu getTransactions có thể ném lỗi
+            List<Transaction> transactions = invoiceService.getTransactions(residentId, from, to);
+            transactionTable.getItems().setAll(transactions); // Dùng setAll để thay thế dữ liệu cũ
+        } catch (Exception e) {
+            showAlert(Alert.AlertType.ERROR, "Lỗi", "Không thể tải lịch sử giao dịch: " + e.getMessage());
+            e.printStackTrace();
+        }
     }
 
     private void showAlert(Alert.AlertType type, String title, String content) {
+        // (Giữ nguyên hàm này)
         Alert alert = new Alert(type);
         alert.setTitle(title);
         alert.setHeaderText(null);
@@ -161,7 +238,7 @@ public class InvoiceHistoryController implements Initializable {
 
     @FXML
     private void handleBack() {
-        // Close (kill) the current Login Management window
+        // (Giữ nguyên hàm này)
         Stage stage = (Stage) backButton.getScene().getWindow();
         stage.close();
     }
