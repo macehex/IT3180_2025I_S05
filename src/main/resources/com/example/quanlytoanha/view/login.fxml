@@ -113,14 +113,6 @@
                      </Button>
                   </children>
                </VBox>
-
-               <!-- Footer -->
-               <VBox alignment="CENTER" style="-fx-padding: 0 40 25 40;">
-                  <children>
-                     <Text text="© 2025 Hệ thống quản lý chung cư. All rights reserved." 
-                           style="-fx-font-size: 10px; -fx-fill: #999;"/>
-                  </children>
-               </VBox>
             </children>
          </VBox>
       </StackPane>

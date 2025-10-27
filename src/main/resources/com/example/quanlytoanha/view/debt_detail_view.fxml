@@ -7,25 +7,27 @@
 <?import javafx.scene.text.Font?>
 
 <?import javafx.scene.control.ScrollPane?>
-<VBox fx:id="mainVBox" prefHeight="400.0" prefWidth="500.0" spacing="10.0" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.quanlytoanha.controller.DebtDetailController">
+<VBox fx:id="mainVBox" prefHeight="400.0" prefWidth="600.0" spacing="10.0" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.quanlytoanha.controller.DebtDetailController" style="-fx-background-color: #21468B;">
     <padding>
         <Insets bottom="15.0" left="15.0" right="15.0" top="15.0" />
     </padding>
     <children>
-        <Label fx:id="lblHeader" text="Chi tiết nợ cho Căn hộ:">
-            <font>
-                <Font name="System Bold" size="18.0" />
-            </font>
-        </Label>
-        <Label fx:id="lblSubHeader" text="Tổng nợ: ...">
-            <padding>
-                <Insets bottom="10.0" />
-            </padding>
-        </Label>
+        <VBox spacing="5" style="-fx-background-color: #ffffff; -fx-padding: 15; -fx-background-radius: 8;">
+            <Label fx:id="lblHeader" text="Chi tiết nợ cho Căn hộ:" style="-fx-text-fill: #21468B; -fx-font-weight: bold;">
+                <font>
+                    <Font name="System Bold" size="18.0" />
+                </font>
+            </Label>
+            <Label fx:id="lblSubHeader" text="Tổng nợ: ..." style="-fx-text-fill: #21468B; -fx-font-size: 14;">
+                <padding>
+                    <Insets bottom="10.0" />
+                </padding>
+            </Label>
+        </VBox>
 
-        <ScrollPane fitToWidth="true" prefHeight="400.0" VBox.vgrow="ALWAYS">
+        <ScrollPane fitToWidth="true" prefHeight="400.0" VBox.vgrow="ALWAYS" style="-fx-background-color: #ffffff; -fx-padding: 10;">
             <content>
-                <VBox fx:id="invoiceVBox" spacing="10.0" />
+                <VBox fx:id="invoiceVBox" spacing="10.0" style="-fx-background-color: #f5f5f5;" />
             </content>
         </ScrollPane>
 

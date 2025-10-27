@@ -82,6 +82,7 @@ public class AccountantDashboardController {
         loadDashboardData();
         configureFeeTableColumns();
         loadFeeData();
+        applyUIStyles();
 
         // Gán sự kiện cho các nút
         btnAddFee.setOnAction(event -> handleAddFee());
@@ -136,7 +137,8 @@ public class AccountantDashboardController {
             Parent root = loader.load();
             Stage loginStage = new Stage();
             loginStage.setTitle("Quản lý Tòa nhà - Đăng nhập");
-            loginStage.setScene(new Scene(root, 400, 300));
+            loginStage.setScene(new Scene(root, 800, 600));
+            loginStage.setMaximized(true);
             loginStage.show();
         } catch (IOException e) {
             e.printStackTrace();
@@ -474,6 +476,32 @@ public class AccountantDashboardController {
                 System.out.println("DEBUG: User cancelled confirmation alert."); // Thêm dòng debug
             }
         });
+    }
+
+    /**
+     * Áp dụng styles cho các components UI
+     */
+    private void applyUIStyles() {
+        // Style cho nút đăng xuất với hiệu ứng hover
+        btnLogout.setOnMouseEntered(e -> btnLogout.setStyle("-fx-background-color: #b71c1c; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 5; -fx-padding: 8 16; -fx-effect: dropshadow(gaussian, rgba(211,47,47,0.3), 10, 0, 0, 3);"));
+        btnLogout.setOnMouseExited(e -> btnLogout.setStyle("-fx-background-color: #d32f2f; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 5; -fx-padding: 8 16;"));
+
+        // Style cho các nút khác khi hover - màu xanh mới #3d6ba8 -> #4d7ac0
+        styleButtonHover(btnSendSingleReminder, "#3d6ba8", "#4d7ac0");
+        styleButtonHover(btnAddFee, "#2e7d32", "#3d9d52"); // Màu xanh lá cho nút Thêm phí mới
+        styleButtonHover(btnEditFee, "#3d6ba8", "#4d7ac0");
+        styleButtonHover(btnGenerateInvoices, "#2e7d32", "#3d9d52");
+        styleButtonHover(btnRecalculateInvoices, "#3d6ba8", "#4d7ac0");
+        styleButtonHover(btnSendManualReminder, "#3d6ba8", "#4d7ac0");
+    }
+
+    /**
+     * Helper method để thêm hiệu ứng hover cho button
+     */
+    private void styleButtonHover(Button button, String baseColor, String hoverColor) {
+        String originalStyle = button.getStyle();
+        button.setOnMouseEntered(e -> button.setStyle(originalStyle.replace(baseColor, hoverColor) + " -fx-cursor: hand;"));
+        button.setOnMouseExited(e -> button.setStyle(originalStyle));
     }
 
 } // <-- Dấu ngoặc cuối cùng của lớp
