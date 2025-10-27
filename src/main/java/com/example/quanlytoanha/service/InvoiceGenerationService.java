@@ -78,4 +78,82 @@ public class InvoiceGenerationService {
 
         return String.format("Hoàn thành:\n- Đã tạo mới: %d hóa đơn.\n- Đã bỏ qua (đã tồn tại): %d hóa đơn.", successCount, skippedCount);
     }
+
+    /**
+     * HÀM MỚI: Tính toán lại hóa đơn cho TẤT CẢ căn hộ trong tháng
+     */
+    public String recalculateMonthlyInvoices(LocalDate billingMonth) {
+        List<Apartment> apartments = apartmentDAO.getAllApartments();
+        if (apartments == null || apartments.isEmpty()) {
+            return "Không tìm thấy căn hộ nào để tính toán lại hóa đơn.";
+        }
+
+        int successCount = 0;
+        int notFoundCount = 0; // Đếm hóa đơn không tìm thấy
+        int errorCount = 0;
+
+        System.out.println("Bắt đầu TÍNH TOÁN LẠI hóa đơn cho tháng: " + billingMonth + " cho " + apartments.size() + " căn hộ.");
+
+        for (Apartment apartment : apartments) {
+            try {
+                // 1. Tìm ID hóa đơn hiện có cho căn hộ và tháng này
+                Integer existingInvoiceId = invoiceDAO.findInvoiceIdByApartmentAndMonth(apartment.getApartmentId(), billingMonth);
+
+                if (existingInvoiceId == null) {
+                    System.out.println("Bỏ qua căn hộ " + apartment.getApartmentId() + ": Không tìm thấy hóa đơn tháng " + billingMonth.getMonthValue() + " để tính lại.");
+                    notFoundCount++;
+                    continue; // Bỏ qua nếu không có hóa đơn để tính lại
+                }
+
+                System.out.println("Đang tính toán lại HĐ #" + existingInvoiceId + " cho căn hộ " + apartment.getApartmentId() + "...");
+
+                // 2. XÓA tất cả chi tiết cũ của hóa đơn này
+                boolean deleted = invoiceDAO.deleteInvoiceDetails(existingInvoiceId);
+                if (!deleted) {
+                    System.err.println("Lỗi: Không thể xóa chi tiết cũ của HĐ #" + existingInvoiceId);
+                    errorCount++;
+                    continue;
+                }
+                System.out.println(" -> Đã xóa chi tiết cũ.");
+
+                // 3. Lấy lại danh sách phí HIỆN TẠI áp dụng cho căn hộ
+                List<FeeType> defaultFees = feeTypeDAO.getAllDefaultFees();
+                List<FeeType> optionalFees = feeTypeDAO.getOptionalFeesForApartment(apartment.getApartmentId());
+                List<FeeType> allFeesToBill = Stream.concat(
+                        defaultFees != null ? defaultFees.stream() : Stream.empty(),
+                        optionalFees != null ? optionalFees.stream() : Stream.empty()
+                ).toList();
+
+                BigDecimal totalAmount = BigDecimal.ZERO;
+
+                // 4. Lặp qua từng phí để tính toán và THÊM LẠI chi tiết MỚI
+                for (FeeType fee : allFeesToBill) {
+                    BigDecimal amount = calculationService.calculateFeeAmount(fee, apartment.getApartmentId());
+                    System.out.println("   -> Tính phí '" + fee.getFeeName() + "': " + amount);
+
+                    if (amount != null && amount.compareTo(BigDecimal.ZERO) > 0) {
+                        invoiceDAO.addInvoiceDetail(existingInvoiceId, fee.getFeeId(), fee.getFeeName(), amount);
+                        totalAmount = totalAmount.add(amount);
+                    } else {
+                        System.out.println("   -> Bỏ qua thêm chi tiết cho '" + fee.getFeeName() + "' vì số tiền là 0 hoặc null.");
+                    }
+                }
+
+                // 5. Cập nhật lại tổng tiền MỚI cho hóa đơn
+                System.out.println(" -> Cập nhật tổng tiền MỚI cho HĐ #" + existingInvoiceId + ": " + totalAmount);
+                invoiceDAO.updateInvoiceTotal(existingInvoiceId, totalAmount);
+                successCount++;
+
+            } catch (Exception e) {
+                System.err.println("Lỗi nghiêm trọng khi tính toán lại cho căn hộ " + apartment.getApartmentId() + ": " + e.getMessage());
+                e.printStackTrace();
+                errorCount++;
+            }
+        }
+
+        System.out.println("Kết thúc tính toán lại. Thành công: " + successCount + ", Không tìm thấy: " + notFoundCount + ", Lỗi: " + errorCount);
+
+        return String.format("Hoàn thành:\n- Đã tính toán lại: %d hóa đơn.\n- Không tìm thấy hóa đơn gốc: %d hóa đơn.\n- Đã xảy ra lỗi: %d hóa đơn.",
+                successCount, notFoundCount, errorCount);
+    }
 }

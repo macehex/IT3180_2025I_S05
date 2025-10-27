@@ -1,4 +1,3 @@
-// Vị trí: src/main/java/com/example/quanlytoanha/model/ApartmentDebt.java
 package com.example.quanlytoanha.model;
 
 import java.math.BigDecimal;
@@ -13,6 +12,11 @@ public class ApartmentDebt {
     private BigDecimal totalDue;  // Tổng tiền nợ
     private Date earliestDueDate; // Ngày hạn sớm nhất
 
+    // --- TRƯỜNG MỚI THÊM VÀO ---
+    private int ownerUserId;     // ID người dùng của chủ hộ (để gửi thông báo)
+    // -------------------------
+
+    // Constructor cũ (giữ lại nếu cần)
     public ApartmentDebt(int apartmentId, String ownerName, String phoneNumber, int unpaidCount, BigDecimal totalDue, Date earliestDueDate) {
         this.apartmentId = apartmentId;
         this.ownerName = ownerName;
@@ -29,56 +33,25 @@ public class ApartmentDebt {
     }
 
     // --- Getters and Setters ---
+    // (Các getter/setter cũ giữ nguyên)
+    public int getApartmentId() { return apartmentId; }
+    public void setApartmentId(int apartmentId) { this.apartmentId = apartmentId; }
+    public String getOwnerName() { return ownerName; }
+    public void setOwnerName(String ownerName) { this.ownerName = ownerName; }
+    public String getPhoneNumber() { return phoneNumber; }
+    public void setPhoneNumber(String phoneNumber) { this.phoneNumber = phoneNumber; }
+    public int getUnpaidCount() { return unpaidCount; }
+    public void setUnpaidCount(int unpaidCount) { this.unpaidCount = unpaidCount; }
+    public BigDecimal getTotalDue() { return totalDue; }
+    public void setTotalDue(BigDecimal totalDue) { this.totalDue = totalDue; }
+    public Date getEarliestDueDate() { return earliestDueDate; }
+    public void setEarliestDueDate(Date earliestDueDate) { this.earliestDueDate = earliestDueDate; }
 
-    public int getApartmentId() {
-        return apartmentId;
-    }
+    // --- GETTER/SETTER CHO TRƯỜNG MỚI ---
+    public int getOwnerUserId() { return ownerUserId; }
+    public void setOwnerUserId(int ownerUserId) { this.ownerUserId = ownerUserId; }
+    // ------------------------------------
 
-    public void setApartmentId(int apartmentId) {
-        this.apartmentId = apartmentId;
-    }
-
-    public String getOwnerName() {
-        return ownerName;
-    }
-
-    public void setOwnerName(String ownerName) {
-        this.ownerName = ownerName;
-    }
-
-    public String getPhoneNumber() {
-        return phoneNumber;
-    }
-
-    public void setPhoneNumber(String phoneNumber) {
-        this.phoneNumber = phoneNumber;
-    }
-
-    public int getUnpaidCount() {
-        return unpaidCount;
-    }
-
-    public void setUnpaidCount(int unpaidCount) {
-        this.unpaidCount = unpaidCount;
-    }
-
-    public BigDecimal getTotalDue() {
-        return totalDue;
-    }
-
-    public void setTotalDue(BigDecimal totalDue) {
-        this.totalDue = totalDue;
-    }
-
-    public Date getEarliestDueDate() {
-        return earliestDueDate;
-    }
-
-    public void setEarliestDueDate(Date earliestDueDate) {
-        this.earliestDueDate = earliestDueDate;
-    }
-
-    // --- (Tùy chọn) Phương thức toString() để debug ---
     @Override
     public String toString() {
         return "ApartmentDebt{" +
@@ -87,6 +60,7 @@ public class ApartmentDebt {
                 ", totalDue=" + totalDue +
                 ", unpaidCount=" + unpaidCount +
                 ", earliestDueDate=" + earliestDueDate +
+                ", ownerUserId=" + ownerUserId + // Thêm vào toString
                 '}';
     }
 }

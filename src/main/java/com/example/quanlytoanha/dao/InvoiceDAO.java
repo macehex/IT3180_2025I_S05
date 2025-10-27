@@ -40,48 +40,56 @@ public class InvoiceDAO {
     // -----------------------------------------------------------------
 
     /**
-     * KIỂM TRA: Hóa đơn cho căn hộ/tháng này đã tồn tại chưa?
+     * KIỂM TRA: Hóa đơn cho căn hộ/kỳ thanh toán này đã tồn tại chưa?
+     * (Kiểm tra dựa trên due_date)
      */
     public boolean checkIfInvoiceExists(int apartmentId, LocalDate billingMonth) {
+        // Tính toán tháng/năm của ngày hết hạn dự kiến
+        LocalDate expectedDueDate = billingMonth.plusMonths(1).withDayOfMonth(15);
+        int dueMonth = expectedDueDate.getMonthValue();
+        int dueYear = expectedDueDate.getYear();
+
+        // SQL kiểm tra tháng/năm của due_date
         String sql = """
-            SELECT 1 FROM invoices 
-            WHERE apartment_id = ? 
-              AND EXTRACT(MONTH FROM issued_date) = ? 
-              AND EXTRACT(YEAR FROM issued_date) = ?
+            SELECT 1 FROM invoices
+            WHERE apartment_id = ?
+              AND EXTRACT(MONTH FROM due_date) = ? 
+              AND EXTRACT(YEAR FROM due_date) = ? 
             LIMIT 1
             """;
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
 
             stmt.setInt(1, apartmentId);
-            stmt.setInt(2, billingMonth.getMonthValue());
-            stmt.setInt(3, billingMonth.getYear());
+            stmt.setInt(2, dueMonth);
+            stmt.setInt(3, dueYear);
 
             try (ResultSet rs = stmt.executeQuery()) {
                 return rs.next(); // Trả về true nếu tìm thấy (đã tồn tại)
             }
         } catch (Exception e) {
             e.printStackTrace();
-            return true; // An toàn là trên hết, giả sử là đã tồn tại nếu có lỗi
+            return true; // An toàn là trên hết
         }
     }
-
     /**
      * TẠO HÓA ĐƠN CHA: Tạo 1 hóa đơn mới với tổng tiền = 0
+     * (ĐÃ SỬA: Bỏ cột issued_date)
      * @return Đối tượng Invoice chứa ID mới
      */
     public Invoice createInvoiceHeader(int apartmentId, LocalDate billingMonth) {
-        LocalDate issuedDate = LocalDate.now();
-        LocalDate dueDate = issuedDate.withDayOfMonth(15).plusMonths(1); // Hạn là ngày 15 tháng sau
+        // (Giả sử Hạn thanh toán là ngày 15 của tháng SAU tháng tạo hóa đơn)
+        // Ví dụ: Tạo hóa đơn tháng 10 (billingMonth=10/2025) -> Hạn là 15/11/2025
+        LocalDate dueDate = billingMonth.plusMonths(1).withDayOfMonth(15);
 
-        String sql = "INSERT INTO invoices (apartment_id, issued_date, due_date, status, total_amount) VALUES (?, ?, ?, 'UNPAID', 0)";
+        // Sửa SQL: Bỏ issued_date
+        String sql = "INSERT INTO invoices (apartment_id, due_date, status, total_amount) VALUES (?, ?, 'UNPAID', 0)";
 
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
 
             stmt.setInt(1, apartmentId);
-            stmt.setDate(2, java.sql.Date.valueOf(issuedDate));
-            stmt.setDate(3, java.sql.Date.valueOf(dueDate));
+            stmt.setDate(2, java.sql.Date.valueOf(dueDate)); // Chỉ set due_date
 
             int affectedRows = stmt.executeUpdate();
             if (affectedRows == 0) return null;
@@ -89,6 +97,7 @@ public class InvoiceDAO {
             try (ResultSet generatedKeys = stmt.getGeneratedKeys()) {
                 if (generatedKeys.next()) {
                     int newInvoiceId = generatedKeys.getInt(1);
+                    // Trả về Invoice với các thông tin đã có
                     return new Invoice(newInvoiceId, BigDecimal.ZERO, java.sql.Date.valueOf(dueDate));
                 }
             }
@@ -377,5 +386,59 @@ public class InvoiceDAO {
         }
 
         return details;
+    }
+
+    /**
+     * TÌM ID HÓA ĐƠN: Tìm ID của hóa đơn dựa trên căn hộ và tháng (due_date)
+     * @return ID hóa đơn hoặc null nếu không tìm thấy
+     */
+    public Integer findInvoiceIdByApartmentAndMonth(int apartmentId, LocalDate billingMonth) {
+        LocalDate expectedDueDate = billingMonth.plusMonths(1).withDayOfMonth(15);
+        int dueMonth = expectedDueDate.getMonthValue();
+        int dueYear = expectedDueDate.getYear();
+
+        String sql = """
+            SELECT invoice_id FROM invoices
+            WHERE apartment_id = ?
+              AND EXTRACT(MONTH FROM due_date) = ?
+              AND EXTRACT(YEAR FROM due_date) = ?
+            LIMIT 1
+            """;
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setInt(1, apartmentId);
+            stmt.setInt(2, dueMonth);
+            stmt.setInt(3, dueYear);
+
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt("invoice_id"); // Trả về ID nếu tìm thấy
+                } else {
+                    return null; // Trả về null nếu không có hóa đơn cho tháng đó
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null; // Trả về null nếu có lỗi
+        }
+    }
+
+    /**
+     * XÓA CHI TIẾT: Xóa tất cả các dòng chi tiết của một hóa đơn
+     * @return true nếu xóa thành công (hoặc không có gì để xóa), false nếu lỗi
+     */
+    public boolean deleteInvoiceDetails(int invoiceId) {
+        String sql = "DELETE FROM invoicedetails WHERE invoice_id = ?";
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setInt(1, invoiceId);
+            stmt.executeUpdate(); // Chạy lệnh DELETE
+            return true; // Giả sử thành công nếu không có exception
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
     }
 }

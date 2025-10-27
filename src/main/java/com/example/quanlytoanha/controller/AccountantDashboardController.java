@@ -1,5 +1,11 @@
-// Vị trí: src/main/java/com/example/quanlytoanha/controller/AccountantDashboardController.java
 package com.example.quanlytoanha.controller;
+
+// --- THÊM CÁC IMPORT CẦN THIẾT ---
+import com.example.quanlytoanha.model.Role; // Đảm bảo bạn có Enum/Class Role
+import com.example.quanlytoanha.service.NotificationService; // Import Service mới
+import java.sql.SQLException; // Import SQLException
+import java.util.ArrayList; // Import ArrayList
+// ------------------------------------
 
 import com.example.quanlytoanha.model.ApartmentDebt;
 import com.example.quanlytoanha.model.DebtReport;
@@ -7,9 +13,7 @@ import com.example.quanlytoanha.model.FeeType;
 import com.example.quanlytoanha.model.Invoice;
 import com.example.quanlytoanha.service.FeeTypeService;
 import com.example.quanlytoanha.service.FinancialService;
-// --- THAY ĐỔI 1: Đổi tên import ---
-import com.example.quanlytoanha.service.InvoiceGenerationService; // Đổi tên từ InvoiceService
-// ------------------------------
+import com.example.quanlytoanha.service.InvoiceGenerationService;
 import com.example.quanlytoanha.session.SessionManager;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -21,12 +25,13 @@ import javafx.stage.Stage;
 
 import java.io.IOException;
 import java.math.BigDecimal;
-import java.time.LocalDate; // <-- THÊM IMPORT NÀY
+import java.time.LocalDate;
 import java.util.List;
 
 public class AccountantDashboardController {
 
-    // ... (Các @FXML không thay đổi) ...
+    // --- KHAI BÁO @FXML ---
+    // (Các @FXML cũ không thay đổi)
     @FXML private Label lblTotalDebt;
     @FXML private Label lblTotalOverdue;
     @FXML private Label lblUnpaidInvoices;
@@ -42,25 +47,39 @@ public class AccountantDashboardController {
     @FXML private Button btnAddFee;
     @FXML private Button btnEditFee;
     @FXML private Button btnDeleteFee;
-    @FXML private Button btnGenerateInvoices;
     @FXML private TextField txtBillingMonth;
     @FXML private TextField txtBillingYear;
+    @FXML private Button btnGenerateInvoices;
+    @FXML private Button btnRecalculateInvoices;
+
+    // --- THÊM @FXML CHO TAB 3 (TỰ ĐỘNG HÓA) ---
+    @FXML private CheckBox chkAutoSendNewInvoice;
+    @FXML private CheckBox chkAutoSendReminder;
+    @FXML private TextField txtDaysBefore;
+    @FXML private CheckBox chkAutoSendOverdue;
+    @FXML private Button btnSendManualReminder;
+    @FXML private TextArea txtAutomationLog;
+    // -----------------------------------------
+
+    @FXML private Button btnSendSingleReminder;
 
     private FinancialService financialService;
     private FeeTypeService feeTypeService;
-    // --- THAY ĐỔI 2: Đổi tên biến ---
-    private InvoiceGenerationService invoiceGenerationService; // Đổi tên từ invoiceService
-    // ----------------------------
+    private InvoiceGenerationService invoiceGenerationService;
+    // --- KHAI BÁO SERVICE MỚI ---
+    private NotificationService notificationService;
+    // ---------------------------
 
     @FXML
     public void initialize() {
         this.financialService = new FinancialService();
         this.feeTypeService = new FeeTypeService();
-        // --- THAY ĐỔI 3: Khởi tạo service mới ---
-        this.invoiceGenerationService = new InvoiceGenerationService(); // Đổi tên
-        // ------------------------------------
-        loadDashboardData();
+        this.invoiceGenerationService = new InvoiceGenerationService();
+        // --- KHỞI TẠO SERVICE MỚI ---
+        this.notificationService = new NotificationService();
+        // ---------------------------
 
+        loadDashboardData();
         configureFeeTableColumns();
         loadFeeData();
 
@@ -68,10 +87,14 @@ public class AccountantDashboardController {
         btnAddFee.setOnAction(event -> handleAddFee());
         btnEditFee.setOnAction(event -> handleEditFee());
         btnDeleteFee.setOnAction(event -> handleDeleteFee());
+        btnGenerateInvoices.setOnAction(event -> handleGenerateInvoices());
+        btnRecalculateInvoices.setOnAction(event -> handleRecalculateInvoices());
 
-        // --- GÁN SỰ KIỆN CHO NÚT TẠO HÓA ĐƠN ---
-        btnGenerateInvoices.setOnAction(event -> handleGenerateInvoices()); // Đảm bảo dòng này tồn tại
-        // -------------------------------------
+        // --- GÁN SỰ KIỆN CHO NÚT NHẮC NỢ ---
+        btnSendManualReminder.setOnAction(event -> handleSendManualReminders());
+        // ---------------------------------
+
+        btnSendSingleReminder.setOnAction(event -> handleSendSingleReminder());
 
         debtTable.setOnMouseClicked(event -> {
             if (event.getClickCount() == 2) {
@@ -83,7 +106,10 @@ public class AccountantDashboardController {
         });
     }
 
-    // ... (loadDashboardData, handleLogout, handleViewDetails, showAlert không thay đổi) ...
+    // ... (Các hàm loadDashboardData, handleLogout, handleViewDetails, showAlert,
+    //      configureFeeTableColumns, loadFeeData, handleAddFee, handleEditFee,
+    //      handleDeleteFee, showFeeEditDialog, handleGenerateInvoices,
+    //      handleRecalculateInvoices không thay đổi) ...
     @FXML
     private void loadDashboardData() {
         try {
@@ -91,10 +117,8 @@ public class AccountantDashboardController {
             lblTotalDebt.setText(String.format("%,.0f VNĐ", report.getTotalDebtAmount()));
             lblTotalOverdue.setText(String.format("%,.0f VNĐ", report.getTotalOverdueAmount()));
             lblUnpaidInvoices.setText(report.getTotalUnpaidInvoices() + " hóa đơn");
-
             List<ApartmentDebt> debtList = financialService.getDetailedDebtList();
             debtTable.getItems().setAll(debtList);
-
         } catch (SecurityException e) {
             showAlert(Alert.AlertType.ERROR, "Lỗi Phân Quyền", "Bạn không có quyền xem thông tin này.");
         } catch (Exception e) {
@@ -134,7 +158,6 @@ public class AccountantDashboardController {
             detailStage.initOwner((Stage) debtTable.getScene().getWindow());
             detailStage.setScene(new Scene(root));
             detailStage.showAndWait();
-
         } catch (SecurityException e) {
             showAlert(Alert.AlertType.ERROR, "Lỗi Phân Quyền", e.getMessage());
         } catch (IOException e) {
@@ -149,10 +172,6 @@ public class AccountantDashboardController {
         alert.setContentText(message);
         alert.showAndWait();
     }
-
-
-    // --- CÁC HÀM CỦA TAB 2 (QUẢN LÝ PHÍ) ---
-    // ... (configureFeeTableColumns, loadFeeData, handleAddFee, handleEditFee, handleDeleteFee, showFeeEditDialog không thay đổi) ...
     private void configureFeeTableColumns() {
         colFeeName.setCellValueFactory(new PropertyValueFactory<>("feeName"));
         colFeePrice.setCellValueFactory(new PropertyValueFactory<>("unitPrice"));
@@ -237,25 +256,19 @@ public class AccountantDashboardController {
             return false;
         }
     }
-
-    // --- HÀM MỚI CHO TAB 3 (TẠO HÓA ĐƠN) ---
-
     @FXML
     private void handleGenerateInvoices() {
         String monthStr = txtBillingMonth.getText();
         String yearStr = txtBillingYear.getText();
-
-        // 1. Validation (Kiểm tra đầu vào)
         int month, year;
         try {
             month = Integer.parseInt(monthStr);
             year = Integer.parseInt(yearStr);
-
             if (month < 1 || month > 12) {
                 showAlert(Alert.AlertType.WARNING, "Lỗi", "Tháng phải là số từ 1 đến 12.");
                 return;
             }
-            if (year < 2000 || year > 2100) { // Giới hạn năm hợp lý
+            if (year < 2000 || year > 2100) {
                 showAlert(Alert.AlertType.WARNING, "Lỗi", "Năm không hợp lệ.");
                 return;
             }
@@ -263,27 +276,202 @@ public class AccountantDashboardController {
             showAlert(Alert.AlertType.WARNING, "Lỗi", "Tháng và Năm phải là số.");
             return;
         }
-
-        // 2. Tạo ngày đầu tiên của tháng
         LocalDate billingMonth = LocalDate.of(year, month, 1);
-
-        // 3. Hiển thị xác nhận (Giống như cũ)
         Alert confirmAlert = new Alert(Alert.AlertType.CONFIRMATION);
         confirmAlert.setTitle("Xác nhận");
         confirmAlert.setHeaderText("Bạn sắp tạo hóa đơn cho tháng " + billingMonth.getMonthValue() + "/" + billingMonth.getYear());
         confirmAlert.setContentText("Hệ thống sẽ tính toán phí cho TẤT CẢ căn hộ.\nQuá trình này có thể mất vài phút.\nBạn có chắc chắn muốn tiếp tục?");
         confirmAlert.getDialogPane().setMinHeight(150);
-
         confirmAlert.showAndWait().ifPresent(response -> {
             if (response == ButtonType.OK) {
                 try {
                     String result = invoiceGenerationService.generateMonthlyInvoices(billingMonth);
                     showAlert(Alert.AlertType.INFORMATION, "Hoàn thành", result);
-                    loadDashboardData(); // Tải lại Tab 1
+                    loadDashboardData();
                 } catch (Exception e) {
                     showAlert(Alert.AlertType.ERROR, "Lỗi nghiêm trọng", "Đã xảy ra lỗi khi tạo hóa đơn: " + e.getMessage());
                     e.printStackTrace();
                 }
+            }
+        });
+    }
+    @FXML
+    private void handleRecalculateInvoices() {
+        String monthStr = txtBillingMonth.getText();
+        String yearStr = txtBillingYear.getText();
+        int month, year;
+        try {
+            month = Integer.parseInt(monthStr);
+            year = Integer.parseInt(yearStr);
+            if (month < 1 || month > 12) {
+                showAlert(Alert.AlertType.WARNING, "Lỗi", "Tháng phải là số từ 1 đến 12.");
+                return;
+            }
+            if (year < 2000 || year > 2100) {
+                showAlert(Alert.AlertType.WARNING, "Lỗi", "Năm không hợp lệ.");
+                return;
+            }
+        } catch (NumberFormatException e) {
+            showAlert(Alert.AlertType.WARNING, "Lỗi", "Tháng và Năm phải là số.");
+            return;
+        }
+        LocalDate billingMonth = LocalDate.of(year, month, 1);
+        Alert confirmAlert = new Alert(Alert.AlertType.CONFIRMATION);
+        confirmAlert.setTitle("Xác nhận");
+        confirmAlert.setHeaderText("Bạn sắp TÍNH TOÁN LẠI hóa đơn cho tháng " + billingMonth.getMonthValue() + "/" + billingMonth.getYear());
+        confirmAlert.setContentText("Hệ thống sẽ XÓA chi tiết cũ và tính lại phí cho TẤT CẢ căn hộ dựa trên cấu hình phí HIỆN TẠI.\nChỉ thực hiện nếu bạn chắc chắn muốn cập nhật lại hóa đơn cho tháng này.\nBạn có chắc chắn muốn tiếp tục?");
+        confirmAlert.getDialogPane().setMinHeight(180);
+        confirmAlert.showAndWait().ifPresent(response -> {
+            if (response == ButtonType.OK) {
+                try {
+                    String result = invoiceGenerationService.recalculateMonthlyInvoices(billingMonth);
+                    showAlert(Alert.AlertType.INFORMATION, "Hoàn thành", result);
+                    loadDashboardData();
+                } catch (Exception e) {
+                    showAlert(Alert.AlertType.ERROR, "Lỗi nghiêm trọng", "Đã xảy ra lỗi khi tính toán lại: " + e.getMessage());
+                    e.printStackTrace();
+                }
+            }
+        });
+    }
+
+    // --- HÀM MỚI CHO TAB 3 (GỬI NHẮC NỢ) ---
+
+    @FXML
+    private void handleSendManualReminders() {
+        List<String> allLogs = new ArrayList<>();
+        try {
+            // Kiểm tra xem checkbox "Nhắc sắp đến hạn" có được chọn không
+            if (chkAutoSendReminder.isSelected()) {
+                // Kiểm tra txtDaysBefore có giá trị hợp lệ
+                if(txtDaysBefore.getText() == null || txtDaysBefore.getText().trim().isEmpty()){
+                    showAlert(Alert.AlertType.WARNING, "Thiếu thông tin", "Vui lòng nhập số ngày báo trước hạn.");
+                    return;
+                }
+                int daysBefore = Integer.parseInt(txtDaysBefore.getText());
+                if(daysBefore <= 0) {
+                    showAlert(Alert.AlertType.WARNING, "Không hợp lệ", "Số ngày báo trước phải lớn hơn 0.");
+                    return;
+                }
+                List<String> upcomingLogs = notificationService.sendUpcomingReminders(daysBefore);
+                allLogs.addAll(upcomingLogs);
+            }
+
+            // Kiểm tra xem checkbox "Nhắc quá hạn" có được chọn không
+            if (chkAutoSendOverdue.isSelected()) {
+                List<String> overdueLogs = notificationService.sendOverdueNotifications();
+                allLogs.addAll(overdueLogs);
+            }
+
+            // Hiển thị kết quả log vào TextArea
+            updateLogDisplay(allLogs);
+
+            if (allLogs.isEmpty()){
+                showAlert(Alert.AlertType.INFORMATION, "Thông báo", "Không có thông báo nào cần gửi dựa trên cấu hình hiện tại.");
+            } else {
+                showAlert(Alert.AlertType.INFORMATION, "Hoàn thành", "Đã gửi xong thông báo nhắc nợ. Xem chi tiết trong nhật ký.");
+            }
+
+
+        } catch (NumberFormatException e) {
+            showAlert(Alert.AlertType.ERROR, "Lỗi", "Số ngày báo trước phải là một con số nguyên.");
+        } catch (SecurityException e) {
+            showAlert(Alert.AlertType.ERROR, "Lỗi Phân Quyền", e.getMessage());
+        } catch (SQLException e) {
+            showAlert(Alert.AlertType.ERROR, "Lỗi Database", "Không thể gửi thông báo: " + e.getMessage());
+            e.printStackTrace();
+        } catch (Exception e) { // Bắt các lỗi khác
+            showAlert(Alert.AlertType.ERROR, "Lỗi Hệ Thống", "Đã xảy ra lỗi không xác định khi gửi thông báo: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+
+    // Hàm helper để cập nhật TextArea log
+    private void updateLogDisplay(List<String> logMessages) {
+        StringBuilder logContent = new StringBuilder();
+        // Giới hạn số lượng dòng log hiển thị (ví dụ: 100 dòng gần nhất)
+        int maxLogLines = 100;
+
+        // Thêm log mới vào đầu
+        for (String msg : logMessages) {
+            logContent.append(msg).append("\n");
+        }
+
+        // Lấy log cũ (nếu có)
+        String oldLog = txtAutomationLog.getText();
+        if (oldLog != null && !oldLog.isEmpty()) {
+            logContent.append("---------------------\n"); // Thêm phân cách
+            logContent.append(oldLog);
+        }
+
+        // Cắt bớt nếu log quá dài
+        String[] lines = logContent.toString().split("\n");
+        if (lines.length > maxLogLines) {
+            StringBuilder truncatedLog = new StringBuilder();
+            for (int i = 0; i < maxLogLines; i++) {
+                truncatedLog.append(lines[i]).append("\n");
+            }
+            txtAutomationLog.setText(truncatedLog.toString());
+        } else {
+            txtAutomationLog.setText(logContent.toString());
+        }
+        txtAutomationLog.setScrollTop(0); // Cuộn lên đầu
+    }
+
+    /**
+     * Xử lý sự kiện nhấn nút "Gửi nhắc nợ riêng" (từ Tab 1)
+     */
+    @FXML
+    private void handleSendSingleReminder() {
+        System.out.println("DEBUG: Entering handleSendSingleReminder"); // Thêm dòng debug này
+        ApartmentDebt selectedDebt = debtTable.getSelectionModel().getSelectedItem();
+        if (selectedDebt == null) {
+            System.out.println("DEBUG: No apartment selected."); // Thêm dòng debug
+            showAlert(Alert.AlertType.WARNING, "Chưa chọn", "Vui lòng chọn một căn hộ trong bảng Công nợ để gửi nhắc nợ.");
+            return;
+        }
+
+        // Lấy ownerUserId (đã thêm vào ApartmentDebt)
+        int recipientUserId = selectedDebt.getOwnerUserId();
+        System.out.println("DEBUG: Selected apartmentId=" + selectedDebt.getApartmentId() + ", ownerUserId=" + recipientUserId); // Thêm dòng debug
+
+        if (recipientUserId <= 0) { // Kiểm tra user ID hợp lệ
+            System.out.println("DEBUG: Invalid ownerUserId."); // Thêm dòng debug
+            showAlert(Alert.AlertType.ERROR, "Lỗi Dữ liệu", "Không tìm thấy thông tin người dùng hợp lệ cho căn hộ này.");
+            return;
+        }
+
+        Alert confirmAlert = new Alert(Alert.AlertType.CONFIRMATION);
+        confirmAlert.setTitle("Xác nhận gửi");
+        confirmAlert.setHeaderText("Gửi thông báo nhắc nợ riêng cho:");
+        confirmAlert.setContentText("Căn hộ: " + selectedDebt.getApartmentId() + " - Chủ hộ: " + selectedDebt.getOwnerName());
+
+        confirmAlert.showAndWait().ifPresent(response -> {
+            if (response == ButtonType.OK) {
+                try {
+                    System.out.println("DEBUG: Calling notificationService.sendSingleReminder..."); // Thêm dòng debug
+                    boolean success = notificationService.sendSingleReminder(recipientUserId, selectedDebt);
+                    if (success) {
+                        System.out.println("DEBUG: sendSingleReminder successful."); // Thêm dòng debug
+                        showAlert(Alert.AlertType.INFORMATION, "Thành công", "Đã gửi thông báo nhắc nợ thành công.");
+                    } else {
+                        System.out.println("DEBUG: sendSingleReminder failed (returned false)."); // Thêm dòng debug
+                        showAlert(Alert.AlertType.ERROR, "Thất bại", "Không thể gửi thông báo (Service trả về false).");
+                    }
+                } catch (SecurityException e) {
+                    System.err.println("DEBUG: SecurityException: " + e.getMessage()); // Thêm dòng debug
+                    showAlert(Alert.AlertType.ERROR, "Lỗi Phân Quyền", e.getMessage());
+                } catch (SQLException e) {
+                    System.err.println("DEBUG: SQLException: " + e.getMessage()); // Thêm dòng debug
+                    showAlert(Alert.AlertType.ERROR, "Lỗi Database", "Không thể gửi thông báo: " + e.getMessage());
+                    e.printStackTrace();
+                } catch (Exception e) {
+                    System.err.println("DEBUG: General Exception: " + e.getMessage()); // Thêm dòng debug
+                    showAlert(Alert.AlertType.ERROR, "Lỗi Hệ Thống", "Đã xảy ra lỗi không xác định: " + e.getMessage());
+                    e.printStackTrace();
+                }
+            } else {
+                System.out.println("DEBUG: User cancelled confirmation alert."); // Thêm dòng debug
             }
         });
     }

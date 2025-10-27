@@ -3,10 +3,7 @@ package com.example.quanlytoanha.service;
 
 import com.example.quanlytoanha.dao.InvoiceDAO;
 import com.example.quanlytoanha.dao.NotificationDAO;
-import com.example.quanlytoanha.model.Invoice;
-import com.example.quanlytoanha.model.Notification;
-import com.example.quanlytoanha.model.Role; // Đảm bảo bạn có Enum/Class Role này
-import com.example.quanlytoanha.model.User;
+import com.example.quanlytoanha.model.*;
 import com.example.quanlytoanha.session.SessionManager; // Đảm bảo đúng đường dẫn
 
 import java.sql.SQLException;
@@ -156,5 +153,48 @@ public class NotificationService {
         return notificationDAO.markAsRead(notificationId);
     }
 
-    // --- (Có thể thêm các hàm khác nếu cần, ví dụ: lấy tất cả thông báo, xóa thông báo...) ---
-}
+    // --- HÀM MỚI ĐÃ THÊM VÀO ---
+    /**
+     * Gửi một thông báo nhắc nợ riêng lẻ.
+     * @param userId ID của người nhận (chủ căn hộ).
+     * @param debtInfo Thông tin công nợ để tạo nội dung.
+     * @return true nếu gửi thành công, false nếu không.
+     * @throws SQLException Nếu có lỗi DB.
+     * @throws SecurityException Nếu không có quyền.
+     */
+    public boolean sendSingleReminder(int userId, ApartmentDebt debtInfo) throws SQLException, SecurityException {
+        checkPermission(); // Vẫn kiểm tra quyền Kế toán/Admin
+
+        // Tạo tiêu đề và nội dung thông báo dựa trên debtInfo
+        String title = String.format("[Nhắc nợ] Vui lòng thanh toán hóa đơn căn hộ %d", debtInfo.getApartmentId());
+
+        // --- SỬA LẠI HÀM FORMAT NÀY ---
+        String message = String.format(
+                "Căn hộ %d (%s) hiện đang có %d hóa đơn chưa thanh toán với tổng số tiền là %,.0f VNĐ. Hạn thanh toán sớm nhất là %s. Vui lòng thanh toán sớm.",
+                debtInfo.getApartmentId(),     // Tham số cho %d đầu tiên
+                debtInfo.getOwnerName(),       // Tham số cho %s đầu tiên
+                debtInfo.getUnpaidCount(),     // Tham số cho %d thứ hai
+                debtInfo.getTotalDue(),        // Tham số cho %,.0f (BigDecimal vẫn dùng được với %f)
+                (debtInfo.getEarliestDueDate() != null ? dateFormat.format(debtInfo.getEarliestDueDate()) : "N/A") // Tham số cho %s cuối cùng
+        );
+        // -----------------------------
+
+        // Tạo đối tượng Notification (không cần relatedInvoiceId cho nhắc nợ chung)
+        Notification notification = new Notification(userId, title, message, null);
+
+        // Gọi DAO để tạo thông báo
+        boolean success = notificationDAO.createNotification(notification);
+
+        // Ghi log (tùy chọn)
+        if (success) {
+            System.out.printf("[%s] Đã gửi nhắc nợ riêng cho User ID %d (Căn hộ %d)\n",
+                    LocalDateTime.now().format(logTimestampFormat), userId, debtInfo.getApartmentId());
+        } else {
+            System.err.printf("[%s] LỖI gửi nhắc nợ riêng cho User ID %d\n",
+                    LocalDateTime.now().format(logTimestampFormat), userId);
+        }
+
+        return success;
+    }}
+    // ----------------------------
+

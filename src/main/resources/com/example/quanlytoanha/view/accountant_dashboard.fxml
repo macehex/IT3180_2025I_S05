@@ -1,25 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import javafx.geometry.Insets?>
-<?import javafx.scene.control.Button?>
-<?import javafx.scene.control.CheckBox?>
-<?import javafx.scene.control.Label?>
-<?import javafx.scene.control.Tab?>
-<?import javafx.scene.control.TabPane?>
-<?import javafx.scene.control.TableColumn?>
-<?import javafx.scene.control.TableView?>
-<?import javafx.scene.control.TextArea?>
-<?import javafx.scene.control.TextField?>
-<?import javafx.scene.control.TitledPane?>
+<?import javafx.scene.control.*?>
 <?import javafx.scene.control.cell.PropertyValueFactory?>
-<?import javafx.scene.layout.AnchorPane?>
-<?import javafx.scene.layout.BorderPane?>
-<?import javafx.scene.layout.ColumnConstraints?>
-<?import javafx.scene.layout.GridPane?>
-<?import javafx.scene.layout.HBox?>
-<?import javafx.scene.layout.Region?>
-<?import javafx.scene.layout.RowConstraints?>
-<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.layout.*?>
 <?import javafx.scene.text.Font?>
 
 <AnchorPane prefHeight="700.0" prefWidth="1000.0" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.quanlytoanha.controller.AccountantDashboardController">
@@ -29,17 +13,13 @@
                 <HBox alignment="CENTER_LEFT" spacing="10.0">
                     <children>
                         <Label text="Dashboard Kế Toán">
-                            <font>
-                                <Font name="System Bold" size="24.0" />
-                            </font>
+                            <font><Font name="System Bold" size="24.0" /></font>
                         </Label>
                         <Label fx:id="lblWelcome" text="(Xin chào, Kế toán A)" />
                         <Region HBox.hgrow="ALWAYS" />
                         <Button fx:id="btnLogout" mnemonicParsing="false" onAction="#handleLogout" text="Đăng xuất ↪" />
                     </children>
-                    <VBox.margin>
-                        <Insets bottom="10.0" />
-                    </VBox.margin>
+                    <VBox.margin><Insets bottom="10.0" /></VBox.margin>
                 </HBox>
 
                 <TabPane tabClosingPolicy="UNAVAILABLE" VBox.vgrow="ALWAYS">
@@ -47,21 +27,13 @@
                         <Tab text="Báo cáo Công nợ">
                             <content>
                                 <BorderPane prefHeight="600.0" prefWidth="800.0">
-                                    <padding>
-                                        <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
-                                    </padding>
+                                    <padding><Insets bottom="10.0" left="10.0" right="10.0" top="10.0" /></padding>
                                     <top>
                                         <VBox spacing="10.0" BorderPane.alignment="CENTER">
                                             <children>
-                                                <Label text="Thống kê Công nợ Tổng quan">
-                                                    <font>
-                                                        <Font name="System Bold" size="18.0" />
-                                                    </font>
-                                                </Label>
+                                                <Label text="Thống kê Công nợ Tổng quan"><font><Font name="System Bold" size="18.0" /></font></Label>
                                                 <GridPane hgap="10.0" vgap="5.0">
-                                                    <padding>
-                                                        <Insets bottom="10.0" top="10.0" />
-                                                    </padding>
+                                                    <padding><Insets bottom="10.0" top="10.0" /></padding>
                                                     <children>
                                                         <Label text="Tổng nợ chưa thanh toán:" GridPane.rowIndex="0" />
                                                         <Label fx:id="lblTotalDebt" style="-fx-font-weight: bold; -fx-text-fill: red;" text="0 VNĐ" GridPane.columnIndex="1" GridPane.rowIndex="0" />
@@ -71,57 +43,41 @@
                                                         <Label fx:id="lblUnpaidInvoices" style="-fx-font-weight: bold;" text="0 hóa đơn" GridPane.columnIndex="1" GridPane.rowIndex="2" />
                                                     </children>
                                                 </GridPane>
-                                                <Label text="Chi tiết công nợ theo căn hộ:">
-                                                    <font>
-                                                        <Font name="System Bold" size="16.0" />
-                                                    </font>
-                                                </Label>
+                                                <Label text="Chi tiết công nợ theo căn hộ:"><font><Font name="System Bold" size="16.0" /></font></Label>
                                             </children>
                                         </VBox>
                                     </top>
                                     <center>
-                                        <TableView fx:id="debtTable" prefHeight="400.0" BorderPane.alignment="CENTER">
-                                            <columns>
-                                                <TableColumn prefWidth="70.0" text="Căn hộ ID">
-                                                    <cellValueFactory><PropertyValueFactory property="apartmentId" /></cellValueFactory>
-                                                </TableColumn>
-                                                <TableColumn prefWidth="150.0" text="Tên chủ hộ">
-                                                    <cellValueFactory><PropertyValueFactory property="ownerName" /></cellValueFactory>
-                                                </TableColumn>
-                                                <TableColumn prefWidth="120.0" text="Số điện thoại">
-                                                    <cellValueFactory><PropertyValueFactory property="phoneNumber" /></cellValueFactory>
-                                                </TableColumn>
-                                                <TableColumn prefWidth="100.0" text="Số HĐ nợ">
-                                                    <cellValueFactory><PropertyValueFactory property="unpaidCount" /></cellValueFactory>
-                                                </TableColumn>
-                                                <TableColumn prefWidth="150.0" text="Tổng nợ (VNĐ)">
-                                                    <cellValueFactory><PropertyValueFactory property="totalDue" /></cellValueFactory>
-                                                </TableColumn>
-                                                <TableColumn prefWidth="150.0" text="Hạn trả sớm nhất">
-                                                    <cellValueFactory><PropertyValueFactory property="earliestDueDate" /></cellValueFactory>
-                                                </TableColumn>
-                                            </columns>
-                                            <BorderPane.margin>
-                                                <Insets top="10.0" />
-                                            </BorderPane.margin>
-                                        </TableView>
+                                        <VBox spacing="10.0" BorderPane.alignment="CENTER"> <BorderPane.margin><Insets top="10.0" /></BorderPane.margin>
+                                            <children>
+                                                <TableView fx:id="debtTable" VBox.vgrow="ALWAYS">
+                                                    <columns>
+                                                        <TableColumn prefWidth="70.0" text="Căn hộ ID"><cellValueFactory><PropertyValueFactory property="apartmentId" /></cellValueFactory></TableColumn>
+                                                        <TableColumn prefWidth="150.0" text="Tên chủ hộ"><cellValueFactory><PropertyValueFactory property="ownerName" /></cellValueFactory></TableColumn>
+                                                        <TableColumn prefWidth="120.0" text="Số điện thoại"><cellValueFactory><PropertyValueFactory property="phoneNumber" /></cellValueFactory></TableColumn>
+                                                        <TableColumn prefWidth="100.0" text="Số HĐ nợ"><cellValueFactory><PropertyValueFactory property="unpaidCount" /></cellValueFactory></TableColumn>
+                                                        <TableColumn prefWidth="150.0" text="Tổng nợ (VNĐ)"><cellValueFactory><PropertyValueFactory property="totalDue" /></cellValueFactory></TableColumn>
+                                                        <TableColumn prefWidth="150.0" text="Hạn trả sớm nhất"><cellValueFactory><PropertyValueFactory property="earliestDueDate" /></cellValueFactory></TableColumn>
+                                                    </columns>
+                                                </TableView>
+
+                                                <HBox alignment="CENTER_LEFT">
+                                                    <children>
+                                                        <Button fx:id="btnSendSingleReminder" mnemonicParsing="false" text="📧 Gửi nhắc nợ riêng..." />
+                                                    </children>
+                                                </HBox>
+                                            </children>
+                                        </VBox>
                                     </center>
                                 </BorderPane>
                             </content>
                         </Tab>
-
                         <Tab text="Quản lý Phí dịch vụ">
                             <content>
                                 <VBox prefHeight="200.0" prefWidth="100.0" spacing="10.0">
-                                    <padding>
-                                        <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
-                                    </padding>
+                                    <padding><Insets bottom="10.0" left="10.0" right="10.0" top="10.0" /></padding>
                                     <children>
-                                        <Label text="Danh sách các loại phí dịch vụ">
-                                            <font>
-                                                <Font name="System Bold" size="18.0" />
-                                            </font>
-                                        </Label>
+                                        <Label text="Danh sách các loại phí dịch vụ"><font><Font name="System Bold" size="18.0" /></font></Label>
                                         <HBox spacing="10.0">
                                             <children>
                                                 <Button fx:id="btnAddFee" mnemonicParsing="false" text="➕ Thêm phí mới" />
@@ -134,7 +90,6 @@
                                                 <TableColumn fx:id="colFeeName" prefWidth="200.0" text="Tên loại phí" />
                                                 <TableColumn fx:id="colFeePrice" prefWidth="120.0" text="Đơn giá (VNĐ)" />
                                                 <TableColumn fx:id="colFeeUnit" prefWidth="80.0" text="Đơn vị" />
-
                                                 <TableColumn fx:id="colFeeIsDefault" prefWidth="100.0" text="Mặc định" />
                                                 <TableColumn fx:id="colFeePricingModel" prefWidth="120.0" text="Hình thức tính" />
                                                 <TableColumn fx:id="colFeeDesc" prefWidth="230.0" text="Mô tả" />
@@ -148,34 +103,48 @@
                         <Tab text="Tự động hóa &amp; Nhắc nợ">
                             <content>
                                 <VBox prefHeight="200.0" prefWidth="100.0" spacing="15.0">
-                                    <padding>
-                                        <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
-                                    </padding>
+                                    <padding><Insets bottom="10.0" left="10.0" right="10.0" top="10.0" /></padding>
                                     <children>
-
-                                        <TitledPane animated="false" text="Tạo Hóa đơn" collapsible="false">
+                                        <TitledPane animated="false" text="Tạo / Tính lại Hóa đơn" collapsible="false">
                                             <content>
                                                 <HBox alignment="CENTER_LEFT" spacing="10.0">
-                                                    <padding>
-                                                        <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
-                                                    </padding>
+                                                    <padding><Insets bottom="10.0" left="10.0" right="10.0" top="10.0" /></padding>
                                                     <children>
-                                                        <Label text="Tạo hóa đơn cho tháng:" />
+                                                        <Label text="Chọn tháng:" />
                                                         <TextField fx:id="txtBillingMonth" prefWidth="50.0" promptText="Tháng" />
                                                         <Label text="/" />
                                                         <TextField fx:id="txtBillingYear" prefWidth="70.0" promptText="Năm" />
-
                                                         <Button fx:id="btnGenerateInvoices" mnemonicParsing="false" text="Bắt đầu Tạo" style="-fx-base: #008000; -fx-text-fill: white;" />
+                                                        <Button fx:id="btnRecalculateInvoices" mnemonicParsing="false" text="Tính toán lại" style="-fx-base: #FFA500;" />
                                                     </children>
                                                 </HBox>
                                             </content>
                                         </TitledPane>
                                         <TitledPane animated="false" text="Cấu hình Tự động hóa">
+                                            <content>
+                                                <VBox spacing="10.0">
+                                                    <padding><Insets bottom="10.0" left="10.0" right="10.0" top="10.0" /></padding>
+                                                    <children>
+                                                        <CheckBox fx:id="chkAutoSendNewInvoice" selected="true" text="Tự động gửi thông báo khi phát hành hóa đơn mới" />
+                                                        <CheckBox fx:id="chkAutoSendReminder" selected="true" text="Tự động gửi nhắc nhở khi sắp đến hạn" />
+                                                        <HBox alignment="CENTER_LEFT" spacing="5.0">
+                                                            <children>
+                                                                <Label text="Gửi nhắc nhở trước" />
+                                                                <TextField fx:id="txtDaysBefore" prefWidth="40.0" text="3" />
+                                                                <Label text="ngày" />
+                                                            </children>
+                                                        </HBox>
+                                                        <CheckBox fx:id="chkAutoSendOverdue" selected="true" text="Tự động gửi thông báo khi đã quá hạn thanh toán" />
+                                                        <Button fx:id="btnSendManualReminder" mnemonicParsing="false" text="Gửi nhắc nợ thủ công ngay" />
+                                                    </children>
+                                                </VBox>
+                                            </content>
                                         </TitledPane>
-
                                         <TitledPane animated="false" text="Nhật ký Gửi thông báo gần nhất" VBox.vgrow="ALWAYS">
+                                            <content>
+                                                <TextArea fx:id="txtAutomationLog" editable="false" prefHeight="200.0" prefWidth="200.0" wrapText="true" />
+                                            </content>
                                         </TitledPane>
-
                                     </children>
                                 </VBox>
                             </content>

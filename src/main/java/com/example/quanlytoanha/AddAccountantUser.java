@@ -1,5 +1,5 @@
 // Vị trí: (Có thể chạy ở bất cứ đâu, ví dụ: com.example.quanlytoanha.utils.AddAccountantUser.java)
-package com.example.quanlytoanha.utils; // (Hoặc package của bạn)
+package com.example.quanlytoanha; // (Hoặc package của bạn)
 
 import com.example.quanlytoanha.utils.DatabaseConnection; // (Giả sử bạn có file này)
 import com.example.quanlytoanha.utils.PasswordUtil; // (File này ở ngay dưới)
