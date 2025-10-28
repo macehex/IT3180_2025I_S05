@@ -1,4 +1,4 @@
-users{
+**users{
 
 user_id INT pk
 
@@ -92,7 +92,7 @@ move_out_date DATE
 
 invoices{
 
-invoice_id INT pk
+invoice_id** INT pk
 
 apartment_id INT NOT NULL
 

@@ -71,9 +71,9 @@ public class InvoiceHistoryController implements Initializable {
                 "Hóa đơn đang chờ thanh toán"
         );
         lastPaymentTile = new DashboardTile(
-                "Thanh Toán Gần Nhất",
+                "Thanh Toán Hôm Nay",
                 "Loading...",
-                "Giao dịch gần đây nhất"
+                "Giao dịch trong ngày"
         );
 
         // Xóa các Tile cũ (nếu có) và thêm các Tile mới
@@ -99,7 +99,7 @@ public class InvoiceHistoryController implements Initializable {
         }
         if (lastPaymentTile != null) {
             // SỬA: Gọi hàm setValue()
-            lastPaymentTile.setValue(invoiceService.getLastPaymentInfo(residentId));
+            lastPaymentTile.setValue(invoiceService.getTodayPaymentTotal(residentId));
         }
     }
 

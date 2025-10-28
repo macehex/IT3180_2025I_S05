@@ -105,4 +105,27 @@ public class TransactionDAO {
         }
         return "No payments yet";
     }
+
+    public String getTodayPaymentTotal(int userId) {
+        String sql = "SELECT SUM(amount) as total_amount FROM transactions " +
+                    "WHERE payer_user_id = ? AND transaction_date = ?";
+
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+            pstmt.setInt(1, userId);
+            pstmt.setDate(2, Date.valueOf(LocalDate.now()));
+            ResultSet rs = pstmt.executeQuery();
+
+            if (rs.next()) {
+                BigDecimal totalAmount = rs.getBigDecimal("total_amount");
+                if (totalAmount != null) {
+                    return String.format("%,.0f VND", totalAmount);
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return "0 VND";
+    }
 }

@@ -56,6 +56,10 @@ public class InvoiceService {
         return transactionDAO.getLastPaymentInfo(residentId);
     }
 
+    public String getTodayPaymentTotal(int residentId) {
+        return transactionDAO.getTodayPaymentTotal(residentId);
+    }
+
     public int getUnpaidInvoicesCount(int residentId) {
         return getUnpaidInvoices(residentId).size();
     }
