@@ -7,8 +7,10 @@ import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.stage.Modality;
 import javafx.stage.Stage;
 
 import java.io.IOException;
@@ -22,6 +24,9 @@ public class ResidentDashboardController implements Initializable {
 
     @FXML
     private Button invoiceHistoryButton;
+
+    @FXML
+    private Button notificationButton;
 
     @FXML
     private Button loginHistoryButton;
@@ -69,6 +74,27 @@ public class ResidentDashboardController implements Initializable {
             // Optionally, show an error alert to the user
         }
     }
+
+    @FXML
+    private void handleNotificationButton() {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/example/quanlytoanha/view/notification_view.fxml"));
+            Parent root = loader.load();
+
+            // Không cần lấy controller ở đây vì nó tự load dữ liệu trong initialize()
+
+            Stage stage = new Stage();
+            stage.setTitle("Thông Báo");
+            stage.initModality(Modality.APPLICATION_MODAL); // Mở dạng modal
+            stage.initOwner(notificationButton.getScene().getWindow()); // Đặt cửa sổ cha
+            stage.setScene(new Scene(root));
+            stage.showAndWait(); // Hiển thị và chờ
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
     /**
      * Xử lý sự kiện đăng xuất.
      */

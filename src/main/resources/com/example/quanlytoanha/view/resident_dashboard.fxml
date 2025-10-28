@@ -35,6 +35,13 @@
                         text="Quản lý lịch sử đăng nhập"
                         style="-fx-font-size: 16px; -fx-background-color: #007bff; -fx-text-fill: white;"/>
 
+                <Button fx:id="notificationButton"
+                        onAction="#handleNotificationButton"
+                        prefHeight="50.0"
+                        prefWidth="300.0"
+                        text="🔔 Xem Thông Báo"
+                        style="-fx-font-size: 16px; -fx-background-color: #007bff; -fx-text-fill: white;"/>
+
                 <Button fx:id="btnLogout"
                         onAction="#handleLogout"
                         prefHeight="25.0"
