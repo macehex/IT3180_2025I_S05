@@ -62,6 +62,7 @@ dependencies {
     
     testImplementation("org.junit.jupiter:junit-jupiter-api:${junitVersion}")
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:${junitVersion}")
+    testImplementation("org.junit.platform:junit-platform-suite:1.12.1")
     testImplementation("org.mockito:mockito-core:5.5.0")         // Mockito core
     testImplementation("org.mockito:mockito-junit-jupiter:5.5.0") // Tích hợp Mockito với JUnit 5
 }

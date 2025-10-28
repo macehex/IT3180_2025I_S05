@@ -147,4 +147,5 @@ src/main/resources/
 
 
 ### Testing
+- [Detailed testing guide])(src/test/README.md)
 
