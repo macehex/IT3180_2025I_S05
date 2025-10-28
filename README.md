@@ -12,6 +12,7 @@ A comprehensive JavaFX-based building management application designed for managi
 - [Running the Application](#running-the-application)
 - [User Roles & Permissions](#user-roles--permissions)
 - [Project Structure](#project-structure)
+- [Testing](#testing)
 
 ##  Project Overview
 
@@ -146,6 +147,6 @@ src/main/resources/
 ```
 
 
-### Testing
-- [Detailed testing guide])(src/test/README.md)
+# Testing
+- [Detailed testing guide](src/test/README.md)
 
