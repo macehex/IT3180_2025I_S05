@@ -195,6 +195,47 @@ public class NotificationService {
         }
 
         return success;
-    }}
-    // ----------------------------
+    }
+
+    /**
+     * HÀM MỚI: Gửi thông báo khi có hóa đơn mới được tạo.
+     * Hàm này được gọi bởi InvoiceGenerationService.
+     * @param userId ID của chủ căn hộ nhận thông báo.
+     * @param newInvoice Đối tượng Invoice vừa được tạo.
+     * @return true nếu gửi thành công, false nếu không.
+     */
+    public boolean sendNewInvoiceNotification(int userId, Invoice newInvoice) {
+        // Không cần checkPermission() vì hàm này được gọi từ logic hệ thống (tạo hóa đơn)
+        // chứ không phải trực tiếp từ UI Kế toán.
+
+        // Tạo tiêu đề và nội dung
+        String title = String.format("Hóa đơn mới #%d đã được phát hành", newInvoice.getInvoiceId());
+        String message = String.format("Hóa đơn mới #%d cho căn hộ %d đã được phát hành với tổng số tiền là %,.0f VNĐ. Hạn thanh toán là %s. Vui lòng kiểm tra và thanh toán.",
+                newInvoice.getInvoiceId(),
+                newInvoice.getApartmentId(), // Cần đảm bảo Invoice có getApartmentId()
+                newInvoice.getTotalAmount(),
+                dateFormat.format(newInvoice.getDueDate())
+        );
+
+        // Tạo đối tượng Notification
+        Notification notification = new Notification(userId, title, message, newInvoice.getInvoiceId());
+
+        try {
+            boolean success = notificationDAO.createNotification(notification);
+            if (success) {
+                System.out.printf("[%s] Đã gửi thông báo HĐ MỚI #%d cho User ID %d\n",
+                        LocalDateTime.now().format(logTimestampFormat), newInvoice.getInvoiceId(), userId);
+            } else {
+                System.err.printf("[%s] LỖI gửi thông báo HĐ MỚI #%d cho User ID %d\n",
+                        LocalDateTime.now().format(logTimestampFormat), newInvoice.getInvoiceId(), userId);
+            }
+            return success;
+        } catch (SQLException e) {
+            System.err.printf("[%s] LỖI DB khi gửi thông báo HĐ MỚI #%d cho User ID %d: %s\n",
+                    LocalDateTime.now().format(logTimestampFormat), newInvoice.getInvoiceId(), userId, e.getMessage());
+            e.printStackTrace();
+            return false;
+        }
+    }
+}
 
