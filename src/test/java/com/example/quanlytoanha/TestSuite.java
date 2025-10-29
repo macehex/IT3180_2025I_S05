@@ -9,6 +9,7 @@ import com.example.quanlytoanha.model.RoleTest;
 import com.example.quanlytoanha.model.UserTest;
 import com.example.quanlytoanha.model.InvoiceTest;
 import com.example.quanlytoanha.model.ResidentTest;
+import com.example.quanlytoanha.dao.ResidentDAOTest;
 import com.example.quanlytoanha.session.SessionManagerTest;
 import com.example.quanlytoanha.service.SimpleAuthServiceTest;
 import com.example.quanlytoanha.service.SimpleInvoiceServiceTest;
@@ -31,6 +32,9 @@ import com.example.quanlytoanha.service.ValidationExceptionTest;
     UserTest.class,
     InvoiceTest.class,
     ResidentTest.class,
+    
+    // DAO Tests
+    ResidentDAOTest.class,
     
     // Session Management Tests
     SessionManagerTest.class,

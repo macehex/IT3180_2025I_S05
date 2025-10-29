@@ -243,6 +243,101 @@ public class ResidentDAO {
     }
 
     /**
+     * Xóa cư dân khỏi hệ thống.
+     * Phương thức này sẽ xóa cư dân và xử lý các ràng buộc liên quan.
+     * @param residentId ID của cư dân cần xóa.
+     * @return true nếu xóa thành công, false nếu không tìm thấy cư dân.
+     * @throws SQLException nếu có lỗi trong quá trình xóa.
+     */
+    public boolean removeResident(int residentId) throws SQLException {
+        Connection conn = null;
+        try {
+            conn = DatabaseConnection.getConnection();
+            conn.setAutoCommit(false); // Bắt đầu transaction
+            
+            // Kiểm tra xem cư dân có tồn tại không
+            String checkSQL = "SELECT resident_id FROM residents WHERE resident_id = ?";
+            try (PreparedStatement checkStmt = conn.prepareStatement(checkSQL)) {
+                checkStmt.setInt(1, residentId);
+                try (ResultSet rs = checkStmt.executeQuery()) {
+                    if (!rs.next()) {
+                        // Cư dân không tồn tại
+                        conn.rollback();
+                        return false;
+                    }
+                }
+            }
+            
+            // Xóa các phương tiện liên quan trước (do foreign key constraint)
+            String deleteVehiclesSQL = "DELETE FROM vehicles WHERE resident_id = ?";
+            try (PreparedStatement pstmt = conn.prepareStatement(deleteVehiclesSQL)) {
+                pstmt.setInt(1, residentId);
+                pstmt.executeUpdate();
+            }
+            
+            // Xóa cư dân
+            String deleteResidentSQL = "DELETE FROM residents WHERE resident_id = ?";
+            try (PreparedStatement pstmt = conn.prepareStatement(deleteResidentSQL)) {
+                pstmt.setInt(1, residentId);
+                int affectedRows = pstmt.executeUpdate();
+                
+                if (affectedRows > 0) {
+                    conn.commit(); // Xác nhận transaction
+                    return true;
+                } else {
+                    conn.rollback();
+                    return false;
+                }
+            }
+            
+        } catch (SQLException e) {
+            if (conn != null) {
+                try {
+                    conn.rollback();
+                } catch (SQLException rollbackEx) {
+                    // Log rollback exception if needed
+                    System.err.println("Lỗi khi rollback transaction: " + rollbackEx.getMessage());
+                }
+            }
+            throw e; // Ném lại exception để caller xử lý
+        } finally {
+            if (conn != null) {
+                try {
+                    conn.setAutoCommit(true); // Khôi phục auto-commit
+                    conn.close();
+                } catch (SQLException e) {
+                    System.err.println("Lỗi khi đóng connection: " + e.getMessage());
+                }
+            }
+        }
+    }
+
+    /**
+     * Xóa cư dân theo user ID.
+     * Phương thức này tìm resident_id dựa trên user_id và sau đó xóa cư dân.
+     * @param userId ID của người dùng.
+     * @return true nếu xóa thành công, false nếu không tìm thấy cư dân.
+     * @throws SQLException nếu có lỗi trong quá trình xóa.
+     */
+    public boolean removeResidentByUserId(int userId) throws SQLException {
+        // Tìm resident_id từ user_id
+        String findResidentSQL = "SELECT resident_id FROM residents WHERE user_id = ?";
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(findResidentSQL)) {
+            
+            pstmt.setInt(1, userId);
+            try (ResultSet rs = pstmt.executeQuery()) {
+                if (rs.next()) {
+                    int residentId = rs.getInt("resident_id");
+                    return removeResident(residentId);
+                } else {
+                    return false; // Không tìm thấy cư dân với user_id này
+                }
+            }
+        }
+    }
+
+    /**
      * Phương thức mới: Lấy Resident đầy đủ từ DB để nạp vào form Edit.
      * Thực hiện JOIN giữa bảng users và residents để có đủ thông tin.
      * @param userId ID của người dùng.

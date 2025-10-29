@@ -47,7 +47,8 @@
                        </font>
                     </Button>
 
-                    <Button mnemonicParsing="false" prefHeight="40.0" prefWidth="130.0" text="🗑️ Xóa Hồ sơ"
+                    <Button fx:id="btnDeleteResident" mnemonicParsing="false" onAction="#handleDeleteResidentAction"
+                            prefHeight="40.0" prefWidth="130.0" text="🗑️ Xóa Hồ sơ"
                             style="-fx-background-color: #dc3545; -fx-text-fill: white; -fx-font-size: 14px; -fx-font-weight: bold; -fx-background-radius: 8;">
                        <font>
                           <Font size="14.0" />

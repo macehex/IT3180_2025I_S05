@@ -3,6 +3,7 @@ package com.example.quanlytoanha.controller;
 
 import com.example.quanlytoanha.model.Resident;
 import com.example.quanlytoanha.service.ResidentService;
+import com.example.quanlytoanha.dao.ResidentDAO;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
@@ -11,6 +12,7 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
+import javafx.scene.control.ButtonType;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
@@ -30,10 +32,12 @@ public class UserManagementController {
     @FXML private TableColumn<Resident, String> colRelationship;
     @FXML private Button btnEditResident;
     @FXML private Button btnAddResident;
+    @FXML private Button btnDeleteResident;
     // Bạn có thể thêm các cột khác như colEmail, colIdCardNumber, etc.
 
     // --- SERVICE ---
     private final ResidentService residentService = new ResidentService();
+    private final ResidentDAO residentDAO = new ResidentDAO();
     private ObservableList<Resident> residentList = FXCollections.observableArrayList();
 
     /**
@@ -127,6 +131,85 @@ public class UserManagementController {
     private void handleAddResidentAction() {
         // Mở cửa sổ ở chế độ Thêm mới (truyền null)
         openResidentForm(null);
+    }
+
+    /**
+     * Xử lý sự kiện khi nhấn nút "XÓA HỒ SƠ".
+     */
+    @FXML
+    private void handleDeleteResidentAction() {
+        Resident selectedResident = residentTable.getSelectionModel().getSelectedItem();
+
+        if (selectedResident == null) {
+            showAlert(Alert.AlertType.WARNING, "Lựa chọn", "Vui lòng chọn một cư dân để xóa.");
+            return;
+        }
+
+        // Hiển thị hộp thoại xác nhận
+        Alert confirmAlert = new Alert(Alert.AlertType.CONFIRMATION);
+        confirmAlert.setTitle("Xác nhận xóa");
+        confirmAlert.setHeaderText("Xóa hồ sơ cư dân");
+        confirmAlert.setContentText(
+            "Bạn có chắc chắn muốn xóa hồ sơ của:\n\n" +
+            "Họ tên: " + selectedResident.getFullName() + "\n" +
+            "Căn hộ: " + selectedResident.getApartmentId() + "\n" +
+            "Quan hệ: " + selectedResident.getRelationship() + "\n\n" +
+            "⚠️ Hành động này sẽ xóa vĩnh viễn hồ sơ cư dân và tất cả thông tin liên quan " +
+            "(bao gồm phương tiện đã đăng ký). Không thể hoàn tác!"
+        );
+
+        // Tùy chỉnh các nút
+        ButtonType buttonYes = new ButtonType("Xóa");
+        ButtonType buttonNo = new ButtonType("Hủy");
+        confirmAlert.getButtonTypes().setAll(buttonYes, buttonNo);
+
+        // Xử lý phản hồi
+        confirmAlert.showAndWait().ifPresent(response -> {
+            if (response == buttonYes) {
+                deleteSelectedResident(selectedResident);
+            }
+        });
+    }
+
+    /**
+     * Thực hiện xóa cư dân được chọn.
+     */
+    private void deleteSelectedResident(Resident resident) {
+        try {
+            boolean success;
+            
+            // Ưu tiên xóa theo resident ID nếu có, nếu không thì dùng user ID
+            if (resident.getResidentId() > 0) {
+                success = residentDAO.removeResident(resident.getResidentId());
+            } else if (resident.getUserId() > 0) {
+                success = residentDAO.removeResidentByUserId(resident.getUserId());
+            } else {
+                showAlert(Alert.AlertType.ERROR, "Lỗi", 
+                         "Không thể xóa cư dân: Không tìm thấy ID hợp lệ.");
+                return;
+            }
+
+            if (success) {
+                // Hiển thị thông báo thành công
+                showAlert(Alert.AlertType.INFORMATION, "Thành công", 
+                         "Đã xóa hồ sơ cư dân '" + resident.getFullName() + "' thành công!");
+                
+                // Làm mới bảng dữ liệu
+                loadResidentData();
+            } else {
+                showAlert(Alert.AlertType.ERROR, "Lỗi", 
+                         "Không thể xóa hồ sơ cư dân. Có thể dữ liệu không tồn tại hoặc đã bị xóa.");
+            }
+
+        } catch (SQLException e) {
+            showAlert(Alert.AlertType.ERROR, "Lỗi Database", 
+                     "Lỗi khi xóa hồ sơ cư dân: " + e.getMessage());
+            e.printStackTrace();
+        } catch (Exception e) {
+            showAlert(Alert.AlertType.ERROR, "Lỗi", 
+                     "Đã xảy ra lỗi không mong muốn: " + e.getMessage());
+            e.printStackTrace();
+        }
     }
 
     /**
