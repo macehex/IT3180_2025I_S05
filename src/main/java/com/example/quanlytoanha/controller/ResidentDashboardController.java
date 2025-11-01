@@ -2,13 +2,12 @@ package com.example.quanlytoanha.controller;
 
 import com.example.quanlytoanha.model.User;
 import com.example.quanlytoanha.session.SessionManager;
+import io.github.palexdev.materialfx.controls.*;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.control.Alert;
-import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
@@ -23,22 +22,81 @@ public class ResidentDashboardController implements Initializable {
     private Label welcomeLabel;
 
     @FXML
-    private Button invoiceHistoryButton;
+    private Label debtAmountLabel;
 
     @FXML
-    private Button notificationButton;
+    private Label paidAmountLabel;
 
     @FXML
-    private Button loginHistoryButton;
+    private Label notificationCountLabel;
 
-    // --- Nút chung ---
-    @FXML private Button btnLogout;
+    // MaterialFX components
+    @FXML
+    private MFXButton invoiceHistoryButton;
+
+    @FXML
+    private MFXButton loginHistoryButton;
+
+    @FXML
+    private MFXButton notificationButton;
+
+    @FXML
+    private MFXButton btnLogout;
+
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         User currentUser = SessionManager.getInstance().getCurrentUser();
         if (currentUser != null) {
-            welcomeLabel.setText("Xin chào, " + currentUser.getUsername() + " (Cư dân)");
+            welcomeLabel.setText("Xin chào, " + currentUser.getUsername());
         }
+
+        // Setup hover effects for MaterialFX components
+        setupButtonHoverEffects();
+
+        // Initialize dashboard data (you can add your own logic here)
+        loadDashboardData();
+    }
+
+    private void setupButtonHoverEffects() {
+        // Invoice History Button hover effect
+        invoiceHistoryButton.setOnMouseEntered(e ->
+                invoiceHistoryButton.setStyle("-fx-background-color: rgba(255,255,255,0.25); -fx-background-radius: 10; -fx-text-fill: white; -fx-font-size: 14px; -fx-font-weight: 500;")
+        );
+        invoiceHistoryButton.setOnMouseExited(e ->
+                invoiceHistoryButton.setStyle("-fx-background-color: rgba(255,255,255,0.15); -fx-background-radius: 10; -fx-text-fill: white; -fx-font-size: 14px; -fx-font-weight: 500;")
+        );
+
+        // Login History Button hover effect
+        loginHistoryButton.setOnMouseEntered(e ->
+                loginHistoryButton.setStyle("-fx-background-color: rgba(255,255,255,0.25); -fx-background-radius: 10; -fx-text-fill: white; -fx-font-size: 14px; -fx-font-weight: 500;")
+        );
+        loginHistoryButton.setOnMouseExited(e ->
+                loginHistoryButton.setStyle("-fx-background-color: rgba(255,255,255,0.15); -fx-background-radius: 10; -fx-text-fill: white; -fx-font-size: 14px; -fx-font-weight: 500;")
+        );
+
+        // Notification Button hover effect
+        notificationButton.setOnMouseEntered(e ->
+                notificationButton.setStyle("-fx-background-color: rgba(255,255,255,0.25); -fx-background-radius: 10; -fx-text-fill: white; -fx-font-size: 14px; -fx-font-weight: 500;")
+        );
+        notificationButton.setOnMouseExited(e ->
+                notificationButton.setStyle("-fx-background-color: rgba(255,255,255,0.15); -fx-background-radius: 10; -fx-text-fill: white; -fx-font-size: 14px; -fx-font-weight: 500;")
+        );
+
+        // Logout Button hover effect
+        btnLogout.setOnMouseEntered(e ->
+                btnLogout.setStyle("-fx-background-color: rgba(244,67,54,1.0); -fx-background-radius: 10; -fx-text-fill: white; -fx-font-size: 14px; -fx-font-weight: 600; -fx-cursor: hand;")
+        );
+        btnLogout.setOnMouseExited(e ->
+                btnLogout.setStyle("-fx-background-color: rgba(244,67,54,0.9); -fx-background-radius: 10; -fx-text-fill: white; -fx-font-size: 14px; -fx-font-weight: 600;")
+        );
+    }
+
+    private void loadDashboardData() {
+        // Example: Load debt amount, paid amount, notification count
+        // Replace with your actual data loading logic
+        debtAmountLabel.setText("0 VND");
+        paidAmountLabel.setText("0 VND");
+        notificationCountLabel.setText("0");
     }
 
     @FXML
@@ -81,19 +139,18 @@ public class ResidentDashboardController implements Initializable {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/example/quanlytoanha/view/notification_view.fxml"));
             Parent root = loader.load();
 
-            // Không cần lấy controller ở đây vì nó tự load dữ liệu trong initialize()
-
             Stage stage = new Stage();
             stage.setTitle("Thông Báo");
-            stage.initModality(Modality.APPLICATION_MODAL); // Mở dạng modal
-            stage.initOwner(notificationButton.getScene().getWindow()); // Đặt cửa sổ cha
+            stage.initModality(Modality.APPLICATION_MODAL);
+            stage.initOwner(notificationButton.getScene().getWindow());
             stage.setScene(new Scene(root));
-            stage.showAndWait(); // Hiển thị và chờ
+            stage.showAndWait();
 
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
+
 
     /**
      * Xử lý sự kiện đăng xuất.
@@ -115,5 +172,4 @@ public class ResidentDashboardController implements Initializable {
             e.printStackTrace();
         }
     }
-
 }

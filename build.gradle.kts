@@ -51,6 +51,7 @@ dependencies {
     implementation("org.postgresql:postgresql:42.7.7")
     implementation("org.controlsfx:controlsfx:11.2.1")
     implementation("org.kordamp.ikonli:ikonli-javafx:12.3.1")
+    implementation("org.kordamp.ikonli:ikonli-materialdesign2-pack:12.3.1")
     
     // Use Spring Security with excluded transitive dependencies that cause module issues
     implementation("org.springframework.security:spring-security-core:6.5.5") {
@@ -60,7 +61,6 @@ dependencies {
         exclude(group = "org.springframework", module = "spring-aop")
         exclude(group = "org.springframework", module = "spring-expression")
     }
-    
     testImplementation("org.junit.jupiter:junit-jupiter-api:${junitVersion}")
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:${junitVersion}")
     testImplementation("org.junit.platform:junit-platform-suite:1.12.1")
