@@ -52,9 +52,10 @@ run-tests.bat
 ```
 Open build/reports/tests/test/index.html in your browser to view detailed results.
 
-### Run All Tests
+### Run All Tests && Generate Test Report
 ```bash
 ./gradlew test
+# Reports will be generated in build/reports/tests/test/index.html
 ```
 
 ### Run Specific Test Class
@@ -72,11 +73,6 @@ Open build/reports/tests/test/index.html in your browser to view detailed result
 ./gradlew test --info
 ```
 
-### Generate Test Report
-```bash
-./gradlew test
-# Reports will be generated in build/reports/tests/test/index.html
-```
 
 ##  Test Technologies Used
 
