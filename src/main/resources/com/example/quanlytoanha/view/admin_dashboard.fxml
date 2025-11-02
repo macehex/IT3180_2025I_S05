@@ -1,174 +1,141 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import javafx.geometry.*?>
+<?import javafx.scene.chart.*?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.text.*?>
 
 <BorderPane xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.quanlytoanha.controller.AdminDashboardController">
+   
+   <!-- Top Header với Hamburger Button -->
+   <top>
+      <HBox styleClass="header-container" alignment="CENTER_LEFT" spacing="15.0">
+         <children>
+            <Button fx:id="btnMenuToggle" text="☰" styleClass="hamburger-button" onAction="#toggleSidebar" />
+            <Label fx:id="lblWelcome" text="Chào mừng, Ban Quản Trị" styleClass="header-title" />
+            <Region HBox.hgrow="ALWAYS" />
+         </children>
+      </HBox>
+   </top>
+   
+   <!-- Left Sidebar Menu -->
+   <left>
+      <VBox fx:id="sidebar" styleClass="sidebar" visible="false" managed="false">
+         <children>
+            <!-- User Info Section -->
+            <VBox styleClass="sidebar-user-section">
+               <children>
+                  <Label fx:id="lblUserName" text="Tên Người Dùng" styleClass="sidebar-user-name" />
+                  <Label text="Ban Quản Trị" styleClass="sidebar-user-role" />
+               </children>
+               <padding>
+                  <Insets top="20.0" bottom="15.0" left="20.0" right="20.0" />
+               </padding>
+            </VBox>
+            <Separator />
+            
+            <!-- Menu Items -->
+            <Button fx:id="btnThemCuDan" text="➕ Thêm Hồ Sơ Cư Dân" styleClass="sidebar-menu-item" />
+            <Button fx:id="btnQuanLyTaiKhoan" text="👤 Quản Lý Tài Khoản" styleClass="sidebar-menu-item" />
+            <Button fx:id="btnXemDanhSachCuDan" text="📋 Danh Sách Cư Dân" styleClass="sidebar-menu-item" onAction="#handleOpenResidentList" />
+            
+            <Separator />
+            
+            <Button fx:id="btnQuanLyHoaDon" text="💰 Hóa Đơn &amp; Công Nợ" styleClass="sidebar-menu-item" />
+            <Button fx:id="btnTaoThongBao" text="📢 Thông Báo Chung" styleClass="sidebar-menu-item" />
+            <Button fx:id="btnXemYeuCauDichVu" text="🛠️ Yêu Cầu Dịch Vụ" styleClass="sidebar-menu-item" />
+            <Button text="🏠 Tài Sản &amp; Thiết Bị" styleClass="sidebar-menu-item" />
+            
+            <Region VBox.vgrow="ALWAYS" />
+            
+            <!-- Logout Button ở cuối -->
+            <Separator />
+            <Button fx:id="btnLogout" text="🚪 Đăng xuất" styleClass="sidebar-logout-btn" onAction="#handleLogout">
+               <VBox.margin>
+                  <Insets top="10.0" bottom="15.0" left="15.0" right="15.0" />
+               </VBox.margin>
+            </Button>
+         </children>
+      </VBox>
+   </left>
+   
+   <!-- Main Content Area -->
    <center>
-      <ScrollPane fitToWidth="true" style="-fx-background: #f8f9fa;" hbarPolicy="NEVER" vbarPolicy="AS_NEEDED">
+      <ScrollPane fitToWidth="true" styleClass="scroll-pane content-area" hbarPolicy="NEVER" vbarPolicy="AS_NEEDED">
          <content>
-            <VBox spacing="25.0" style="-fx-background-color: #f8f9fa; -fx-padding: 30 50 30 50;" prefWidth="100.0">
+            <VBox spacing="25.0" styleClass="vbox-spacing" prefWidth="100.0">
                <children>
-            <!-- Welcome Header -->
-            <HBox alignment="CENTER_LEFT" style="-fx-background-color: linear-gradient(to right, #1e3c72 0%, #2a5298 100%); -fx-padding: 25; -fx-background-radius: 10;">
-               <children>
-                  <Label fx:id="lblWelcome" text="Chào mừng, Ban Quản Trị" style="-fx-text-fill: white; -fx-font-size: 24px; -fx-font-weight: bold;">
-                     <HBox.margin>
-                        <Insets left="15.0" />
-                     </HBox.margin>
-                  </Label>
-               </children>
-            </HBox>
-
             <!-- Statistics Tiles -->
-            <HBox spacing="20.0" alignment="CENTER"
-                  style="-fx-max-height: 180;">
-               <children>
-                  <VBox alignment="CENTER" spacing="10.0"
-                        style="-fx-background-color: white; -fx-padding: 20; -fx-background-radius: 10; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.15), 10, 0, 0, 3); -fx-min-width: 160; -fx-min-height: 160;">
+            <HBox spacing="20.0" alignment="CENTER" styleClass="hbox-spacing"
+                  style="-fx-max-height: 220;">
                      <children>
-                        <Label text="👥" style="-fx-font-size: 36px;"/>
-                        <Label fx:id="lblTotalResidents" text="0" style="-fx-font-size: 32px; -fx-font-weight: bold; -fx-text-fill: #1e3c72;"/>
-                        <Label text="Tổng cư dân" style="-fx-font-size: 13px; -fx-text-fill: #666;"/>
-                     </children>
-                  </VBox>
+                        <VBox alignment="CENTER" spacing="10.0" styleClass="stat-tile">
+                           <children>
+                              <Label text="👥" styleClass="stat-icon"/>
+                              <Label fx:id="lblTotalResidents" text="0" styleClass="stat-value"/>
+                              <Label text="Tổng cư dân" styleClass="stat-label"/>
+                           </children>
+                        </VBox>
 
-                  <VBox alignment="CENTER" spacing="10.0"
-                        style="-fx-background-color: white; -fx-padding: 20; -fx-background-radius: 10; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.15), 10, 0, 0, 3); -fx-min-width: 160; -fx-min-height: 160;">
+                        <VBox alignment="CENTER" spacing="10.0" styleClass="stat-tile">
+                           <children>
+                              <Label text="🏠" styleClass="stat-icon"/>
+                              <Label fx:id="lblTotalApartments" text="0" styleClass="stat-value"/>
+                              <Label text="Tổng căn hộ" styleClass="stat-label"/>
+                           </children>
+                        </VBox>
+
+                        <VBox alignment="CENTER" spacing="10.0" styleClass="stat-tile">
+                           <children>
+                              <Label text="💰" styleClass="stat-icon"/>
+                              <Label fx:id="lblTotalDebt" text="0" styleClass="stat-value"/>
+                              <Label text="Công nợ (VNĐ)" styleClass="stat-label"/>
+                           </children>
+                        </VBox>
+
+                        <VBox alignment="CENTER" spacing="10.0" styleClass="stat-tile">
+                           <children>
+                              <Label text="📋" styleClass="stat-icon"/>
+                              <Label fx:id="lblTotalUnpaidInvoices" text="0" styleClass="stat-value"/>
+                              <Label text="Hóa đơn chưa trả" styleClass="stat-label"/>
+                           </children>
+                        </VBox>
+                     </children>
+                  </HBox>
+
+                  <!-- Charts Section -->
+                  <HBox spacing="30.0" alignment="CENTER" styleClass="hbox-spacing">
                      <children>
-                        <Label text="🏠" style="-fx-font-size: 36px;"/>
-                        <Label fx:id="lblTotalApartments" text="0" style="-fx-font-size: 32px; -fx-font-weight: bold; -fx-text-fill: #1e3c72;"/>
-                        <Label text="Tổng căn hộ" style="-fx-font-size: 13px; -fx-text-fill: #666;"/>
+                        <!-- Chart 1: Resident Status Pie Chart -->
+                        <VBox spacing="10.0" styleClass="chart-container">
+                           <children>
+                              <Label text="📊 Thống kê Cư dân" styleClass="chart-title" />
+                              <PieChart fx:id="residentStatusPieChart" 
+                                       prefWidth="400.0" prefHeight="300.0" 
+                                       legendVisible="true" 
+                                       labelsVisible="true"
+                                       legendSide="BOTTOM"
+                                       startAngle="90">
+                              </PieChart>
+                           </children>
+                        </VBox>
+
+                        <!-- Chart 2: Debt Paid -->
+                        <VBox spacing="10.0" styleClass="chart-container">
+                           <children>
+                              <Label text="💰 Số Nợ Đã Thanh Toán" styleClass="chart-title" />
+                              <VBox alignment="CENTER" spacing="15.0" styleClass="debt-chart-container">
+                                 <children>
+                                    <Label fx:id="lblTotalPaid" text="0 VNĐ" styleClass="debt-paid-value" />
+                                    <Label text="Tổng số tiền đã thanh toán" styleClass="debt-paid-label" />
+                                    <ProgressBar fx:id="debtProgressBar" prefWidth="300.0" styleClass="debt-progress" />
+                                 </children>
+                              </VBox>
+                           </children>
+                        </VBox>
                      </children>
-                  </VBox>
-
-                  <VBox alignment="CENTER" spacing="10.0"
-                        style="-fx-background-color: white; -fx-padding: 20; -fx-background-radius: 10; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.15), 10, 0, 0, 3); -fx-min-width: 160; -fx-min-height: 160;">
-                     <children>
-                        <Label text="💰" style="-fx-font-size: 36px;"/>
-                        <Label fx:id="lblTotalDebt" text="0" style="-fx-font-size: 32px; -fx-font-weight: bold; -fx-text-fill: #1e3c72;"/>
-                        <Label text="Công nợ (VNĐ)" style="-fx-font-size: 13px; -fx-text-fill: #666;"/>
-                     </children>
-                  </VBox>
-
-                  <VBox alignment="CENTER" spacing="10.0"
-                        style="-fx-background-color: white; -fx-padding: 20; -fx-background-radius: 10; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.15), 10, 0, 0, 3); -fx-min-width: 160; -fx-min-height: 160;">
-                     <children>
-                        <Label text="📋" style="-fx-font-size: 36px;"/>
-                        <Label fx:id="lblTotalUnpaidInvoices" text="0" style="-fx-font-size: 32px; -fx-font-weight: bold; -fx-text-fill: #1e3c72;"/>
-                        <Label text="Hóa đơn chưa trả" style="-fx-font-size: 13px; -fx-text-fill: #666;"/>
-                     </children>
-                  </VBox>
-               </children>
-            </HBox>
-
-                  <!-- Management Sections -->
-                  <VBox spacing="25.0">
-                     <!-- Account & Resident Management -->
-                     <VBox spacing="15.0" style="-fx-background-color: white; -fx-padding: 20 15 20 15; -fx-background-radius: 10; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 10, 0, 0, 2);" VBox.vgrow="ALWAYS">
-                        <children>
-                           <Label text="💼 QUẢN LÝ TÀI KHOẢN VÀ CƯ DÂN" style="-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #1e3c72;">
-                              <VBox.margin>
-                                 <Insets bottom="12.0" />
-                              </VBox.margin>
-                           </Label>
-                           
-                           <!-- Horizontal button layout - fills entire width -->
-                           <HBox spacing="10.0" alignment="CENTER">
-                              <children>
-                                 <Button fx:id="btnThemCuDan" text="➕ Thêm Hồ Sơ Cư Dân" minHeight="60.0" 
-                                         style="-fx-background-color: linear-gradient(to right, #1e3c72, #2a5298); -fx-text-fill: white; -fx-font-size: 14px; -fx-font-weight: bold; -fx-background-radius: 8;"
-                                         HBox.hgrow="ALWAYS">
-                                    <font>
-                                       <Font size="14.0" />
-                                    </font>
-                                 </Button>
-
-                                 <Button fx:id="btnQuanLyTaiKhoan" text="👤 Quản Lý Tài Khoản" minHeight="60.0" 
-                                         style="-fx-background-color: linear-gradient(to right, #1e3c72, #2a5298); -fx-text-fill: white; -fx-font-size: 14px; -fx-font-weight: bold; -fx-background-radius: 8;"
-                                         HBox.hgrow="ALWAYS">
-                                    <font>
-                                       <Font size="14.0" />
-                                    </font>
-                                 </Button>
-
-                                 <Button fx:id="btnXemDanhSachCuDan" text="📋 Danh Sách Cư Dân" onAction="#handleOpenResidentList" minHeight="60.0" 
-                                         style="-fx-background-color: linear-gradient(to right, #1e3c72, #2a5298); -fx-text-fill: white; -fx-font-size: 14px; -fx-font-weight: bold; -fx-background-radius: 8;"
-                                         HBox.hgrow="ALWAYS">
-                                    <font>
-                                       <Font size="14.0" />
-                                    </font>
-                                 </Button>
-                              </children>
-                           </HBox>
-                        </children>
-                     </VBox>
-
-                     <!-- Building Operations Management -->
-                     <VBox spacing="15.0" style="-fx-background-color: white; -fx-padding: 20 15 20 15; -fx-background-radius: 10; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 10, 0, 0, 2);" VBox.vgrow="ALWAYS">
-                        <children>
-                           <Label text="🏢 QUẢN LÝ VẬN HÀNH TÒA NHÀ" style="-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #1e3c72;">
-                              <VBox.margin>
-                                 <Insets bottom="12.0" />
-                              </VBox.margin>
-                           </Label>
-
-                           <!-- Horizontal buttons - fills entire width -->
-                           <HBox spacing="10.0" alignment="CENTER">
-                              <children>
-                                 <Button fx:id="btnQuanLyHoaDon" text="💰 Hóa Đơn &amp; Công Nợ" minHeight="60.0" 
-                                         style="-fx-background-color: linear-gradient(to right, #1e3c72, #2a5298); -fx-text-fill: white; -fx-font-size: 14px; -fx-font-weight: bold; -fx-background-radius: 8;"
-                                         HBox.hgrow="ALWAYS">
-                                    <font>
-                                       <Font size="14.0" />
-                                    </font>
-                                 </Button>
-
-                                 <Button fx:id="btnTaoThongBao" text="📢 Thông Báo Chung" minHeight="60.0" 
-                                         style="-fx-background-color: linear-gradient(to right, #1e3c72, #2a5298); -fx-text-fill: white; -fx-font-size: 14px; -fx-font-weight: bold; -fx-background-radius: 8;"
-                                         HBox.hgrow="ALWAYS">
-                                    <font>
-                                       <Font size="14.0" />
-                                    </font>
-                                 </Button>
-
-                                 <Button fx:id="btnXemYeuCauDichVu" text="🛠️ Yêu Cầu Dịch Vụ" minHeight="60.0" 
-                                         style="-fx-background-color: linear-gradient(to right, #1e3c72, #2a5298); -fx-text-fill: white; -fx-font-size: 14px; -fx-font-weight: bold; -fx-background-radius: 8;"
-                                         HBox.hgrow="ALWAYS">
-                                    <font>
-                                       <Font size="14.0" />
-                                    </font>
-                                 </Button>
-
-                                 <Button text="🏠 Tài Sản &amp; Thiết Bị" minHeight="60.0" 
-                                         style="-fx-background-color: linear-gradient(to right, #1e3c72, #2a5298); -fx-text-fill: white; -fx-font-size: 14px; -fx-font-weight: bold; -fx-background-radius: 8;"
-                                         HBox.hgrow="ALWAYS">
-                                    <font>
-                                       <Font size="14.0" />
-                                    </font>
-                                 </Button>
-                              </children>
-                           </HBox>
-                        </children>
-                     </VBox>
-
-                     <!-- Logout Button -->
-                     <HBox alignment="CENTER_RIGHT">
-                        <children>
-                           <Button fx:id="btnLogout" onAction="#handleLogout" prefHeight="45.0" prefWidth="180.0" 
-                                   text="🚪 Đăng xuất" style="-fx-background-color: #dc3545; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 8;">
-                              <font>
-                                 <Font size="14.0" />
-                              </font>
-                              <VBox.margin>
-                                 <Insets top="10.0" />
-                              </VBox.margin>
-                           </Button>
-                        </children>
-                     </HBox>
-                  </VBox>
+                  </HBox>
                </children>
             </VBox>
          </content>

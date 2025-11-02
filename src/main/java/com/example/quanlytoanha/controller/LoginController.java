@@ -148,10 +148,18 @@ public class LoginController {
             FXMLLoader loader = new FXMLLoader(getClass().getResource(fxmlFile));
             Parent root = loader.load();
 
-            // 4. Hiển thị cửa sổ mới
+            // 4. Load CSS stylesheet tương ứng với role
+            Scene scene = new Scene(root, 800, 600);
+            if (user.getRole() == Role.ADMIN) {
+                scene.getStylesheets().add(getClass().getResource("/com/example/quanlytoanha/view/styles/admin-styles.css").toExternalForm());
+            } else if (user.getRole() == Role.ACCOUNTANT) {
+                scene.getStylesheets().add(getClass().getResource("/com/example/quanlytoanha/view/styles/accountant-styles.css").toExternalForm());
+            }
+
+            // 5. Hiển thị cửa sổ mới
             Stage mainStage = new Stage();
             mainStage.setTitle("Dashboard - " + user.getFullName());
-            mainStage.setScene(new Scene(root, 800, 600)); // Kích thước lớn hơn để hiển thị đầy đủ
+            mainStage.setScene(scene); // Kích thước lớn hơn để hiển thị đầy đủ
             mainStage.setResizable(true); // Cho phép resize
             mainStage.setMaximized(true); // Set full screen
             mainStage.show();

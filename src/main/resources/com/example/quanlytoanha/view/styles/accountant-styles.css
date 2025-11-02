@@ -1,0 +1,317 @@
+/* ============================================
+   ACCOUNTANT DASHBOARD - MODERN CSS STYLES
+   ============================================ */
+
+/* Root và Background */
+.root {
+    -fx-font-family: "Segoe UI", "System", sans-serif;
+    -fx-font-size: 16px; /* Tăng từ 14px */
+    -fx-background-color: #f0f4f8;
+}
+
+/* ============================================
+   TOP HEADER
+   ============================================ */
+.accountant-header {
+    -fx-background-color: #1e3c72; /* Màu xanh đậm giống admin */
+    -fx-padding: 25px 20px; /* Tăng padding */
+    -fx-background-radius: 12px;
+    -fx-effect: dropshadow(gaussian, rgba(30, 60, 114, 0.3), 12, 0, 0, 4);
+}
+
+.accountant-header-title {
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-font-size: 28px; /* Tăng từ 26px */
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.2), 5, 0, 0, 2);
+}
+
+.accountant-welcome {
+    -fx-text-fill: rgba(255, 255, 255, 0.95);
+    -fx-font-size: 16px; /* Tăng từ 14px */
+}
+
+/* ============================================
+   TAB PANE
+   ============================================ */
+.tab-pane {
+    -fx-tab-min-width: 200px; /* Tăng từ 180px */
+    -fx-tab-min-height: 50px; /* Tăng từ 45px */
+}
+
+.tab-pane .tab {
+    -fx-background-color: #e8f4f8;
+    -fx-background-radius: 8px 8px 0 0;
+    -fx-padding: 12px 24px; /* Tăng padding */
+    -fx-font-weight: bold;
+    -fx-font-size: 16px; /* Tăng từ 14px */
+    -fx-text-fill: #2c5282;
+}
+
+.tab-pane .tab:selected {
+    -fx-background-color: white;
+    -fx-text-fill: #1e3c72; /* Màu xanh đậm giống admin */
+}
+
+.tab-pane .tab:hover {
+    -fx-background-color: #d1e7f0;
+}
+
+.tab-pane .tab-content-area {
+    -fx-background-color: white;
+    -fx-padding: 20px; /* Tăng từ 15px */
+}
+
+/* ============================================
+   STATISTICS CARD
+   ============================================ */
+.stats-card {
+    -fx-background-color: white;
+    -fx-padding: 25px; /* Tăng từ 20px */
+    -fx-background-radius: 12px;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.08), 12, 0, 0, 3);
+}
+
+.stats-title {
+    -fx-text-fill: #1e3c72; /* Màu xanh đậm giống admin */
+    -fx-font-weight: bold;
+    -fx-font-size: 22px; /* Tăng từ 20px */
+}
+
+.stats-label {
+    -fx-text-fill: #2c5282;
+    -fx-font-size: 16px; /* Tăng từ 14px */
+}
+
+.stats-value {
+    -fx-font-weight: bold;
+    -fx-font-size: 20px; /* Tăng từ 18px */
+}
+
+.stats-value-debt {
+    -fx-text-fill: #e53e3e;
+}
+
+.stats-value-overdue {
+    -fx-text-fill: #c53030;
+}
+
+.stats-value-invoice {
+    -fx-text-fill: #1e3c72; /* Màu xanh đậm giống admin */
+}
+
+/* ============================================
+   BUTTONS
+   ============================================ */
+.btn-success {
+    -fx-background-color: #28a745; /* Màu xanh lá giống admin */
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-font-size: 15px; /* Tăng font size */
+    -fx-background-radius: 8px;
+    -fx-padding: 12px 24px; /* Tăng padding */
+    -fx-cursor: hand;
+    -fx-effect: dropshadow(gaussian, rgba(40, 167, 69, 0.3), 8, 0, 0, 3);
+}
+
+.btn-success:hover {
+    -fx-background-color: #218838; /* Màu xanh lá đậm hơn khi hover */
+    -fx-effect: dropshadow(gaussian, rgba(40, 167, 69, 0.5), 12, 0, 0, 5);
+    -fx-translate-y: -2px;
+}
+
+.btn-success:pressed {
+    -fx-translate-y: 0px;
+    -fx-effect: dropshadow(gaussian, rgba(40, 167, 69, 0.2), 5, 0, 0, 2);
+}
+
+.btn-info {
+    -fx-background-color: #1e3c72; /* Màu xanh đậm giống admin */
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-font-size: 15px; /* Tăng font size */
+    -fx-background-radius: 8px;
+    -fx-padding: 12px 24px; /* Tăng padding */
+    -fx-cursor: hand;
+    -fx-effect: dropshadow(gaussian, rgba(30, 60, 114, 0.3), 8, 0, 0, 3);
+}
+
+.btn-info:hover {
+    -fx-background-color: #2a5298; /* Màu xanh nhạt hơn khi hover */
+    -fx-effect: dropshadow(gaussian, rgba(30, 60, 114, 0.5), 12, 0, 0, 5);
+    -fx-translate-y: -2px;
+}
+
+.btn-danger {
+    -fx-background-color: #dc3545; /* Màu đỏ solid thay vì gradient */
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-font-size: 15px; /* Tăng font size */
+    -fx-background-radius: 8px;
+    -fx-padding: 12px 24px; /* Tăng padding */
+    -fx-cursor: hand;
+    -fx-effect: dropshadow(gaussian, rgba(220, 53, 69, 0.3), 8, 0, 0, 3);
+}
+
+.btn-danger:hover {
+    -fx-background-color: #c82333; /* Màu đỏ đậm hơn khi hover */
+    -fx-effect: dropshadow(gaussian, rgba(220, 53, 69, 0.5), 12, 0, 0, 5);
+    -fx-translate-y: -2px;
+}
+
+.btn-logout {
+    -fx-background-color: #eb3349; /* Màu đỏ solid thay vì gradient */
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-font-size: 15px; /* Tăng font size */
+    -fx-background-radius: 8px;
+    -fx-padding: 12px 24px; /* Tăng padding */
+    -fx-cursor: hand;
+    -fx-effect: dropshadow(gaussian, rgba(235, 51, 73, 0.3), 8, 0, 0, 3);
+    -fx-min-width: -fx-pref-width; /* Giữ nguyên kích thước */
+    -fx-min-height: -fx-pref-height; /* Giữ nguyên kích thước */
+}
+
+.btn-logout:hover {
+    -fx-background-color: #dc3545; /* Màu đỏ đậm hơn khi hover */
+    -fx-effect: dropshadow(gaussian, rgba(235, 51, 73, 0.5), 12, 0, 0, 5);
+    /* Bỏ -fx-translate-y để không làm header bị co */
+}
+
+/* ============================================
+   TABLE VIEW
+   ============================================ */
+.table-view {
+    -fx-background-color: white;
+    -fx-background-radius: 8px;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.06), 10, 0, 0, 2);
+}
+
+.table-view .column-header-background {
+    -fx-background-color: #1e3c72; /* Màu xanh đậm giống admin */
+    -fx-background-radius: 8px 8px 0 0;
+}
+
+.table-view .column-header {
+    -fx-background-color: transparent;
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-font-size: 15px; /* Tăng từ 13px */
+    -fx-padding: 12px; /* Tăng từ 10px */
+}
+
+.table-view .column-header .label {
+    -fx-text-fill: white;
+}
+
+.table-row-cell {
+    -fx-background-color: white;
+    -fx-font-size: 15px; /* Tăng font size cho table cells */
+}
+
+.table-row-cell:odd {
+    -fx-background-color: #f7fafc;
+}
+
+.table-row-cell:hover {
+    -fx-background-color: #e6fffa;
+}
+
+.table-row-cell:selected {
+    -fx-background-color: #b2f5ea;
+    -fx-text-fill: #2c5282;
+}
+
+/* ============================================
+   TITLED PANE
+   ============================================ */
+.titled-pane {
+    -fx-text-fill: #1e3c72; /* Màu xanh đậm giống admin */
+    -fx-font-weight: bold;
+    -fx-font-size: 17px; /* Tăng font size */
+    -fx-background-color: white;
+    -fx-border-color: #d1e8f0;
+    -fx-border-width: 1px;
+    -fx-border-radius: 8px;
+}
+
+.titled-pane .title {
+    -fx-background-color: #d1e8f0; /* Màu xanh nhạt */
+    -fx-background-radius: 8px 8px 0 0;
+    -fx-padding: 12px 18px; /* Tăng padding */
+}
+
+.titled-pane .content {
+    -fx-background-color: white;
+    -fx-background-radius: 0 0 8px 8px;
+    -fx-padding: 18px; /* Tăng từ 15px */
+}
+
+/* ============================================
+   TEXT FIELD & TEXT AREA
+   ============================================ */
+.text-field, .text-area {
+    -fx-background-color: #f7fafc;
+    -fx-background-radius: 6px;
+    -fx-border-color: #cbd5e0;
+    -fx-border-radius: 6px;
+    -fx-border-width: 1px;
+    -fx-padding: 10px 14px; /* Tăng từ 8px 12px */
+    -fx-font-size: 15px; /* Tăng font size */
+}
+
+.text-field:focused, .text-area:focused {
+    -fx-background-color: white;
+    -fx-border-color: #1e3c72; /* Màu xanh đậm giống admin */
+    -fx-border-width: 2px;
+}
+
+/* ============================================
+   CHECKBOX
+   ============================================ */
+.check-box {
+    -fx-text-fill: #2c5282;
+    -fx-font-size: 16px; /* Tăng từ 14px */
+}
+
+.check-box .box {
+    -fx-background-color: white;
+    -fx-border-color: #1e3c72; /* Màu xanh đậm giống admin */
+    -fx-border-width: 2px;
+    -fx-background-radius: 4px;
+    -fx-border-radius: 4px;
+}
+
+.check-box:selected .mark {
+    -fx-background-color: #1e3c72; /* Màu xanh đậm giống admin */
+}
+
+/* ============================================
+   LABEL
+   ============================================ */
+.label-primary {
+    -fx-text-fill: #1e3c72; /* Màu xanh đậm giống admin */
+    -fx-font-weight: bold;
+    -fx-font-size: 17px; /* Tăng font size */
+}
+
+.label-secondary {
+    -fx-text-fill: #2c5282;
+    -fx-font-size: 16px; /* Tăng font size */
+}
+
+/* ============================================
+   BACKGROUND COLORS
+   ============================================ */
+.bg-white {
+    -fx-background-color: white;
+}
+
+.bg-light {
+    -fx-background-color: #f7fafc;
+}
+
+.bg-primary-light {
+    -fx-background-color: #e6fffa;
+}
+

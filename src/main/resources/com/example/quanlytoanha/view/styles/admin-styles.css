@@ -1,0 +1,469 @@
+/* ============================================
+   ADMIN DASHBOARD - MODERN CSS STYLES
+   ============================================ */
+
+/* Root và Background */
+.root {
+    -fx-font-family: "Segoe UI", "System", sans-serif;
+    -fx-font-size: 16px; /* Tăng từ 14px lên 16px */
+}
+
+/* ScrollPane */
+.scroll-pane {
+    -fx-background: #f5f7fa;
+    -fx-background-color: transparent;
+}
+
+.scroll-pane .viewport {
+    -fx-background-color: transparent;
+}
+
+/* ============================================
+   HEADER SECTION
+   ============================================ */
+.header-container {
+    -fx-background-color: #1e3c72;
+    -fx-padding: 25px 35px; /* Tăng padding */
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.2), 10, 0, 0, 2);
+}
+
+.header-title {
+    -fx-text-fill: white;
+    -fx-font-size: 28px; /* Tăng từ 24px lên 28px */
+    -fx-font-weight: bold;
+}
+
+/* ============================================
+   STATISTICS TILES
+   ============================================ */
+.stat-tile {
+    -fx-background-color: white;
+    -fx-padding: 35px 30px; /* Tăng padding */
+    -fx-background-radius: 20px; /* Bo góc lớn hơn */
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.1), 20, 0, 0, 5);
+    -fx-min-width: 220px; /* Tăng kích thước */
+    -fx-min-height: 200px; /* Tăng kích thước */
+    -fx-cursor: hand;
+}
+
+.stat-tile:hover {
+    -fx-effect: dropshadow(gaussian, rgba(30, 60, 114, 0.4), 25, 0, 0, 10);
+    -fx-translate-y: -8px; /* Nâng lên cao hơn khi hover */
+}
+
+.stat-icon {
+    -fx-font-size: 56px; /* Tăng từ 42px lên 56px */
+    -fx-padding: 0 0 12px 0;
+}
+
+.stat-value {
+    -fx-font-size: 48px; /* Tăng từ 36px lên 48px */
+    -fx-font-weight: bold;
+    -fx-text-fill: #1e3c72;
+}
+
+.stat-label {
+    -fx-font-size: 16px; /* Tăng từ 14px lên 16px */
+    -fx-text-fill: #4a5568; /* Màu đậm hơn cho dễ đọc */
+    -fx-font-weight: 500;
+}
+
+/* ============================================
+   MANAGEMENT SECTIONS
+   ============================================ */
+.section-container {
+    -fx-background-color: white;
+    -fx-padding: 30px 25px; /* Tăng padding */
+    -fx-background-radius: 15px; /* Bo góc lớn hơn */
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.08), 15, 0, 0, 4);
+}
+
+.section-title {
+    -fx-font-size: 22px; /* Tăng từ 18px lên 22px */
+    -fx-font-weight: bold;
+    -fx-text-fill: #1e3c72;
+    -fx-padding: 0 0 20px 0; /* Tăng spacing */
+}
+
+/* ============================================
+   BUTTONS
+   ============================================ */
+.btn-primary {
+    -fx-background-color: #1e3c72;
+    -fx-text-fill: white;
+    -fx-font-size: 13px;
+    -fx-font-weight: bold;
+    -fx-background-radius: 8px;
+    -fx-padding: 10px 20px;
+    -fx-cursor: hand;
+    -fx-min-height: 35px;
+    -fx-wrap-text: false;
+}
+
+.btn-primary:hover {
+    -fx-background-color: #2a5298;
+    -fx-translate-y: -3px;
+}
+
+.btn-primary:pressed {
+    -fx-translate-y: 0px;
+    -fx-effect: dropshadow(gaussian, rgba(30, 60, 114, 0.2), 5, 0, 0, 2);
+}
+
+.btn-danger {
+    -fx-background-color: #dc3545;
+    -fx-text-fill: white;
+    -fx-font-size: 13px;
+    -fx-font-weight: bold;
+    -fx-background-radius: 8px;
+    -fx-padding: 10px 20px;
+    -fx-cursor: hand;
+    -fx-min-height: 35px;
+    -fx-wrap-text: false;
+}
+
+.btn-danger:hover {
+    -fx-background-color: #c82333;
+    -fx-translate-y: -3px;
+}
+
+.btn-danger:pressed {
+    -fx-translate-y: 0px;
+}
+
+.btn-success {
+    -fx-background-color: #28a745;
+    -fx-text-fill: white;
+    -fx-font-size: 13px;
+    -fx-font-weight: bold;
+    -fx-background-radius: 8px;
+    -fx-padding: 10px 20px;
+    -fx-cursor: hand;
+    -fx-min-height: 35px;
+    -fx-wrap-text: false;
+}
+
+.btn-success:hover {
+    -fx-background-color: #218838;
+    -fx-translate-y: -3px;
+}
+
+.btn-success:pressed {
+    -fx-translate-y: 0px;
+}
+
+/* Button với full width */
+.btn-full-width {
+    -fx-min-height: 75px; /* Tăng từ 65px lên 75px */
+    -fx-max-width: Infinity;
+    -fx-font-size: 16px; /* Tăng font size */
+}
+
+/* ============================================
+   VBOX & HBOX SPACING
+   ============================================ */
+.vbox-spacing {
+    -fx-spacing: 35px; /* Tăng từ 25px lên 35px */
+    -fx-padding: 40px 60px; /* Tăng padding */
+    -fx-background-color: #f5f7fa;
+}
+
+.hbox-spacing {
+    -fx-spacing: 30px; /* Tăng từ 20px lên 30px */
+    -fx-alignment: center;
+}
+
+/* ============================================
+   TABLE VIEW
+   ============================================ */
+.table-view {
+    -fx-background-color: white;
+    -fx-background-radius: 8px;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.06), 10, 0, 0, 2);
+}
+
+.table-view .column-header-background {
+    -fx-background-color: #1e3c72;
+    -fx-background-radius: 8px 8px 0 0;
+}
+
+.table-view .column-header {
+    -fx-background-color: transparent;
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-font-size: 15px; /* Tăng từ 13px lên 15px */
+    -fx-padding: 15px; /* Tăng từ 10px lên 15px */
+}
+
+.table-view .column-header .label {
+    -fx-text-fill: white;
+}
+
+.table-row-cell {
+    -fx-background-color: white;
+}
+
+.table-row-cell:odd {
+    -fx-background-color: #f8f9fa;
+}
+
+.table-row-cell:hover {
+    -fx-background-color: #e9ecef;
+}
+
+.table-row-cell:selected {
+    -fx-background-color: #d1e0f0;
+    -fx-text-fill: #1e3c72;
+}
+
+/* ============================================
+   BACKGROUND COLORS
+   ============================================ */
+.bg-light {
+    -fx-background-color: #f5f7fa;
+}
+
+/* ============================================
+   SIDEBAR MENU
+   ============================================ */
+.hamburger-button {
+    -fx-background-color: transparent;
+    -fx-text-fill: white;
+    -fx-font-size: 30px; /* Tăng từ 24px lên 30px */
+    -fx-font-weight: bold;
+    -fx-cursor: hand;
+    -fx-padding: 15px; /* Tăng padding */
+    -fx-background-radius: 8px;
+    -fx-min-width: 50px;
+    -fx-min-height: 50px;
+}
+
+.hamburger-button:hover {
+    -fx-background-color: rgba(255, 255, 255, 0.1);
+}
+
+.sidebar {
+    -fx-background-color: #1e3c72;
+    -fx-pref-width: 280px; /* Tăng từ 250px lên 280px */
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.3), 15, 0, 0, 0);
+}
+
+.sidebar-menu-item {
+    -fx-background-color: transparent;
+    -fx-text-fill: white;
+    -fx-font-size: 17px; /* Tăng từ 15px lên 17px */
+    -fx-font-weight: 500; /* Tăng độ đậm */
+    -fx-alignment: CENTER_LEFT;
+    -fx-padding: 20px 25px; /* Tăng padding */
+    -fx-cursor: hand;
+    -fx-border-width: 0;
+    -fx-min-height: 55px; /* Tăng chiều cao */
+}
+
+.sidebar-menu-item:hover {
+    -fx-background-color: #2a5298;
+}
+
+.sidebar-menu-item:pressed {
+    -fx-background-color: #1a2f5a;
+}
+
+.sidebar-user-section {
+    -fx-background-color: #1a2f5a;
+}
+
+.sidebar-user-name {
+    -fx-text-fill: white;
+    -fx-font-size: 20px; /* Tăng từ 16px lên 20px */
+    -fx-font-weight: bold;
+}
+
+.sidebar-user-role {
+    -fx-text-fill: rgba(255, 255, 255, 0.9); /* Tăng độ sáng */
+    -fx-font-size: 15px; /* Tăng từ 13px lên 15px */
+    -fx-font-weight: 500;
+}
+
+.sidebar-logout-btn {
+    -fx-background-color: #dc3545;
+    -fx-text-fill: white;
+    -fx-font-size: 16px; /* Tăng từ 14px lên 16px */
+    -fx-font-weight: bold;
+    -fx-background-radius: 10px;
+    -fx-padding: 16px; /* Tăng padding */
+    -fx-cursor: hand;
+    -fx-alignment: CENTER;
+    -fx-min-height: 50px; /* Tăng chiều cao */
+}
+
+.sidebar-logout-btn:hover {
+    -fx-background-color: #c82333;
+}
+
+.sidebar-logout-btn:pressed {
+    -fx-background-color: #bd2130;
+}
+
+.content-area {
+    -fx-background-color: #f5f7fa;
+}
+
+/* ============================================
+   CHARTS
+   ============================================ */
+.chart-container {
+    -fx-background-color: white;
+    -fx-padding: 25px;
+    -fx-background-radius: 15px;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.08), 15, 0, 0, 4);
+    -fx-min-width: 450px;
+    -fx-min-height: 350px;
+    -fx-pref-width: 550px;
+    -fx-pref-height: 450px;
+}
+
+.chart-title {
+    -fx-font-size: 20px; /* Tăng font size */
+    -fx-font-weight: bold;
+    -fx-text-fill: #1e3c72;
+    -fx-padding: 0 0 15px 0;
+}
+
+/* Resident Status Cards */
+.resident-stat-card {
+    -fx-background-color: white;
+    -fx-padding: 30px 25px;
+    -fx-background-radius: 15px;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.1), 15, 0, 0, 4);
+    -fx-min-width: 180px;
+    -fx-pref-width: 200px;
+    -fx-min-height: 200px;
+}
+
+.resident-stat-card:hover {
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.2), 20, 0, 0, 6);
+    -fx-translate-y: -5px;
+}
+
+.resident-stat-green {
+    -fx-background-color: linear-gradient(to bottom, #d4edda, #ffffff);
+    -fx-border-color: #28a745;
+    -fx-border-width: 3px;
+    -fx-border-radius: 15px;
+}
+
+.resident-stat-red {
+    -fx-background-color: linear-gradient(to bottom, #f8d7da, #ffffff);
+    -fx-border-color: #dc3545;
+    -fx-border-width: 3px;
+    -fx-border-radius: 15px;
+}
+
+.resident-stat-yellow {
+    -fx-background-color: linear-gradient(to bottom, #fff3cd, #ffffff);
+    -fx-border-color: #ffc107;
+    -fx-border-width: 3px;
+    -fx-border-radius: 15px;
+}
+
+.resident-stat-icon {
+    -fx-font-size: 48px;
+    -fx-padding: 0 0 10px 0;
+}
+
+.resident-stat-value {
+    -fx-font-size: 42px;
+    -fx-font-weight: bold;
+}
+
+.resident-stat-green .resident-stat-value {
+    -fx-text-fill: #28a745;
+}
+
+.resident-stat-red .resident-stat-value {
+    -fx-text-fill: #dc3545;
+}
+
+.resident-stat-yellow .resident-stat-value {
+    -fx-text-fill: #ff9800;
+}
+
+.resident-stat-label {
+    -fx-font-size: 16px;
+    -fx-text-fill: #4a5568;
+    -fx-font-weight: 500;
+}
+
+.chart-bar {
+    -fx-legend-side: bottom;
+    -fx-legend-visible: true;
+    -fx-background-color: transparent;
+    -fx-padding: 10px;
+}
+
+.chart-bar .chart-series-bar {
+    -fx-background-color: transparent;
+}
+
+.chart-bar .default-color0.chart-bar {
+    -fx-bar-fill: #28a745; /* Xanh lá cho Đang ở */
+}
+
+.chart-bar .default-color1.chart-bar {
+    -fx-bar-fill: #dc3545; /* Đỏ cho Đã chuyển đi */
+}
+
+.chart-bar .default-color2.chart-bar {
+    -fx-bar-fill: #ffc107; /* Vàng cho Tạm trú */
+}
+
+/* Đảm bảo màu được áp dụng cho các cột */
+.chart-bar .bar {
+    -fx-bar-fill: #28a745;
+}
+
+.chart-bar .data0.chart-bar {
+    -fx-bar-fill: #28a745;
+}
+
+.chart-bar .data1.chart-bar {
+    -fx-bar-fill: #dc3545;
+}
+
+.chart-bar .data2.chart-bar {
+    -fx-bar-fill: #ffc107;
+}
+
+.debt-chart-container {
+    -fx-padding: 30px 20px;
+}
+
+.debt-paid-value {
+    -fx-font-size: 36px; /* Tăng font size */
+    -fx-font-weight: bold;
+    -fx-text-fill: #28a745;
+}
+
+.debt-paid-label {
+    -fx-font-size: 16px;
+    -fx-text-fill: #6b7280;
+}
+
+.debt-progress {
+    -fx-pref-height: 25px; /* Tăng chiều cao progress bar */
+}
+
+.debt-progress .track {
+    -fx-background-color: #e9ecef;
+    -fx-background-radius: 12px;
+}
+
+.debt-progress .bar {
+    -fx-background-color: linear-gradient(to right, #28a745, #20c997);
+    -fx-background-radius: 12px;
+}
+
+/* ============================================
+   TRANSITIONS (sử dụng trong Java code)
+   ============================================ */
+

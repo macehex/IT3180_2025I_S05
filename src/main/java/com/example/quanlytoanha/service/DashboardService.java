@@ -36,4 +36,32 @@ public class DashboardService {
 
         return stats;
     }
+
+    /**
+     * Lấy số lượng cư dân theo trạng thái cho chart
+     */
+    public Map<String, Integer> getResidentStatusStats() throws SecurityException, SQLException {
+        User currentUser = SessionManager.getInstance().getCurrentUser();
+        if (currentUser == null || currentUser.getRole() != Role.ADMIN) {
+            throw new SecurityException("Chỉ Ban Quản Trị mới có quyền xem thống kê này.");
+        }
+
+        Map<String, Integer> stats = new HashMap<>();
+        stats.put("RESIDING", dashboardDAO.getResidingResidentsCount());
+        stats.put("MOVED_OUT", dashboardDAO.getMovedOutResidentsCount());
+        stats.put("TEMPORARY", dashboardDAO.getTemporaryResidentsCount());
+        return stats;
+    }
+
+    /**
+     * Lấy tổng số tiền đã thanh toán
+     */
+    public BigDecimal getTotalPaidAmount() throws SecurityException, SQLException {
+        User currentUser = SessionManager.getInstance().getCurrentUser();
+        if (currentUser == null || currentUser.getRole() != Role.ADMIN) {
+            throw new SecurityException("Chỉ Ban Quản Trị mới có quyền xem thống kê này.");
+        }
+
+        return dashboardDAO.getTotalPaidAmount();
+    }
 }

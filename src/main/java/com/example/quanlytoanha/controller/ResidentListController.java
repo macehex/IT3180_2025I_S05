@@ -2,8 +2,6 @@ package com.example.quanlytoanha.controller;
 
 import com.example.quanlytoanha.dao.ResidentDAO;
 import com.example.quanlytoanha.model.Resident;
-import com.example.quanlytoanha.session.SessionManager;
-import com.example.quanlytoanha.model.User;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
@@ -11,7 +9,6 @@ import javafx.fxml.Initializable;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.text.Text;
-import javafx.stage.Stage;
 
 import java.net.URL;
 import java.sql.SQLException;
@@ -22,7 +19,6 @@ import java.util.ResourceBundle;
 public class ResidentListController implements Initializable {
 
     // FXML Components - Header
-    @FXML private Label lblWelcome;
 
     // FXML Components - Search Section
     @FXML private TextField txtSearchName;
@@ -66,9 +62,6 @@ public class ResidentListController implements Initializable {
         
         // Load initial data
         loadAllResidents();
-        
-        // Setup welcome message
-        setupWelcomeMessage();
     }
 
     private void setupTableColumns() {
@@ -116,12 +109,6 @@ public class ResidentListController implements Initializable {
         cmbStatus.setValue("Tất cả");
     }
 
-    private void setupWelcomeMessage() {
-        User currentUser = SessionManager.getInstance().getCurrentUser();
-        if (currentUser != null) {
-            lblWelcome.setText("Xin chào, " + currentUser.getFullName());
-        }
-    }
 
     @FXML
     private void handleSearch() {

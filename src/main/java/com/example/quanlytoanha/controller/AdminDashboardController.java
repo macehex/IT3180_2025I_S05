@@ -7,9 +7,12 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.chart.PieChart;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.control.ProgressBar;
+import javafx.scene.layout.VBox;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 
@@ -27,11 +30,17 @@ public class AdminDashboardController {
     @FXML private Button btnXemYeuCauDichVu;
     @FXML private Button btnXemDanhSachCuDan;
     @FXML private Button btnLogout;
+    @FXML private Button btnMenuToggle;
+    @FXML private VBox sidebar;
+    @FXML private Label lblUserName;
 
     @FXML private Label lblTotalResidents;
     @FXML private Label lblTotalApartments;
     @FXML private Label lblTotalDebt;
     @FXML private Label lblTotalUnpaidInvoices;
+    @FXML private PieChart residentStatusPieChart;
+    @FXML private Label lblTotalPaid;
+    @FXML private ProgressBar debtProgressBar;
 
     // --- THÊM: Khai báo Service ---
     private DashboardService dashboardService;
@@ -43,8 +52,14 @@ public class AdminDashboardController {
 
         if (currentUser != null) {
             lblWelcome.setText("Xin chào, " + currentUser.getFullName() + " (Ban Quản Trị)");
+            
+            // Set tên user trong sidebar
+            if (lblUserName != null) {
+                lblUserName.setText(currentUser.getFullName());
+            }
 
             loadDashboardStats();
+            loadCharts();
 
             if (btnThemCuDan != null) {
                 boolean hasPermission = currentUser.hasPermission("CREATE_RESIDENT");
@@ -98,6 +113,59 @@ public class AdminDashboardController {
         }
     }
 
+    
+    /**
+     * Load dữ liệu vào các charts
+     */
+    private void loadCharts() {
+        try {
+            // Load Resident Status Pie Chart
+            if (residentStatusPieChart != null) {
+                Map<String, Integer> residentStats = dashboardService.getResidentStatusStats();
+                int residing = residentStats.getOrDefault("RESIDING", 0);
+                int movedOut = residentStats.getOrDefault("MOVED_OUT", 0);
+                int temporary = residentStats.getOrDefault("TEMPORARY", 0);
+                
+                // Tạo dữ liệu cho PieChart
+                PieChart.Data residingData = new PieChart.Data("Đang ở (" + residing + ")", residing);
+                PieChart.Data movedOutData = new PieChart.Data("Đã chuyển đi (" + movedOut + ")", movedOut);
+                PieChart.Data temporaryData = new PieChart.Data("Tạm trú (" + temporary + ")", temporary);
+                
+                residentStatusPieChart.getData().clear();
+                residentStatusPieChart.getData().addAll(residingData, movedOutData, temporaryData);
+                
+                // Tùy chỉnh màu sắc cho các phần của pie chart
+                residentStatusPieChart.setAnimated(true);
+            }
+
+            // Load Debt Paid
+            if (lblTotalPaid != null && debtProgressBar != null) {
+                BigDecimal totalPaid = dashboardService.getTotalPaidAmount();
+                
+                // Format số tiền đã thanh toán
+                lblTotalPaid.setText(String.format("%,.0f VNĐ", totalPaid.doubleValue()));
+                
+                // Lấy tổng nợ hiện tại
+                Map<String, Object> stats = dashboardService.getAdminDashboardStats();
+                BigDecimal totalDebt = (BigDecimal) stats.get("totalDebt");
+                
+                // Tính phần trăm đã thanh toán (so với tổng nợ + đã thanh toán)
+                BigDecimal total = totalPaid.add(totalDebt);
+                if (total.compareTo(BigDecimal.ZERO) > 0 && totalPaid.compareTo(BigDecimal.ZERO) > 0) {
+                    double progress = totalPaid.doubleValue() / total.doubleValue();
+                    debtProgressBar.setProgress(Math.min(progress, 1.0)); // Đảm bảo không vượt quá 1.0
+                } else {
+                    debtProgressBar.setProgress(0);
+                }
+            }
+        } catch (SecurityException e) {
+            System.err.println("Lỗi phân quyền khi tải charts: " + e.getMessage());
+        } catch (Exception e) {
+            System.err.println("Lỗi khi tải charts: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+
     private void handleOpenAddResidentForm() {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/example/quanlytoanha/view/add_resident_form.fxml"));
@@ -121,11 +189,15 @@ public class AdminDashboardController {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/example/quanlytoanha/view/UserManagement.fxml"));
             Parent root = loader.load();
 
+            Scene scene = new Scene(root, 900, 600);
+            // Load CSS cho UserManagement
+            scene.getStylesheets().add(getClass().getResource("/com/example/quanlytoanha/view/styles/admin-styles.css").toExternalForm());
+
             Stage stage = new Stage();
             stage.setTitle("Quản lý tài khoản người dùng");
             stage.initModality(Modality.WINDOW_MODAL);
             stage.initOwner(btnQuanLyTaiKhoan.getScene().getWindow());
-            stage.setScene(new Scene(root, 900, 600));
+            stage.setScene(scene);
             stage.setResizable(true);
             stage.showAndWait();
 
@@ -157,13 +229,27 @@ public class AdminDashboardController {
             stage.setTitle("Danh sách cư dân");
             stage.initModality(Modality.WINDOW_MODAL);
             stage.initOwner(btnXemDanhSachCuDan.getScene().getWindow());
-            stage.setScene(new Scene(root, 1000, 700));
+            stage.setScene(new Scene(root, 1300, 750));
             stage.setResizable(true);
+            stage.setMinWidth(1200);
+            stage.setMinHeight(700);
             stage.showAndWait();
 
         } catch (IOException e) {
             e.printStackTrace();
             showAlert(Alert.AlertType.ERROR, "Lỗi", "Không thể tải danh sách cư dân.");
+        }
+    }
+
+    /**
+     * Toggle sidebar menu - Ẩn/hiện menu sidebar
+     */
+    @FXML
+    private void toggleSidebar() {
+        if (sidebar != null) {
+            boolean isVisible = sidebar.isVisible();
+            sidebar.setVisible(!isVisible);
+            sidebar.setManaged(!isVisible);
         }
     }
 

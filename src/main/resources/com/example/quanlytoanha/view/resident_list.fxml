@@ -16,9 +16,6 @@
             <children>
                 <Label text="🏢 QUẢN LÝ DANH SÁCH CƯ DÂN" 
                        style="-fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: white;"/>
-                <Region HBox.hgrow="ALWAYS"/>
-                <Label fx:id="lblWelcome" text="Xin chào, Quản Trị Viên" 
-                       style="-fx-text-fill: white; -fx-font-size: 16px; -fx-font-weight: bold;"/>
             </children>
         </HBox>
     </top>
@@ -61,10 +58,10 @@
                         <children>
                             <Button fx:id="btnSearch" text="🔍 Tìm kiếm" onAction="#handleSearch" 
                                     prefHeight="40.0" prefWidth="150.0"
-                                    style="-fx-background-color: linear-gradient(to right, #1e3c72, #2a5298); -fx-text-fill: white; -fx-font-size: 14px; -fx-font-weight: bold; -fx-background-radius: 8; -fx-padding: 10;"/>
+                                    style="-fx-background-color: #28a745; -fx-text-fill: white; -fx-font-size: 14px; -fx-font-weight: bold; -fx-background-radius: 8; -fx-padding: 10;"/>
                             <Button fx:id="btnShowAll" text="🔄 Hiển thị tất cả" onAction="#handleShowAll" 
-                                    prefHeight="40.0" prefWidth="160.0"
-                                    style="-fx-background-color: linear-gradient(to right, #1e3c72, #2a5298); -fx-text-fill: white; -fx-font-size: 14px; -fx-font-weight: bold; -fx-background-radius: 8; -fx-padding: 10;"/>
+                                    prefHeight="40.0" prefWidth="170.0"
+                                    style="-fx-background-color: #1e3c72; -fx-text-fill: white; -fx-font-size: 14px; -fx-font-weight: bold; -fx-background-radius: 8; -fx-padding: 10;"/>
                         </children>
                     </HBox>
 

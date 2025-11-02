@@ -62,4 +62,56 @@ public class DashboardDAO {
         }
         return 0;
     }
+
+    // Lấy số lượng cư dân đang ở (RESIDING)
+    public int getResidingResidentsCount() throws SQLException {
+        String sql = "SELECT COUNT(*) FROM residents WHERE status = 'RESIDING'";
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql);
+             ResultSet rs = stmt.executeQuery()) {
+            if (rs.next()) {
+                return rs.getInt(1);
+            }
+        }
+        return 0;
+    }
+
+    // Lấy số lượng cư dân đã chuyển đi (MOVED_OUT)
+    public int getMovedOutResidentsCount() throws SQLException {
+        String sql = "SELECT COUNT(*) FROM residents WHERE status = 'MOVED_OUT'";
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql);
+             ResultSet rs = stmt.executeQuery()) {
+            if (rs.next()) {
+                return rs.getInt(1);
+            }
+        }
+        return 0;
+    }
+
+    // Lấy số lượng cư dân tạm trú (TEMPORARY)
+    public int getTemporaryResidentsCount() throws SQLException {
+        String sql = "SELECT COUNT(*) FROM residents WHERE status = 'TEMPORARY'";
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql);
+             ResultSet rs = stmt.executeQuery()) {
+            if (rs.next()) {
+                return rs.getInt(1);
+            }
+        }
+        return 0;
+    }
+
+    // Lấy tổng số tiền đã thanh toán (từ bảng transactions)
+    public BigDecimal getTotalPaidAmount() throws SQLException {
+        String sql = "SELECT COALESCE(SUM(amount), 0) FROM transactions";
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql);
+             ResultSet rs = stmt.executeQuery()) {
+            if (rs.next()) {
+                return rs.getBigDecimal(1);
+            }
+        }
+        return BigDecimal.ZERO;
+    }
 }
