@@ -32,7 +32,7 @@
                       text="Trang chủ"
                       prefHeight="60.0"
                       maxWidth="Infinity"
-                      style="-fx-background-color: rgba(255,255,255,0.15); -fx-background-radius: 12; -fx-text-fill: white; -fx-font-size: 17px; -fx-font-weight: 500; -fx-font-family: 'DejaVu Sans'; -fx-alignment: center-left; -fx-content-display: left;">
+                      style="-fx-background-color: rgba(255,255,255,0.15); -fx-background-radius: 12; -fx-text-fill: white; -fx-font-size: 17px; -fx-font-weight: 500; -fx-font-family: 'DejaVu Sans'; -fx-alignment: center; -fx-content-display: left;">
             </MFXButton>
             
             <!-- Hóa đơn, tra cứu lịch sử -->
@@ -41,7 +41,7 @@
                       text="Hóa đơn, tra cứu lịch sử"
                       prefHeight="60.0"
                       maxWidth="Infinity"
-                      style="-fx-background-color: rgba(255,255,255,0.15); -fx-background-radius: 12; -fx-text-fill: white; -fx-font-size: 17px; -fx-font-weight: 500; -fx-font-family: 'DejaVu Sans'; -fx-alignment: center-left;">
+                      style="-fx-background-color: rgba(255,255,255,0.15); -fx-background-radius: 12; -fx-text-fill: white; -fx-font-size: 17px; -fx-font-weight: 500; -fx-font-family: 'DejaVu Sans'; -fx-alignment: center;">
             </MFXButton>
 
             <!-- Quản lý lịch sử đăng nhập -->
@@ -50,7 +50,7 @@
                       text="Quản lý lịch sử đăng nhập"
                       prefHeight="60.0"
                       maxWidth="Infinity"
-                      style="-fx-background-color: rgba(255,255,255,0.15); -fx-background-radius: 12; -fx-text-fill: white; -fx-font-size: 17px; -fx-font-weight: 500; -fx-font-family: 'DejaVu Sans'; -fx-alignment: center-left;">
+                      style="-fx-background-color: rgba(255,255,255,0.15); -fx-background-radius: 12; -fx-text-fill: white; -fx-font-size: 17px; -fx-font-weight: 500; -fx-font-family: 'DejaVu Sans'; -fx-alignment: center;">
             </MFXButton>
 
             <!-- Xem thông báo -->
@@ -59,7 +59,7 @@
                       text="Xem thông báo"
                       prefHeight="60.0"
                       maxWidth="Infinity"
-                      style="-fx-background-color: rgba(255,255,255,0.15); -fx-background-radius: 12; -fx-text-fill: white; -fx-font-size: 17px; -fx-font-weight: 500; -fx-font-family: 'DejaVu Sans'; -fx-alignment: center-left;">
+                      style="-fx-background-color: rgba(255,255,255,0.15); -fx-background-radius: 12; -fx-text-fill: white; -fx-font-size: 17px; -fx-font-weight: 500; -fx-font-family: 'DejaVu Sans'; -fx-alignment: center;">
             </MFXButton>
             
         </VBox>
