@@ -35,7 +35,7 @@
                 <Button fx:id="changePasswordButton"
                         onAction="#handleChangePassword"
                         text="Đổi mật khẩu"
-                        style="-fx-font-size: 18.2px; -fx-background-color: #007bff; -fx-text-fill: white; -fx-font-family: 'DejaVu Sans';"
+                        style="-fx-font-size: 18.2px; -fx-background-color: #21468B; -fx-text-fill: white; -fx-font-family: 'DejaVu Sans';"
                         prefWidth="200"/>
             </children>
         </VBox>

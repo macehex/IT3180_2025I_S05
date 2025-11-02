@@ -28,7 +28,7 @@
                 <ComboBox fx:id="invoiceSelector" promptText="Chọn hóa đơn" maxWidth="Infinity" style="-fx-font-family: 'DejaVu Sans'; -fx-font-size: 16.9px;"/>
                 <TextField fx:id="amountField" promptText="Số tiền" editable="false" style="-fx-font-family: 'DejaVu Sans'; -fx-font-size: 16.9px;"/>
                 <Button text="Thanh Toán Ngay" onAction="#handlePayment"
-                        style="-fx-background-color: #2196F3; -fx-text-fill: white; -fx-font-family: 'DejaVu Sans'; -fx-font-size: 16.9px;"
+                        style="-fx-background-color: #21468B; -fx-text-fill: white; -fx-font-family: 'DejaVu Sans'; -fx-font-size: 16.9px;"
                         maxWidth="Infinity"/>
             </VBox>
         </TitledPane>
