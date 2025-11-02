@@ -12,7 +12,7 @@
 
 <VBox alignment="TOP_CENTER"
       spacing="20.0"
-      style="-fx-background-color: transparent;"
+      style="-fx-background-color: transparent; -fx-font-family: 'DejaVu Sans';"
       xmlns="http://javafx.com/javafx/11.0.1"
       xmlns:fx="http://javafx.com/fxml/1"
       fx:controller="com.example.quanlytoanha.controller.ResidentLoginHistoryAndManagementController">
@@ -23,43 +23,44 @@
 
     <children>
         <!-- Password change section -->
-        <VBox alignment="CENTER" spacing="10">
+        <VBox alignment="CENTER" spacing="10" style="-fx-font-family: 'DejaVu Sans';">
             <children>
-                <Label text="Đổi mật khẩu:" style="-fx-font-size: 16px;"/>
+                <Label text="Đổi mật khẩu:" style="-fx-font-size: 16px; -fx-font-family: 'DejaVu Sans';"/>
 
                 <PasswordField fx:id="newPasswordField"
                                promptText="Nhập mật khẩu mới"
-                               prefWidth="300"/>
+                               prefWidth="300"
+                               style="-fx-font-family: 'DejaVu Sans';"/>
 
                 <Button fx:id="changePasswordButton"
                         onAction="#handleChangePassword"
                         text="Đổi mật khẩu"
-                        style="-fx-font-size: 14px; -fx-background-color: #007bff; -fx-text-fill: white;"
+                        style="-fx-font-size: 14px; -fx-background-color: #007bff; -fx-text-fill: white; -fx-font-family: 'DejaVu Sans';"
                         prefWidth="200"/>
             </children>
         </VBox>
 
         <!-- Login history table -->
-        <Label text="Lịch sử đăng nhập:" style="-fx-font-size: 16px;"/>
+        <Label text="Lịch sử đăng nhập:" style="-fx-font-size: 16px; -fx-font-family: 'DejaVu Sans';"/>
 
-        <TableView fx:id="loginHistoryTable" prefHeight="300" prefWidth="600">
+        <TableView fx:id="loginHistoryTable" prefHeight="300" prefWidth="600" style="-fx-font-family: 'DejaVu Sans';">
             <columns>
-                <TableColumn fx:id="colDate" text="Ngày" prefWidth="200">
+                <TableColumn fx:id="colDate" text="Ngày" prefWidth="200" style="-fx-font-family: 'DejaVu Sans';">
                     <cellValueFactory>
                         <PropertyValueFactory property="date"/>
                     </cellValueFactory>
                 </TableColumn>
-                <TableColumn fx:id="colTime" text="Giờ" prefWidth="150">
+                <TableColumn fx:id="colTime" text="Giờ" prefWidth="150" style="-fx-font-family: 'DejaVu Sans';">
                     <cellValueFactory>
                         <PropertyValueFactory property="time"/>
                     </cellValueFactory>
                 </TableColumn>
-                <TableColumn fx:id="colStatus" text="Trạng thái" prefWidth="150">
+                <TableColumn fx:id="colStatus" text="Trạng thái" prefWidth="150" style="-fx-font-family: 'DejaVu Sans';">
                     <cellValueFactory>
                         <PropertyValueFactory property="status"/>
                     </cellValueFactory>
                 </TableColumn>
-                <TableColumn fx:id="colIp" text="Địa chỉ IP" prefWidth="150">
+                <TableColumn fx:id="colIp" text="Địa chỉ IP" prefWidth="150" style="-fx-font-family: 'DejaVu Sans';">
                     <cellValueFactory>
                         <PropertyValueFactory property="ipAddress"/>
                     </cellValueFactory>
