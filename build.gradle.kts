@@ -47,6 +47,7 @@ tasks.withType<JavaExec> {
 }
 
 dependencies {
+    implementation("io.github.palexdev:materialfx:11.17.0")
     implementation("org.postgresql:postgresql:42.7.7")
     implementation("org.controlsfx:controlsfx:11.2.1")
     implementation("org.kordamp.ikonli:ikonli-javafx:12.3.1")

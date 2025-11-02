@@ -12,6 +12,7 @@ A comprehensive JavaFX-based building management application designed for managi
 - [Running the Application](#running-the-application)
 - [User Roles & Permissions](#user-roles--permissions)
 - [Project Structure](#project-structure)
+  - [Classes for Product Management](##classes-for-product-management)
 - [Testing](#testing)
 
 ##  Project Overview
@@ -144,6 +145,21 @@ src/main/resources/
 ├── com/example/quanlytoanha/view/  # FXML files
 ├── database.properties.example     # Database config template
 └── reference_database.md          # Database schema
+```
+### Classes for Product Management
+```
+src/main/java/com/example/quanlytoanha/
+├── model/              # Look for Product-related entity classes
+│   ├── Product.java
+│   └── ProductCategory.java
+├── service/            # Product business logic
+│   ├── ProductService.java
+│   └── ProductServiceImpl.java
+├── dao/                # Product data access
+│   ├── ProductDAO.java
+│   └── ProductDAOImpl.java
+└── controller/         # Product UI controllers
+    └── ProductController.java
 ```
 
 
