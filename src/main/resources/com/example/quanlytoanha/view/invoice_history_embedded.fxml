@@ -8,9 +8,9 @@
             xmlns:fx="http://javafx.com/fxml"
             fx:controller="com.example.quanlytoanha.controller.InvoiceHistoryController"
             fitToWidth="true"
-            style="-fx-background-color: transparent; -fx-background: transparent; -fx-font-family: 'DejaVu Sans';">
+            style="-fx-background-color: transparent; -fx-background: transparent; -fx-font-family: 'DejaVu Sans'; -fx-font-size: 16.9px;">
 
-    <VBox spacing="20" style="-fx-padding: 20; -fx-font-family: 'DejaVu Sans';">
+    <VBox spacing="20" style="-fx-padding: 20; -fx-font-family: 'DejaVu Sans'; -fx-font-size: 16.9px;">
         
         <!-- Phần Hóa Đơn -->
         <VBox>
@@ -20,37 +20,37 @@
         </VBox>
 
         <!-- Phần Thanh Toán Trực Tuyến -->
-        <TitledPane text="Thanh Toán Trực Tuyến" expanded="true" style="-fx-font-family: 'DejaVu Sans';">
-            <VBox spacing="10" style="-fx-font-family: 'DejaVu Sans';">
+        <TitledPane text="Thanh Toán Trực Tuyến" expanded="true" style="-fx-font-family: 'DejaVu Sans'; -fx-font-size: 16.9px;">
+            <VBox spacing="10" style="-fx-font-family: 'DejaVu Sans'; -fx-font-size: 16.9px;">
                 <padding>
                     <Insets top="10" right="10" bottom="10" left="10"/>
                 </padding>
-                <ComboBox fx:id="invoiceSelector" promptText="Chọn hóa đơn" maxWidth="Infinity" style="-fx-font-family: 'DejaVu Sans';"/>
-                <TextField fx:id="amountField" promptText="Số tiền" editable="false" style="-fx-font-family: 'DejaVu Sans';"/>
+                <ComboBox fx:id="invoiceSelector" promptText="Chọn hóa đơn" maxWidth="Infinity" style="-fx-font-family: 'DejaVu Sans'; -fx-font-size: 16.9px;"/>
+                <TextField fx:id="amountField" promptText="Số tiền" editable="false" style="-fx-font-family: 'DejaVu Sans'; -fx-font-size: 16.9px;"/>
                 <Button text="Thanh Toán Ngay" onAction="#handlePayment"
-                        style="-fx-background-color: #2196F3; -fx-text-fill: white; -fx-font-family: 'DejaVu Sans';"
+                        style="-fx-background-color: #2196F3; -fx-text-fill: white; -fx-font-family: 'DejaVu Sans'; -fx-font-size: 16.9px;"
                         maxWidth="Infinity"/>
             </VBox>
         </TitledPane>
 
         <!-- Lịch Sử Giao Dịch -->
-        <TitledPane text="Lịch Sử Giao Dịch" expanded="true" style="-fx-font-family: 'DejaVu Sans';">
-            <VBox spacing="10" style="-fx-font-family: 'DejaVu Sans';">
+        <TitledPane text="Lịch Sử Giao Dịch" expanded="true" style="-fx-font-family: 'DejaVu Sans'; -fx-font-size: 16.9px;">
+            <VBox spacing="10" style="-fx-font-family: 'DejaVu Sans'; -fx-font-size: 16.9px;">
                 <padding>
                     <Insets top="10" right="10" bottom="10" left="10"/>
                 </padding>
-                <HBox spacing="10" alignment="CENTER_LEFT" style="-fx-font-family: 'DejaVu Sans';">
-                    <DatePicker fx:id="fromDate" promptText="Từ ngày" style="-fx-font-family: 'DejaVu Sans';"/>
-                    <DatePicker fx:id="toDate" promptText="Đến ngày" style="-fx-font-family: 'DejaVu Sans';"/>
+                <HBox spacing="10" alignment="CENTER_LEFT" style="-fx-font-family: 'DejaVu Sans'; -fx-font-size: 16.9px;">
+                    <DatePicker fx:id="fromDate" promptText="Từ ngày" style="-fx-font-family: 'DejaVu Sans'; -fx-font-size: 16.9px;"/>
+                    <DatePicker fx:id="toDate" promptText="Đến ngày" style="-fx-font-family: 'DejaVu Sans'; -fx-font-size: 16.9px;"/>
                     <Button text="Lọc" onAction="#filterTransactions"
-                            style="-fx-background-color: #4CAF50; -fx-text-fill: white; -fx-font-family: 'DejaVu Sans';"/>
+                            style="-fx-background-color: #4CAF50; -fx-text-fill: white; -fx-font-family: 'DejaVu Sans'; -fx-font-size: 16.9px;"/>
                 </HBox>
-                <TableView fx:id="transactionTable" VBox.vgrow="ALWAYS" style="-fx-font-family: 'DejaVu Sans';">
+                <TableView fx:id="transactionTable" VBox.vgrow="ALWAYS" style="-fx-font-family: 'DejaVu Sans'; -fx-font-size: 16.9px;">
                     <columns>
-                        <TableColumn fx:id="dateColumn" text="Ngày" prefWidth="150" style="-fx-font-family: 'DejaVu Sans';"/>
-                        <TableColumn fx:id="descriptionColumn" text="Mô tả" prefWidth="300" style="-fx-font-family: 'DejaVu Sans';"/>
-                        <TableColumn fx:id="amountColumn" text="Số tiền" prefWidth="150" style="-fx-font-family: 'DejaVu Sans';"/>
-                        <TableColumn fx:id="statusColumn" text="Trạng thái" prefWidth="100" style="-fx-font-family: 'DejaVu Sans';"/>
+                        <TableColumn fx:id="dateColumn" text="Ngày" prefWidth="150" style="-fx-font-family: 'DejaVu Sans'; -fx-font-size: 16.9px;"/>
+                        <TableColumn fx:id="descriptionColumn" text="Mô tả" prefWidth="300" style="-fx-font-family: 'DejaVu Sans'; -fx-font-size: 16.9px;"/>
+                        <TableColumn fx:id="amountColumn" text="Số tiền" prefWidth="150" style="-fx-font-family: 'DejaVu Sans'; -fx-font-size: 16.9px;"/>
+                        <TableColumn fx:id="statusColumn" text="Trạng thái" prefWidth="100" style="-fx-font-family: 'DejaVu Sans'; -fx-font-size: 16.9px;"/>
                     </columns>
                 </TableView>
             </VBox>
