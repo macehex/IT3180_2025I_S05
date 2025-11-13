@@ -3,7 +3,7 @@ package com.example.quanlytoanha.controller;
 import com.example.quanlytoanha.model.User;
 import com.example.quanlytoanha.service.DashboardService;
 import com.example.quanlytoanha.session.SessionManager;
-import com.example.quanlytoanha.service.AssetService; // <-- BỔ SUNG: Import AssetService
+import com.example.quanlytoanha.service.AssetService;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -53,8 +53,11 @@ public class AdminDashboardController {
     // --- FXML cho BÁO CÁO DÂN CƯ (US7_2_1) ---
     @FXML private Button btnBaoCaoDanCu;
 
-    // --- BỔ SUNG (US7_2_1): Khai báo nút Báo cáo Công nợ ---
+    // --- FXML cho BÁO CÁO CÔNG NỢ (US7_2_1) ---
     @FXML private Button btnBaoCaoCongNo;
+
+    // --- BỔ SUNG (US8_1_1): Khai báo nút Kiểm soát Ra/Vào ---
+    @FXML private Button btnKiemSoatRaVao;
 
     // --- Khai báo Service ---
     private DashboardService dashboardService;
@@ -116,9 +119,14 @@ public class AdminDashboardController {
                 btnBaoCaoDanCu.setOnAction(event -> handleOpenPopulationReport());
             }
 
-            // --- BỔ SUNG (US7_2_1): Gắn sự kiện cho nút Báo cáo Công nợ ---
+            // Cấu hình sự kiện cho nút Báo cáo Công nợ (US7_2_1)
             if (btnBaoCaoCongNo != null) {
                 btnBaoCaoCongNo.setOnAction(event -> handleOpenDebtReport());
+            }
+
+            // --- BỔ SUNG (US8_1_1): Gắn sự kiện cho nút Kiểm soát Ra/Vào ---
+            if (btnKiemSoatRaVao != null) {
+                btnKiemSoatRaVao.setOnAction(event -> handleOpenAccessControl());
             }
         }
     }
@@ -287,11 +295,10 @@ public class AdminDashboardController {
         }
     }
 
-    // --- BỔ SUNG (US7_2_1): Hàm mở màn hình Báo cáo Công nợ ---
+    // --- HÀM MỞ MÀN HÌNH BÁO CÁO CÔNG NỢ (US7_2_1) ---
     @FXML
     private void handleOpenDebtReport() {
         try {
-            // (Đảm bảo đường dẫn FXML này chính xác)
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/example/quanlytoanha/view/debt_report_view.fxml"));
             Parent root = loader.load();
 
@@ -306,6 +313,28 @@ public class AdminDashboardController {
         } catch (IOException e) {
             e.printStackTrace();
             showAlert(Alert.AlertType.ERROR, "Lỗi", "Không thể tải màn hình Báo cáo Công nợ: " + e.getMessage());
+        }
+    }
+
+    // --- BỔ SUNG (US8_1_1): Hàm mở màn hình Kiểm soát Ra/Vào ---
+    @FXML
+    private void handleOpenAccessControl() {
+        try {
+            // (Đảm bảo đường dẫn FXML này chính xác)
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/example/quanlytoanha/view/access_control_view.fxml"));
+            Parent root = loader.load();
+
+            Stage stage = new Stage();
+            stage.setTitle("Kiểm soát An ninh Ra/Vào");
+            stage.initModality(Modality.WINDOW_MODAL);
+            stage.initOwner(btnKiemSoatRaVao.getScene().getWindow());
+            stage.setScene(new Scene(root, 1000, 700)); // Kích thước màn hình an ninh
+            stage.setResizable(true);
+            stage.showAndWait();
+
+        } catch (IOException e) {
+            e.printStackTrace();
+            showAlert(Alert.AlertType.ERROR, "Lỗi", "Không thể tải màn hình Kiểm soát Ra/Vào: " + e.getMessage());
         }
     }
 

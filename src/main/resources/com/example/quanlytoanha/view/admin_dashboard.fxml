@@ -51,6 +51,8 @@
 
                 <Button fx:id="btnBaoCaoCongNo" text="📈 Báo cáo Công nợ" styleClass="sidebar-menu-item" onAction="#handleOpenDebtReport" />
 
+                <Button fx:id="btnKiemSoatRaVao" text="🛡️ Kiểm soát Ra/Vào" styleClass="sidebar-menu-item" onAction="#handleOpenAccessControl" />
+
                 <Region VBox.vgrow="ALWAYS" />
 
                 <Separator />
