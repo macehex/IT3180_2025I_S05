@@ -3,23 +3,27 @@ package com.example.quanlytoanha.dao;
 
 import com.example.quanlytoanha.model.*;
 import com.example.quanlytoanha.utils.DatabaseConnection;
-import com.example.quanlytoanha.utils.PasswordUtil; // 1. KHẮC PHỤC LỖI PasswordUtil
-import java.time.Instant; // 3. KHẮC PHỤC LỖI Instant (Dùng cho Timestamp.from(Instant.now()))
+import com.example.quanlytoanha.utils.PasswordUtil;
+import com.google.gson.Gson; // <-- BỔ SUNG: Cho chuyển đổi JSON (Cần thư viện GSON)
+import java.time.Instant;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Timestamp;
-import java.sql.Statement; // <-- THÊM DÒNG NÀY
-import java.sql.SQLException; // <-- Đảm bảo dòng này có
-
+import java.sql.Statement;
+import java.sql.SQLException;
 
 // (Giả sử bạn có một lớp DBConnection để kết nối)
 
 public class UserDAO {
 
+    // Khởi tạo DAO cho lịch sử
+    private final ResidentHistoryDAO historyDAO = new ResidentHistoryDAO();
+
+    // --- Các hàm đã có (getUserById, findUserByUsername, updateUserProfile, addResident) GIỮ NGUYÊN ---
+
     /**
      * Lấy một User từ DB bằng ID.
-     * Đây là nơi phép "phiên dịch" diễn ra.
      */
     public User getUserById(int userId) {
         User user = null;
@@ -32,14 +36,9 @@ public class UserDAO {
             ResultSet rs = pstmt.executeQuery();
 
             if (rs.next()) {
-                // 1. Lấy role_id từ DB (dưới dạng INT)
                 int roleId = rs.getInt("role_id");
-
-                // 2. PHIÊN DỊCH: Chuyển INT thành ENUM
-                // Chúng ta dùng phương thức Role.fromId() đã tạo ở bước trước
                 Role userRole = Role.fromId(roleId);
 
-                // Lấy các thông tin chung khác
                 String username = rs.getString("username");
                 String email = rs.getString("email");
                 String fullName = rs.getString("full_name");
@@ -47,8 +46,6 @@ public class UserDAO {
                 Timestamp createdAt = rs.getTimestamp("created_at");
                 Timestamp lastLogin = rs.getTimestamp("last_login");
 
-                // 3. QUAN TRỌNG: Dùng Factory Pattern để tạo đúng đối tượng
-                // Dựa vào Enum Role, ta quyết định tạo Admin, Resident, hay Accountant
                 switch (userRole) {
                     case ADMIN:
                         user = new Admin(userId, username, email, fullName, userRole, createdAt, lastLogin, phone);
@@ -60,10 +57,8 @@ public class UserDAO {
                         // (Tương tự, tạo new Police(...))
                         break;
                     case RESIDENT:
-                        // Đối với Resident, bạn cần JOIN thêm bảng 'residents'
-                        // (Đây là ví dụ đơn giản, thực tế bạn cần query thêm)
-                        // int residentId = ... (lấy từ bảng residents)
-                        // user = new Resident(...);
+                        user = new Resident(userId, username, email, fullName, userRole, createdAt, lastLogin, phone,
+                                0, 0, null, "", "");
                         break;
                     default:
                         throw new IllegalStateException("Vai trò không xác định: " + userRole);
@@ -77,16 +72,12 @@ public class UserDAO {
 
     /**
      * Tìm một người dùng bằng username (dùng cho việc login).
-     *
-     * @param username Tên đăng nhập
-     * @return Đối tượng User (Admin, Resident,...) nếu tìm thấy, ngược lại trả về null
      */
     public User findUserByUsername(String username) {
         User user = null;
-        // Lấy tất cả thông tin user, bao gồm cả password (đã băm)
         String sql = "SELECT * FROM users WHERE username = ?";
 
-        try (Connection conn = DatabaseConnection.getConnection(); // Giả sử bạn có lớp DBConnection
+        try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
 
             pstmt.setString(1, username);
@@ -95,21 +86,15 @@ public class UserDAO {
             if (rs.next()) {
                 int userId = rs.getInt("user_id");
                 int roleId = rs.getInt("role_id");
-
-                // "Phiên dịch" int sang Enum Role
                 Role userRole = Role.fromId(roleId);
 
-                // Lấy các thông tin chung
                 String email = rs.getString("email");
                 String fullName = rs.getString("full_name");
                 String phone = rs.getString("phone_number");
                 Timestamp createdAt = rs.getTimestamp("created_at");
                 Timestamp lastLogin = rs.getTimestamp("last_login");
-
-                // !! QUAN TRỌNG: Lấy mật khẩu đã băm từ DB
                 String hashedPassword = rs.getString("password");
 
-                // Dùng "Factory" để tạo đúng đối tượng User
                 switch (userRole) {
                     case ADMIN:
                         user = new Admin(userId, username, email, fullName, userRole, createdAt, lastLogin, phone);
@@ -117,43 +102,32 @@ public class UserDAO {
                     case ACCOUNTANT:
                         user = new Accountant(userId, username, email, fullName, userRole, createdAt, lastLogin, phone);
                         break;
-                    // case POLICE:
-                    //     user = new Police(...);
-                    //     break;
                     case RESIDENT:
-                        // !! Với Resident, bạn cần query (JOIN) thêm thông tin từ bảng 'residents'
-                        // (Để đơn giản, tạm thời ta tạo Resident với thông tin cơ bản)
-                        // (Sau này bạn sẽ cải tiến query này để lấy đủ thông tin Resident)
                         user = new Resident(userId, username, email, fullName, userRole, createdAt, lastLogin, phone,
-                                0, 0, null, "", ""); // ID, ApartmentId, DOB,... tạm
+                                0, 0, null, "", "");
                         break;
                     default:
                         throw new IllegalStateException("Vai trò không xác định: " + userRole);
                 }
-
-                // !! NẠP mật khẩu băm vào đối tượng User
-                // (Bạn cần thêm trường `password` và setter/getter cho nó trong Abstract User)
-                user.setPassword(hashedPassword); // --> Bạn cần thêm
+                user.setPassword(hashedPassword);
             }
         } catch (Exception e) {
             e.printStackTrace();
         }
-        return user; // Trả về null nếu không tìm thấy user
+        return user;
     }
 
-    // Trong lớp UserDAO
+    /**
+     * Cập nhật profile của User (không phải Resident).
+     */
     public void updateUserProfile(User user) {
-        // Chúng ta muốn cập nhật email, phone, và roleId
         String sql = "UPDATE users SET email = ?, phone_number = ?, role_id = ? WHERE user_id = ?";
 
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
 
             pstmt.setString(1, user.getEmail());
-            pstmt.setString(2, user.getPhoneNumber()); // Giả sử bạn đã thêm getter/setter này
-
-            // 3. PHIÊN DỊCH NGƯỢC: Chuyển ENUM thành INT
-            // Chúng ta dùng getter của Enum để lấy ra số INT
+            pstmt.setString(2, user.getPhoneNumber());
             int roleIdToSave = user.getRole().getRoleId();
 
             pstmt.setInt(3, roleIdToSave);
@@ -167,19 +141,11 @@ public class UserDAO {
     }
 
     /**
-     * Thêm một hồ sơ cư dân mới. Thực hiện INSERT vào bảng users và residents
-     * trong một Database Transaction.
-     *
-     * @param resident Đối tượng Resident chứa thông tin cần lưu.
-     * @return true nếu thêm thành công.
+     * Thêm một hồ sơ cư dân mới (Giữ nguyên).
      */
     public boolean addResident(Resident resident) throws SQLException {
-        // SQL cho bảng users (Lấy khóa tự tăng - user_id)
         String userSql = "INSERT INTO users (username, password, full_name, role_id, created_at, phone_number, email) VALUES (?, ?, ?, ?, ?, ?, ?)";
-
-        // SQL cho bảng residents
-        // Lưu ý: SQL này đã được tối giản (loại bỏ status, move_in_date) để khớp với Resident.java hiện tại
-        String residentSql = "INSERT INTO residents (user_id, apartment_id, date_of_birth, id_card_number, relationship) VALUES (?, ?, ?, ?, ?)"; // 5 THAM SỐ
+        String residentSql = "INSERT INTO residents (user_id, apartment_id, date_of_birth, id_card_number, relationship) VALUES (?, ?, ?, ?, ?)";
 
         Connection conn = null;
         int generatedUserId = -1;
@@ -190,22 +156,18 @@ public class UserDAO {
 
             // --- PHẦN 1: INSERT VÀO BẢNG USERS ---
             try (PreparedStatement userStmt = conn.prepareStatement(userSql, Statement.RETURN_GENERATED_KEYS)) {
-
-                // Giả định ResidentService đã gán Username và Mật khẩu tạm thời
                 String hashedPassword = PasswordUtil.hashPassword(resident.getPassword());
 
                 userStmt.setString(1, resident.getUsername());
                 userStmt.setString(2, hashedPassword);
                 userStmt.setString(3, resident.getFullName());
-                // Giả định Resident đã được gán Role.RESIDENT
                 userStmt.setInt(4, resident.getRole().getRoleId());
                 userStmt.setTimestamp(5, Timestamp.from(Instant.now()));
-                userStmt.setString(6, resident.getPhoneNumber()); // Cần có getter trong User
-                userStmt.setString(7, resident.getEmail());     // Cần có getter trong User
+                userStmt.setString(6, resident.getPhoneNumber());
+                userStmt.setString(7, resident.getEmail());
 
                 userStmt.executeUpdate();
 
-                // Lấy ID tự tăng (user_id)
                 ResultSet rs = userStmt.getGeneratedKeys();
                 if (rs.next()) {
                     generatedUserId = rs.getInt(1);
@@ -213,21 +175,17 @@ public class UserDAO {
                     throw new SQLException("Không thể lấy user ID tự tăng sau khi INSERT users.");
                 }
 
-                // Cập nhật lại userId cho đối tượng Resident
                 resident.setUserId(generatedUserId);
             }
 
             // --- PHẦN 2: INSERT VÀO BẢNG RESIDENTS ---
             if (generatedUserId != -1) {
                 try (PreparedStatement residentStmt = conn.prepareStatement(residentSql)) {
-
-                    // Chuyển java.util.Date sang java.sql.Date
                     java.sql.Date sqlDateOfBirth = (resident.getDateOfBirth() != null)
                             ? new java.sql.Date(resident.getDateOfBirth().getTime())
                             : null;
 
-                    residentStmt.setInt(1, generatedUserId); // SỬ DỤNG USER ID VỪA TẠO
-                    // getApartmentId() của bạn trả về int
+                    residentStmt.setInt(1, generatedUserId);
                     residentStmt.setInt(2, resident.getApartmentId());
                     residentStmt.setDate(3, sqlDateOfBirth);
                     residentStmt.setString(4, resident.getIdCardNumber());
@@ -237,13 +195,13 @@ public class UserDAO {
                 }
             }
 
-            conn.commit(); // Ghi nhận thay đổi nếu cả 2 INSERT thành công
+            conn.commit();
             return true;
 
         } catch (Exception e) {
             e.printStackTrace();
             if (conn != null) {
-                conn.rollback(); // Hoàn tác nếu có lỗi
+                conn.rollback();
             }
             throw new SQLException("Thêm cư dân thất bại: " + e.getMessage());
         } finally {
@@ -253,17 +211,23 @@ public class UserDAO {
             }
         }
     }
+
+    // --- BỔ SUNG: HÀM UPDATE VÀ GHI LOG (US1_1_1.4) ---
+
     /**
-     * Cập nhật thông tin của một Resident (Cư dân) trên cả 2 bảng (users và residents).
+     * Cập nhật thông tin của một Resident và ghi lại lịch sử thay đổi (Audit Log).
      * @param resident Đối tượng Resident chứa thông tin mới.
-     * @return true nếu cập nhật thành công, false nếu thất bại.
+     * @param changedByUserId ID của Ban Quản trị thực hiện thay đổi.
+     * @param oldDataJson Dữ liệu Cũ của Resident (JSON String).
+     * @param newDataJson Dữ liệu Mới của Resident (JSON String).
+     * @return true nếu cập nhật thành công.
      */
-    public boolean updateResident(Resident resident) throws SQLException {
+    public boolean updateResidentAndLog(Resident resident, int changedByUserId, String oldDataJson, String newDataJson) throws SQLException {
+
         // Cập nhật bảng users (fullName, phoneNumber, email)
         String userSql = "UPDATE users SET full_name = ?, phone_number = ?, email = ? WHERE user_id = ?";
 
-        // Cập nhật bảng residents (dateOfBirth, idCardNumber, relationship, apartment_id)
-        // Lưu ý: SQL này đã được tối giản để khớp với Resident.java hiện tại
+        // Cập nhật bảng residents
         String residentSql = "UPDATE residents SET date_of_birth = ?, id_card_number = ?, relationship = ?, apartment_id = ? WHERE resident_id = ?";
 
         Connection conn = null;
@@ -276,16 +240,14 @@ public class UserDAO {
             // 1. Cập nhật bảng users
             try (PreparedStatement userStmt = conn.prepareStatement(userSql)) {
                 userStmt.setString(1, resident.getFullName());
-                userStmt.setString(2, resident.getPhoneNumber()); // Giả định có getter trong User
-                userStmt.setString(3, resident.getEmail());      // Giả định có getter trong User
+                userStmt.setString(2, resident.getPhoneNumber());
+                userStmt.setString(3, resident.getEmail());
                 userStmt.setInt(4, resident.getUserId());
                 userStmt.executeUpdate();
             }
 
             // 2. Cập nhật bảng residents
             try (PreparedStatement residentStmt = conn.prepareStatement(residentSql)) {
-
-                // Chuyển java.util.Date sang java.sql.Date
                 java.sql.Date sqlDateOfBirth = (resident.getDateOfBirth() != null)
                         ? new java.sql.Date(resident.getDateOfBirth().getTime())
                         : null;
@@ -293,22 +255,33 @@ public class UserDAO {
                 residentStmt.setDate(1, sqlDateOfBirth);
                 residentStmt.setString(2, resident.getIdCardNumber());
                 residentStmt.setString(3, resident.getRelationship());
-                residentStmt.setInt(4, resident.getApartmentId()); // Thêm cập nhật ApartmentId
-                residentStmt.setInt(5, resident.getResidentId()); // Điều kiện WHERE
+                residentStmt.setInt(4, resident.getApartmentId());
+                residentStmt.setInt(5, resident.getResidentId());
 
                 residentStmt.executeUpdate();
             }
 
-            conn.commit(); // Ghi nhận thay đổi nếu cả 2 thành công
+            // --- BƯỚC 3: GHI LỊCH SỬ THAY ĐỔI (AUDIT LOG) ---
+            // Kiểm tra: Chỉ ghi log nếu có sự khác biệt về nội dung JSON
+            if (oldDataJson != null && newDataJson != null && !oldDataJson.equals(newDataJson)) {
+                historyDAO.addHistory(
+                        conn,
+                        resident.getResidentId(),
+                        changedByUserId,
+                        oldDataJson,
+                        newDataJson
+                );
+            }
+
+            conn.commit();
             success = true;
 
         } catch (Exception e) {
             e.printStackTrace();
             if (conn != null) {
-                conn.rollback(); // Hoàn tác nếu có lỗi
+                conn.rollback();
             }
-            // Ném lại lỗi để tầng Service xử lý
-            throw new SQLException("Cập nhật hồ sơ thất bại: " + e.getMessage());
+            throw new SQLException("Cập nhật hồ sơ và ghi log thất bại: " + e.getMessage());
         } finally {
             if (conn != null) {
                 conn.setAutoCommit(true);
@@ -319,23 +292,55 @@ public class UserDAO {
     }
 
     /**
-     * Cập nhật mật khẩu của người dùng.
-     * @param userId ID của người dùng
-     * @param hashedPassword Mật khẩu đã được băm
-     * @return true nếu cập nhật thành công, false nếu thất bại
+     * (Hàm cũ: updateResident, ĐÃ BỊ LOẠI BỎ vì nó không ghi log.
+     * Hàm updateResidentAndLog sẽ thay thế nó.)
+     * * Nếu bạn vẫn cần hàm không ghi log, hãy sao chép logic của updateResidentAndLog
+     * và bỏ qua phần gọi historyDAO.addHistory().
+     * * Ví dụ:
+     * public boolean updateResident(Resident resident) throws SQLException {
+     * // ... logic cập nhật users/residents ...
+     * return true;
+     * }
+     */
+
+    // --- BỔ SUNG: HÀM HỖ TRỢ LẤY DỮ LIỆU CŨ TỪ RESIDENT ID (Dùng trong Service) ---
+
+    public Resident getResidentByResidentId(int residentId) throws SQLException {
+        Resident resident = null;
+        // Sử dụng logic của ResidentDAO.getResidentByUserId nhưng dựa trên resident_id
+        String SQL = "SELECT u.*, r.* FROM residents r LEFT JOIN users u ON r.user_id = u.user_id WHERE r.resident_id = ?";
+
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(SQL)) {
+
+            pstmt.setInt(1, residentId);
+            try (ResultSet rs = pstmt.executeQuery()) {
+                if (rs.next()) {
+                    // Cần ResidentDAO để ánh xạ kết quả
+                    ResidentDAO residentDAO = new ResidentDAO();
+                    // Gọi hàm ánh xạ dữ liệu phức tạp
+                    resident = residentDAO.mapResultSetToResident(rs);
+                }
+            }
+        }
+        return resident;
+    }
+
+    /**
+     * Cập nhật mật khẩu của người dùng. (Giữ nguyên)
      */
     public static boolean updateUserPassword(int userId, String hashedPassword) {
         String sql = "UPDATE users SET password = ? WHERE user_id = ?";
-        
+
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            
+
             pstmt.setString(1, hashedPassword);
             pstmt.setInt(2, userId);
-            
+
             int rowsAffected = pstmt.executeUpdate();
             return rowsAffected > 0;
-            
+
         } catch (SQLException e) {
             e.printStackTrace();
             return false;
@@ -343,22 +348,20 @@ public class UserDAO {
     }
 
     /**
-     * Cập nhật thời gian đăng nhập cuối cùng của người dùng.
-     * @param userId ID của người dùng
-     * @return true nếu cập nhật thành công, false nếu thất bại
+     * Cập nhật thời gian đăng nhập cuối cùng của người dùng. (Giữ nguyên)
      */
     public static boolean updateLastLogin(int userId) {
         String sql = "UPDATE users SET last_login = ? WHERE user_id = ?";
-        
+
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            
+
             pstmt.setTimestamp(1, Timestamp.from(Instant.now()));
             pstmt.setInt(2, userId);
-            
+
             int rowsAffected = pstmt.executeUpdate();
             return rowsAffected > 0;
-            
+
         } catch (SQLException e) {
             e.printStackTrace();
             return false;

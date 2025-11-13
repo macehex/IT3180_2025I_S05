@@ -52,6 +52,8 @@ dependencies {
     implementation("org.controlsfx:controlsfx:11.2.1")
     implementation("org.kordamp.ikonli:ikonli-javafx:12.3.1")
     implementation("org.kordamp.ikonli:ikonli-materialdesign2-pack:12.3.1")
+    implementation("com.google.code.gson:gson:2.10.1")
+    implementation("org.apache.pdfbox:pdfbox:3.0.2")
     
     // Use Spring Security with excluded transitive dependencies that cause module issues
     implementation("org.springframework.security:spring-security-core:6.5.5") {

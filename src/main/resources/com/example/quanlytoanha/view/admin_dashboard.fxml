@@ -7,138 +7,147 @@
 <?import javafx.scene.text.*?>
 
 <BorderPane xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.quanlytoanha.controller.AdminDashboardController">
-   
-   <!-- Top Header với Hamburger Button -->
-   <top>
-      <HBox styleClass="header-container" alignment="CENTER_LEFT" spacing="15.0">
-         <children>
-            <Button fx:id="btnMenuToggle" text="☰" styleClass="hamburger-button" onAction="#toggleSidebar" />
-            <Label fx:id="lblWelcome" text="Chào mừng, Ban Quản Trị" styleClass="header-title" />
-            <Region HBox.hgrow="ALWAYS" />
-         </children>
-      </HBox>
-   </top>
-   
-   <!-- Left Sidebar Menu -->
-   <left>
-      <VBox fx:id="sidebar" styleClass="sidebar" visible="false" managed="false">
-         <children>
-            <!-- User Info Section -->
-            <VBox styleClass="sidebar-user-section">
-               <children>
-                  <Label fx:id="lblUserName" text="Tên Người Dùng" styleClass="sidebar-user-name" />
-                  <Label text="Ban Quản Trị" styleClass="sidebar-user-role" />
-               </children>
-               <padding>
-                  <Insets top="20.0" bottom="15.0" left="20.0" right="20.0" />
-               </padding>
-            </VBox>
-            <Separator />
-            
-            <!-- Menu Items -->
-            <Button fx:id="btnThemCuDan" text="➕ Thêm Hồ Sơ Cư Dân" styleClass="sidebar-menu-item" />
-            <Button fx:id="btnQuanLyTaiKhoan" text="👤 Quản Lý Tài Khoản" styleClass="sidebar-menu-item" />
-            <Button fx:id="btnXemDanhSachCuDan" text="📋 Danh Sách Cư Dân" styleClass="sidebar-menu-item" onAction="#handleOpenResidentList" />
-            
-            <Separator />
-            
-            <Button fx:id="btnQuanLyHoaDon" text="💰 Hóa Đơn &amp; Công Nợ" styleClass="sidebar-menu-item" />
-            <Button fx:id="btnTaoThongBao" text="📢 Thông Báo Chung" styleClass="sidebar-menu-item" />
-            <Button fx:id="btnXemYeuCauDichVu" text="🛠️ Yêu Cầu Dịch Vụ" styleClass="sidebar-menu-item" />
-            <Button text="🏠 Tài Sản &amp; Thiết Bị" styleClass="sidebar-menu-item" />
-            
-            <Region VBox.vgrow="ALWAYS" />
-            
-            <!-- Logout Button ở cuối -->
-            <Separator />
-            <Button fx:id="btnLogout" text="🚪 Đăng xuất" styleClass="sidebar-logout-btn" onAction="#handleLogout">
-               <VBox.margin>
-                  <Insets top="10.0" bottom="15.0" left="15.0" right="15.0" />
-               </VBox.margin>
-            </Button>
-         </children>
-      </VBox>
-   </left>
-   
-   <!-- Main Content Area -->
-   <center>
-      <ScrollPane fitToWidth="true" styleClass="scroll-pane content-area" hbarPolicy="NEVER" vbarPolicy="AS_NEEDED">
-         <content>
-            <VBox spacing="25.0" styleClass="vbox-spacing" prefWidth="100.0">
-               <children>
-            <!-- Statistics Tiles -->
-            <HBox spacing="20.0" alignment="CENTER" styleClass="hbox-spacing"
-                  style="-fx-max-height: 220;">
-                     <children>
-                        <VBox alignment="CENTER" spacing="10.0" styleClass="stat-tile">
-                           <children>
-                              <Label text="👥" styleClass="stat-icon"/>
-                              <Label fx:id="lblTotalResidents" text="0" styleClass="stat-value"/>
-                              <Label text="Tổng cư dân" styleClass="stat-label"/>
-                           </children>
-                        </VBox>
 
-                        <VBox alignment="CENTER" spacing="10.0" styleClass="stat-tile">
-                           <children>
-                              <Label text="🏠" styleClass="stat-icon"/>
-                              <Label fx:id="lblTotalApartments" text="0" styleClass="stat-value"/>
-                              <Label text="Tổng căn hộ" styleClass="stat-label"/>
-                           </children>
-                        </VBox>
+    <top>
+        <HBox styleClass="header-container" alignment="CENTER_LEFT" spacing="15.0">
+            <children>
+                <Button fx:id="btnMenuToggle" text="☰" styleClass="hamburger-button" onAction="#toggleSidebar" />
+                <Label fx:id="lblWelcome" text="Chào mừng, Ban Quản Trị" styleClass="header-title" />
+                <Region HBox.hgrow="ALWAYS" />
+            </children>
+        </HBox>
+    </top>
 
-                        <VBox alignment="CENTER" spacing="10.0" styleClass="stat-tile">
-                           <children>
-                              <Label text="💰" styleClass="stat-icon"/>
-                              <Label fx:id="lblTotalDebt" text="0" styleClass="stat-value"/>
-                              <Label text="Công nợ (VNĐ)" styleClass="stat-label"/>
-                           </children>
-                        </VBox>
+    <left>
+        <VBox fx:id="sidebar" styleClass="sidebar" visible="false" managed="false">
+            <children>
+                <VBox styleClass="sidebar-user-section">
+                    <children>
+                        <Label fx:id="lblUserName" text="Tên Người Dùng" styleClass="sidebar-user-name" />
+                        <Label text="Ban Quản Trị" styleClass="sidebar-user-role" />
+                    </children>
+                    <padding>
+                        <Insets top="20.0" bottom="15.0" left="20.0" right="20.0" />
+                    </padding>
+                </VBox>
+                <Separator />
 
-                        <VBox alignment="CENTER" spacing="10.0" styleClass="stat-tile">
-                           <children>
-                              <Label text="📋" styleClass="stat-icon"/>
-                              <Label fx:id="lblTotalUnpaidInvoices" text="0" styleClass="stat-value"/>
-                              <Label text="Hóa đơn chưa trả" styleClass="stat-label"/>
-                           </children>
-                        </VBox>
-                     </children>
-                  </HBox>
+                <Button fx:id="btnThemCuDan" text="➕ Thêm Hồ Sơ Cư Dân" styleClass="sidebar-menu-item" />
+                <Button fx:id="btnQuanLyTaiKhoan" text="👤 Quản Lý Tài Khoản" styleClass="sidebar-menu-item" />
+                <Button fx:id="btnXemDanhSachCuDan" text="📋 Danh Sách Cư Dân" styleClass="sidebar-menu-item" onAction="#handleOpenResidentList" />
 
-                  <!-- Charts Section -->
-                  <HBox spacing="30.0" alignment="CENTER" styleClass="hbox-spacing">
-                     <children>
-                        <!-- Chart 1: Resident Status Pie Chart -->
-                        <VBox spacing="10.0" styleClass="chart-container">
-                           <children>
-                              <Label text="📊 Thống kê Cư dân" styleClass="chart-title" />
-                              <PieChart fx:id="residentStatusPieChart" 
-                                       prefWidth="400.0" prefHeight="300.0" 
-                                       legendVisible="true" 
-                                       labelsVisible="true"
-                                       legendSide="BOTTOM"
-                                       startAngle="90">
-                              </PieChart>
-                           </children>
-                        </VBox>
+                <Separator />
 
-                        <!-- Chart 2: Debt Paid -->
-                        <VBox spacing="10.0" styleClass="chart-container">
-                           <children>
-                              <Label text="💰 Số Nợ Đã Thanh Toán" styleClass="chart-title" />
-                              <VBox alignment="CENTER" spacing="15.0" styleClass="debt-chart-container">
-                                 <children>
-                                    <Label fx:id="lblTotalPaid" text="0 VNĐ" styleClass="debt-paid-value" />
-                                    <Label text="Tổng số tiền đã thanh toán" styleClass="debt-paid-label" />
-                                    <ProgressBar fx:id="debtProgressBar" prefWidth="300.0" styleClass="debt-progress" />
-                                 </children>
-                              </VBox>
-                           </children>
-                        </VBox>
-                     </children>
-                  </HBox>
-               </children>
-            </VBox>
-         </content>
-      </ScrollPane>
-   </center>
+                <Button fx:id="btnQuanLyHoaDon" text="💰 Hóa Đơn &amp; Công Nợ" styleClass="sidebar-menu-item" />
+                <Button fx:id="btnTaoThongBao" text="📢 Thông Báo Chung" styleClass="sidebar-menu-item" />
+                <Button fx:id="btnXemYeuCauDichVu" text="🛠️ Yêu Cầu Dịch Vụ" styleClass="sidebar-menu-item" />
+
+                <Separator />
+
+                <Button fx:id="btnQuanLyTaiSan" text="🏠 Tài Sản &amp; Thiết Bị" styleClass="sidebar-menu-item" onAction="#handleOpenAssetManagement" />
+                <Button fx:id="btnQuanLyBaoTri" text="🔧 Lịch sử Bảo trì" styleClass="sidebar-menu-item" onAction="#handleOpenMaintenanceHistory" />
+
+                <Button fx:id="btnBaoCaoDanCu" text="📊 Báo cáo Dân cư" styleClass="sidebar-menu-item" onAction="#handleOpenPopulationReport" />
+
+                <Button fx:id="btnBaoCaoCongNo" text="📈 Báo cáo Công nợ" styleClass="sidebar-menu-item" onAction="#handleOpenDebtReport" />
+
+                <Button fx:id="btnKiemSoatRaVao" text="🛡️ Kiểm soát Ra/Vào" styleClass="sidebar-menu-item" onAction="#handleOpenAccessControl" />
+
+                <Region VBox.vgrow="ALWAYS" />
+
+                <Separator />
+                <Button fx:id="btnLogout" text="🚪 Đăng xuất" styleClass="sidebar-logout-btn" onAction="#handleLogout">
+                    <VBox.margin>
+                        <Insets top="10.0" bottom="15.0" left="15.0" right="15.0" />
+                    </VBox.margin>
+                </Button>
+            </children>
+        </VBox>
+    </left>
+
+    <center>
+        <ScrollPane fitToWidth="true" styleClass="scroll-pane content-area" hbarPolicy="NEVER" vbarPolicy="AS_NEEDED">
+            <content>
+                <VBox spacing="25.0" styleClass="vbox-spacing" prefWidth="100.0">
+                    <children>
+                        <HBox spacing="20.0" alignment="CENTER" styleClass="hbox-spacing"
+                              style="-fx-max-height: 220;">
+                            <children>
+                                <VBox alignment="CENTER" spacing="10.0" styleClass="stat-tile">
+                                    <children>
+                                        <Label text="👥" styleClass="stat-icon"/>
+                                        <Label fx:id="lblTotalResidents" text="0" styleClass="stat-value"/>
+                                        <Label text="Tổng cư dân" styleClass="stat-label"/>
+                                    </children>
+                                </VBox>
+
+                                <VBox alignment="CENTER" spacing="10.0" styleClass="stat-tile">
+                                    <children>
+                                        <Label text="🏠" styleClass="stat-icon"/>
+                                        <Label fx:id="lblTotalApartments" text="0" styleClass="stat-value"/>
+                                        <Label text="Tổng căn hộ" styleClass="stat-label"/>
+                                    </children>
+                                </VBox>
+
+                                <VBox alignment="CENTER" spacing="10.0" styleClass="stat-tile">
+                                    <children>
+                                        <Label text="💰" styleClass="stat-icon"/>
+                                        <Label fx:id="lblTotalDebt" text="0" styleClass="stat-value"/>
+                                        <Label text="Công nợ (VNĐ)" styleClass="stat-label"/>
+                                    </children>
+                                </VBox>
+
+                                <VBox alignment="CENTER" spacing="10.0" styleClass="stat-tile">
+                                    <children>
+                                        <Label text="📋" styleClass="stat-icon"/>
+                                        <Label fx:id="lblTotalUnpaidInvoices" text="0" styleClass="stat-value"/>
+                                        <Label text="Hóa đơn chưa trả" styleClass="stat-label"/>
+                                    </children>
+                                </VBox>
+
+                                <VBox alignment="CENTER" spacing="10.0" styleClass="stat-tile">
+                                    <children>
+                                        <Label text="⚠️" styleClass="stat-icon"/>
+                                        <Label fx:id="lblAssetsInTrouble" text="0" styleClass="stat-value-warning"/>
+                                        <Label text="Tài sản cần xử lý" styleClass="stat-label"/>
+                                    </children>
+                                </VBox>
+
+                            </children>
+                        </HBox>
+
+                        <HBox spacing="30.0" alignment="CENTER" styleClass="hbox-spacing">
+                            <children>
+                                <VBox spacing="10.0" styleClass="chart-container">
+                                    <children>
+                                        <Label text="📊 Thống kê Cư dân" styleClass="chart-title" />
+                                        <PieChart fx:id="residentStatusPieChart"
+                                                  prefWidth="400.0" prefHeight="300.0"
+                                                  legendVisible="true"
+                                                  labelsVisible="true"
+                                                  legendSide="BOTTOM"
+                                                  startAngle="90">
+                                        </PieChart>
+                                    </children>
+                                </VBox>
+
+                                <VBox spacing="10.0" styleClass="chart-container">
+                                    <children>
+                                        <Label text="💰 Số Nợ Đã Thanh Toán" styleClass="chart-title" />
+                                        <VBox alignment="CENTER" spacing="15.0" styleClass="debt-chart-container">
+                                            <children>
+                                                <Label fx:id="lblTotalPaid" text="0 VNĐ" styleClass="debt-paid-value" />
+                                                <Label text="Tổng số tiền đã thanh toán" styleClass="debt-paid-label" />
+                                                <ProgressBar fx:id="debtProgressBar" prefWidth="300.0" styleClass="debt-progress" />
+                                            </children>
+                                        </VBox>
+                                    </children>
+                                </VBox>
+                            </children>
+                        </HBox>
+                    </children>
+                </VBox>
+            </content>
+        </ScrollPane>
+    </center>
 </BorderPane>

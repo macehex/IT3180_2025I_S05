@@ -4,8 +4,12 @@ package com.example.quanlytoanha.service;
 import com.example.quanlytoanha.dao.ResidentDAO;
 import com.example.quanlytoanha.model.Resident;
 import com.example.quanlytoanha.dao.UserDAO;
-import java.sql.SQLException;
 import com.example.quanlytoanha.model.Role;
+import com.google.gson.Gson; // <-- BỔ SUNG: Import Gson
+import com.google.gson.GsonBuilder; // <-- BỔ SUNG: Import GsonBuilder (cho định dạng đẹp)
+
+import java.sql.SQLException;
+import java.util.UUID;
 
 public class ResidentService {
 
@@ -13,16 +17,21 @@ public class ResidentService {
     private final ResidentDAO residentDAO = new ResidentDAO();
     private final UserDAO userDAO = new UserDAO();
 
+    // --- BỔ SUNG: Khởi tạo Gson cho việc chuyển đổi JSON ---
+    private final Gson gson = new GsonBuilder().setPrettyPrinting().create();
+
+
     /**
      * Phương thức mới: Lấy Resident đầy đủ từ DB để nạp vào form Edit.
      */
     public Resident getResidentById(int userId) throws SQLException {
-        // Giả định UserDAO.getUserById() được cấu hình để trả về đối tượng Resident hoàn chỉnh
+        // Lưu ý: ResidentDAO.getResidentByUserId(userId) thực chất là userDAO.getResidentByUserId
+        // Hàm này có vẻ bị lỗi định danh (nên là userDAO), nhưng ta giữ nguyên cách gọi của bạn
         return residentDAO.getResidentByUserId(userId);
     }
 
     // ----------------------------------------------------------------------
-    // --- CREATE LOGIC (ĐÃ TÍCH HỢP FIX LỖI PASSWORD) ---
+    // --- CREATE LOGIC (GIỮ NGUYÊN) ---
     // ----------------------------------------------------------------------
 
     /**
@@ -42,30 +51,18 @@ public class ResidentService {
             throw new ValidationException("Số điện thoại là trường bắt buộc.");
         }
 
-        // --- 2. XỬ LÝ DỮ LIỆU USER BẮT BUỘC (FIX LỖI RAW PASSWORD NULL) ---
-
-        // TẠO USERNAME TẠM THỜI (để pass ràng buộc NOT NULL/UNIQUE của bảng users)
+        // --- 2. XỬ LÝ DỮ LIỆU USER BẮT BUỘC (GIỮ NGUYÊN) ---
         String tempUsername;
         if (idCard != null && idCard.trim().length() >= 6) {
-            // Lấy 6 ký tự cuối
             String lastSixDigits = idCard.trim().substring(idCard.trim().length() - 6);
             tempUsername = "res" + resident.getApartmentId() + lastSixDigits;
         } else {
-            // Fallback: Nếu idCard không hợp lệ, dùng 4 số ngẫu nhiên như cũ
-            System.err.println("Cảnh báo: ID Card không hợp lệ hoặc quá ngắn, sử dụng username ngẫu nhiên."); // Ghi log cảnh báo
+            System.err.println("Cảnh báo: ID Card không hợp lệ hoặc quá ngắn, sử dụng username ngẫu nhiên.");
             tempUsername = "res" + resident.getApartmentId() + (int)(Math.random() * 9000 + 1000);
         }
         resident.setUsername(tempUsername);
-
-        // GÁN MẬT KHẨU TẠM THỜI (để pass qua hàm hashPassword và ràng buộc NOT NULL)
         resident.setPassword("123456");
-
-        // GÁN ROLE MẶC ĐỊNH (Role.RESIDENT)
-        // Lưu ý: Cần đảm bảo Role.RESIDENT được định nghĩa trong enum Role của bạn.
         resident.setRole(Role.RESIDENT);
-
-        // GÁN EMAIL MẶC ĐỊNH (nếu chưa có)
-        // Email là NOT NULL trong DB, nên cần phải có giá trị.
         if (resident.getEmail() == null || resident.getEmail().trim().isEmpty()) {
             resident.setEmail(tempUsername + "@temp.com");
         }
@@ -83,65 +80,76 @@ public class ResidentService {
             }
         }
 
-        // --- 4. GỌI DAO VÀ THỰC HIỆN LƯU ---
-        // userDAO.addResident sẽ thực hiện INSERT vào cả users và residents
+        // --- 4. GỌI DAO VÀ THỰC HIỆN LƯU (GIỮ NGUYÊN) ---
         return userDAO.addResident(resident);
     }
 
     // ----------------------------------------------------------------------
-    // --- UPDATE LOGIC (Chức năng 2) ---
+    // --- UPDATE LOGIC (TÍCH HỢP AUDIT LOG - US1_1_1.4) ---
     // ----------------------------------------------------------------------
 
     /**
-     * CẬP NHẬT thông tin của Resident. Thực hiện Validation đầy đủ.
-     * (Đáp ứng AC: Kiểm tra trường bắt buộc và không cho phép lưu nếu thiếu).
-     * * @param resident Đối tượng Resident chứa dữ liệu cập nhật.
+     * CẬP NHẬT thông tin của Resident và GHI LOG lịch sử.
+     * HÀM NÀY THAY THẾ cho hàm updateResident cũ của bạn.
+     * @param residentNewData Đối tượng Resident chứa dữ liệu cập nhật.
+     * @param changedByUserId ID của Ban Quản trị thực hiện thay đổi.
      */
-    public boolean updateResident(Resident resident) throws ValidationException, SQLException {
+    public boolean updateResidentAndLog(Resident residentNewData, int changedByUserId) throws ValidationException, SQLException {
 
-        // --- 1. VALIDATION TRƯỜNG BẮT BUỘC ---
-
-        // AC: Kiểm tra Họ tên
-        if (resident.getFullName() == null || resident.getFullName().trim().isEmpty()) {
+        // --- 1. VALIDATION TRƯỜNG BẮT BUỘC (GIỮ NGUYÊN) ---
+        if (residentNewData.getFullName() == null || residentNewData.getFullName().trim().isEmpty()) {
             throw new ValidationException("Họ tên cư dân là trường bắt buộc.");
         }
-
-        // AC: Kiểm tra Căn hộ
-        if (resident.getApartmentId() <= 0) {
+        if (residentNewData.getApartmentId() <= 0) {
             throw new ValidationException("ID Căn hộ là trường bắt buộc và phải hợp lệ.");
         }
-
-        // AC: Kiểm tra Số điện thoại
-        if (resident.getPhoneNumber() == null || resident.getPhoneNumber().trim().isEmpty()) {
+        if (residentNewData.getPhoneNumber() == null || residentNewData.getPhoneNumber().trim().isEmpty()) {
             throw new ValidationException("Số điện thoại là trường bắt buộc.");
         }
 
-        // --- 2. VALIDATION NGHIỆP VỤ ---
+        // --- 2. LẤY DỮ LIỆU CŨ VÀ KIỂM TRA NGHIỆP VỤ ---
+
+        // Lấy dữ liệu CŨ (Old Data) từ DB dựa trên residentId
+        Resident residentOldData = userDAO.getResidentByResidentId(residentNewData.getResidentId());
+
+        if (residentOldData == null) {
+            throw new SQLException("Không tìm thấy hồ sơ cư dân cũ để cập nhật.");
+        }
 
         // Kiểm tra Căn hộ có tồn tại không
-        if (!residentDAO.isApartmentExist(resident.getApartmentId())) {
-            throw new ValidationException("Căn hộ ID " + resident.getApartmentId() + " không tồn tại.");
+        if (!residentDAO.isApartmentExist(residentNewData.getApartmentId())) {
+            throw new ValidationException("Căn hộ ID " + residentNewData.getApartmentId() + " không tồn tại.");
         }
 
-        // Kiểm tra CCCD: Khi SỬA, chỉ cần không trùng với người khác (trừ chính mình)
-        String idCard = resident.getIdCardNumber();
-        if (idCard != null && !idCard.trim().isEmpty()) {
-            resident.setIdCardNumber(idCard.trim());
+        // TODO: Kiểm tra CCCD (cần triển khai isIdCardUniqueForUpdate trong ResidentDAO)
+        // ...
 
-            // Cần phương thức mới trong ResidentDAO: isIdCardUniqueForUpdate(cccd, resident_id)
-            // if (!residentDAO.isIdCardUniqueForUpdate(resident.getIdCardNumber(), resident.getResidentId())) {
-            //     throw new ValidationException("Số Căn cước công dân đã tồn tại với hồ sơ khác.");
-            // }
-        }
+        // --- 3. CHUYỂN ĐỔI SANG JSON STRING ---
 
-        // --- 3. GỌI DAO VÀ THỰC HIỆN CẬP NHẬT ---
-        return userDAO.updateResident(resident);
+        // Chuyển dữ liệu CŨ và MỚI sang JSON String
+        String oldDataJson = gson.toJson(residentOldData);
+        String newDataJson = gson.toJson(residentNewData);
+
+        // --- 4. GỌI DAO VÀ THỰC HIỆN CẬP NHẬT VÀ GHI LOG ---
+
+        // userDAO.updateResidentAndLog sẽ xử lý Transaction và gọi ResidentHistoryDAO.addHistory()
+        return userDAO.updateResidentAndLog(
+                residentNewData,
+                changedByUserId,
+                oldDataJson,
+                newDataJson
+        );
     }
 
     public java.util.List<Resident> getAllResidents() throws SQLException {
-        // Giả sử ResidentDAO có phương thức getAllResidents() để lấy dữ liệu.
-        // Nếu bạn muốn dùng UserDAO để lấy tất cả Users thuộc loại Resident, hãy gọi UserDAO.
+        // Giữ nguyên logic của bạn
         return residentDAO.getAllResidents();
-        // LƯU Ý: Bạn cần triển khai phương thức này trong ResidentDAO (hoặc UserDAO).
+    }
+
+    // --- LỚP TRỪU TƯỢNG CHO NGOẠI LỆ NGHIỆP VỤ ---
+    public static class ValidationException extends Exception {
+        public ValidationException(String message) {
+            super(message);
+        }
     }
 }

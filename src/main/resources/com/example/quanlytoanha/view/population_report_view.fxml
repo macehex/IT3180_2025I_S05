@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.chart.BarChart?>
+<?import javafx.scene.chart.CategoryAxis?>
+<?import javafx.scene.chart.NumberAxis?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox spacing="15.0" style="-fx-padding: 20; -fx-background-color: #f8f9fa;"
+      xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="com.example.quanlytoanha.controller.PopulationReportController">
+    <children>
+
+        <HBox alignment="CENTER_LEFT" spacing="10.0">
+            <Label text="📊 BÁO CÁO BIẾN ĐỘNG DÂN CƯ"
+                   style="-fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: #1e3c72;"/>
+        </HBox>
+
+        <HBox spacing="10.0" alignment="BOTTOM_LEFT" styleClass="filter-box">
+            <VBox>
+                <Label text="Từ ngày:" style="-fx-font-weight: bold;"/>
+                <DatePicker fx:id="dpStartDate" prefWidth="150.0"/>
+            </VBox>
+            <VBox>
+                <Label text="Đến ngày:" style="-fx-font-weight: bold;"/>
+                <DatePicker fx:id="dpEndDate" prefWidth="150.0"/>
+            </VBox>
+            <Button fx:id="btnGenerateReport" text="Tạo Báo cáo" onAction="#handleGenerateReport" styleClass="btn-primary"/>
+
+            <Button fx:id="btnExportPDF" text="Xuất PDF" onAction="#handleExportPDF" styleClass="btn-success"/>
+
+        </HBox>
+
+        <VBox spacing="20.0" VBox.vgrow="ALWAYS" style="-fx-background-color: white; -fx-padding: 20; -fx-background-radius: 8;">
+
+            <HBox spacing="30.0" alignment="CENTER">
+                <VBox alignment="CENTER" style="-fx-border-color: #28a745; -fx-border-width: 2; -fx-padding: 15; -fx-background-radius: 5;">
+                    <Label text="Số lượng chuyển vào" style="-fx-font-size: 14px; -fx-text-fill: #555;"/>
+                    <Label fx:id="lblMoveIns" text="0" style="-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: #28a745;"/>
+                </VBox>
+                <VBox alignment="CENTER" style="-fx-border-color: #dc3545; -fx-border-width: 2; -fx-padding: 15; -fx-background-radius: 5;">
+                    <Label text="Số lượng chuyển đi" style="-fx-font-size: 14px; -fx-text-fill: #555;"/>
+                    <Label fx:id="lblMoveOuts" text="0" style="-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: #dc3545;"/>
+                </VBox>
+            </HBox>
+
+            <BarChart fx:id="barChart" title="Biểu đồ Biến động Dân cư" VBox.vgrow="ALWAYS">
+                <xAxis>
+                    <CategoryAxis label="Loại Biến động" />
+                </xAxis>
+                <yAxis>
+                    <NumberAxis label="Số lượng" side="LEFT" />
+                </yAxis>
+            </BarChart>
+        </VBox>
+
+    </children>
+</VBox>

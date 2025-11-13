@@ -1,9 +1,12 @@
 // Vị trí: src/main/java/com/example/quanlytoanha/controller/AddResidentController.java
 package com.example.quanlytoanha.controller;
 
-import com.example.quanlytoanha.service.ValidationException;
+import com.example.quanlytoanha.service.ResidentService.ValidationException;
 import com.example.quanlytoanha.model.Resident;
 import com.example.quanlytoanha.service.ResidentService;
+import com.example.quanlytoanha.session.SessionManager; // <-- BỔ SUNG: Import SessionManager
+import com.example.quanlytoanha.model.User;             // <-- BỔ SUNG: Import User
+
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
@@ -18,19 +21,18 @@ public class AddResidentController {
 
     // --- KHAI BÁO CÁC THÀNH PHẦN FXML CỦA FORM ---
     @FXML private TextField txtFullName;
-    @FXML private ComboBox<Integer> cbApartmentId; // Giả sử Apartment ID là số nguyên
+    @FXML private ComboBox<Integer> cbApartmentId;
     @FXML private TextField txtIdCard;
     @FXML private DatePicker dpDateOfBirth;
     @FXML private ComboBox<String> cbRelationship;
     @FXML private TextField txtPhoneNumber;
     @FXML private Button btnSave;
-
-    // Yêu cầu thêm Label này vào FXML để hiển thị tiêu đề
-    @FXML private Label titleLabel;
+    @FXML private Label titleLabel; // (Giữ nguyên)
 
     // --- KHAI BÁO SERVICE VÀ ĐỐI TƯỢNG SỬA ---
+    // (Giữ nguyên)
     private final ResidentService residentService = new ResidentService();
-    private Resident residentToEdit; // Đối tượng Resident được truyền vào khi ở chế độ SỬA
+    private Resident residentToEdit;
 
     /**
      * Phương thức khởi tạo logic cho các ComboBox (Chạy sau khi FXML load)
@@ -66,17 +68,15 @@ public class AddResidentController {
 
     /**
      * Thiết lập Controller sang chế độ SỬA/CẬP NHẬT và điền dữ liệu cũ.
-     * @param resident Đối tượng Resident cần chỉnh sửa.
      */
     public void setResident(Resident resident) {
         this.residentToEdit = resident;
 
-        // *** KHÔNG CẦN TRY/CATCH BAO BỌC NỮA, CHỈ TRY CATCH TỪNG PHẦN ***
         if (titleLabel != null) {
-            titleLabel.setText("CAP NHAT HO SO CU DAN"); // Dùng tiếng Việt không dấu
+            titleLabel.setText("CẬP NHẬT HỒ SƠ CƯ DÂN");
         }
         if (btnSave != null) {
-            btnSave.setText("CAP NHAT"); // Dùng tiếng Việt không dấu
+            btnSave.setText("CẬP NHẬT");
         }
 
         // --- SECTION A: STRING FIELDS ---
@@ -93,7 +93,7 @@ public class AddResidentController {
         } catch (Exception e) {
             System.err.println("!!! ERROR A: STRING FIELDS FAILED");
             e.printStackTrace();
-            throw new RuntimeException("ERROR A: STRING FIELDS FAILED", e); // Ném lỗi rõ ràng
+            throw new RuntimeException("ERROR A: STRING FIELDS FAILED", e);
         }
 
         // --- SECTION B: DATE PICKER ---
@@ -101,27 +101,24 @@ public class AddResidentController {
             if (dpDateOfBirth != null) {
                 Date dob = resident.getDateOfBirth();
 
-                // Đảm bảo dob KHÔNG NULL và CÓ THỂ CHUYỂN ĐỔI.
                 if (dob != null) {
-                    // Cố gắng chuyển đổi
                     try {
-                        LocalDate localDate = dob.toInstant()
-                                .atZone(ZoneId.systemDefault()).toLocalDate();
+                        // FIX: Chuyển đổi an toàn kiểu Date
+                        LocalDate localDate = new java.util.Date(dob.getTime())
+                                .toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
                         dpDateOfBirth.setValue(localDate);
                     } catch (Exception dateEx) {
-                        // Nếu chuyển đổi thất bại (dữ liệu không hợp lệ), đặt giá trị null
-                        System.err.println("CANH BAO: Ngay sinh khong hop le trong DB. Dat gia tri null. " + dateEx.getMessage());
+                        System.err.println("CẢNH BÁO: Ngày sinh không hợp lệ trong DB. Đặt giá trị null. " + dateEx.getMessage());
                         dpDateOfBirth.setValue(null);
                     }
                 } else {
-                    // Nếu dob là NULL, đặt giá trị null
                     dpDateOfBirth.setValue(null);
                 }
             }
         } catch (Exception e) {
-            System.err.println("!!! ERROR B: DATE PICKER FAILED (Sau Fix)");
+            System.err.println("!!! ERROR B: DATE PICKER FAILED");
             e.printStackTrace();
-            throw new RuntimeException("ERROR B: DATE PICKER FAILED (Sau Fix)", e);
+            throw new RuntimeException("ERROR B: DATE PICKER FAILED", e);
         }
 
         // --- SECTION C: APARTMENT COMBOBOX ---
@@ -137,7 +134,7 @@ public class AddResidentController {
         } catch (Exception e) {
             System.err.println("!!! ERROR C: APARTMENT COMBOBOX FAILED");
             e.printStackTrace();
-            throw new RuntimeException("ERROR C: APARTMENT COMBOBOX FAILED", e); // Ném lỗi rõ ràng
+            throw new RuntimeException("ERROR C: APARTMENT COMBOBOX FAILED", e);
         }
 
         // --- SECTION D: RELATIONSHIP COMBOBOX ---
@@ -153,19 +150,18 @@ public class AddResidentController {
         } catch (Exception e) {
             System.err.println("!!! ERROR D: RELATIONSHIP COMBOBOX FAILED");
             e.printStackTrace();
-            throw new RuntimeException("ERROR D: RELATIONSHIP COMBOBOX FAILED", e); // Ném lỗi rõ ràng
+            throw new RuntimeException("ERROR D: RELATIONSHIP COMBOBOX FAILED", e);
         }
     }
 
     /**
      * Xử lý sự kiện khi nhấn nút LƯU/CẬP NHẬT.
-     * Logic này phân biệt chế độ Thêm mới và Cập nhật (Chức năng 2).
+     * Logic này phân biệt chế độ Thêm mới và Cập nhật.
      */
     @FXML
     private void handleSaveButtonAction() {
-        // Nếu residentToEdit đã được gán (tức là đang ở chế độ Sửa)
         if (this.residentToEdit != null) {
-            // CHẾ ĐỘ CẬP NHẬT (Chức năng 2)
+            // CHẾ ĐỘ CẬP NHẬT (Gọi hàm mới có Audit Log)
             updateExistingResident();
         } else {
             // CHẾ ĐỘ THÊM MỚI
@@ -173,7 +169,7 @@ public class AddResidentController {
         }
     }
 
-    // --- LOGIC THÊM MỚI ---
+    // --- LOGIC THÊM MỚI (GIỮ NGUYÊN) ---
     private void createNewResident() {
         try {
             // 1. Lấy dữ liệu từ form
@@ -200,14 +196,12 @@ public class AddResidentController {
             // 3. Gọi Service
             if (residentService.createNewResident(newResident)) {
                 showAlert(Alert.AlertType.INFORMATION, "Thành công", "Thêm cư dân mới thành công: " + fullName);
-                // Đóng cửa sổ (Hoàn thành AC)
                 Stage stage = (Stage) btnSave.getScene().getWindow();
                 stage.close();
             } else {
                 showAlert(Alert.AlertType.ERROR, "Lỗi", "Không thể thêm cư dân (Lỗi không xác định).");
             }
         } catch (ValidationException e) {
-            // Hiển thị lỗi Validation (Đáp ứng AC)
             showAlert(Alert.AlertType.WARNING, "Thiếu thông tin", e.getMessage());
         } catch (SQLException e) {
             showAlert(Alert.AlertType.ERROR, "Lỗi Database", "Lỗi DB: Không thể lưu hồ sơ. " + e.getMessage());
@@ -215,10 +209,10 @@ public class AddResidentController {
         }
     }
 
-    // --- LOGIC CẬP NHẬT HỒ SƠ CÓ SẴN (CHỨC NĂNG 2) ---
+    // --- LOGIC CẬP NHẬT HỒ SƠ CÓ SẴN (BỔ SUNG AUDIT LOG - US1_1_1.4) ---
     private void updateExistingResident() {
         try {
-            // 1. Lấy dữ liệu mới từ form
+            // 1. Lấy dữ liệu MỚI từ form và gán vào residentToEdit
             String fullName = txtFullName.getText().trim();
             Integer apartmentId = cbApartmentId.getSelectionModel().getSelectedItem();
             String idCard = txtIdCard.getText().trim();
@@ -229,7 +223,7 @@ public class AddResidentController {
                     : null;
             String phoneNumber = txtPhoneNumber.getText().trim();
 
-            // 2. Gán giá trị mới vào đối tượng đang chỉnh sửa
+            // Gán giá trị mới vào đối tượng đang chỉnh sửa
             residentToEdit.setFullName(fullName);
             residentToEdit.setApartmentId(apartmentId);
             residentToEdit.setIdCardNumber(idCard.isEmpty() ? null : idCard);
@@ -237,11 +231,18 @@ public class AddResidentController {
             residentToEdit.setRelationship(relationship);
             residentToEdit.setPhoneNumber(phoneNumber);
 
-            // 3. Gọi Service để cập nhật
-            // (Service sẽ thực hiện Validation SĐT và các trường bắt buộc khác)
-            if (residentService.updateResident(residentToEdit)) {
-                // AC: Thì hệ thống lưu thay đổi và hiển thị thông báo thành công.
-                showAlert(Alert.AlertType.INFORMATION, "Thành công", "Cập nhật hồ sơ cư dân thành công!");
+            // 2. Lấy ID người dùng (Ban Quản trị) đang thực hiện thay đổi
+            User currentUser = SessionManager.getInstance().getCurrentUser();
+            if (currentUser == null) {
+                showAlert(Alert.AlertType.ERROR, "Lỗi Phiên", "Phiên đăng nhập không hợp lệ. Vui lòng đăng nhập lại.");
+                return;
+            }
+            int changedByUserId = currentUser.getUserId();
+
+
+            // 3. Gọi Service để cập nhật và GHI LOG
+            if (residentService.updateResidentAndLog(residentToEdit, changedByUserId)) {
+                showAlert(Alert.AlertType.INFORMATION, "Thành công", "Cập nhật hồ sơ cư dân thành công và đã ghi nhận lịch sử!");
                 // Đóng cửa sổ
                 ((Stage) btnSave.getScene().getWindow()).close();
             } else {
@@ -249,10 +250,12 @@ public class AddResidentController {
             }
 
         } catch (ValidationException e) {
-            // AC: Thì hệ thống hiển thị lỗi và không cho phép lưu (khi xóa trường bắt buộc)
             showAlert(Alert.AlertType.WARNING, "Thiếu thông tin", e.getMessage());
         } catch (SQLException e) {
             showAlert(Alert.AlertType.ERROR, "Lỗi Database", "Lỗi DB: Không thể cập nhật hồ sơ. " + e.getMessage());
+            e.printStackTrace();
+        } catch (Exception e) {
+            showAlert(Alert.AlertType.ERROR, "Lỗi Không Xác Định", "Lỗi: " + e.getMessage());
             e.printStackTrace();
         }
     }

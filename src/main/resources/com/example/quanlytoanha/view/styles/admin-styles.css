@@ -5,7 +5,7 @@
 /* Root và Background */
 .root {
     -fx-font-family: "Segoe UI", "System", sans-serif;
-    -fx-font-size: 16px; /* Tăng từ 14px lên 16px */
+    -fx-font-size: 16px;
 }
 
 /* ScrollPane */
@@ -23,13 +23,13 @@
    ============================================ */
 .header-container {
     -fx-background-color: #1e3c72;
-    -fx-padding: 25px 35px; /* Tăng padding */
+    -fx-padding: 25px 35px;
     -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.2), 10, 0, 0, 2);
 }
 
 .header-title {
     -fx-text-fill: white;
-    -fx-font-size: 28px; /* Tăng từ 24px lên 28px */
+    -fx-font-size: 28px;
     -fx-font-weight: bold;
 }
 
@@ -38,33 +38,46 @@
    ============================================ */
 .stat-tile {
     -fx-background-color: white;
-    -fx-padding: 35px 30px; /* Tăng padding */
-    -fx-background-radius: 20px; /* Bo góc lớn hơn */
+    -fx-padding: 35px 30px;
+    -fx-background-radius: 20px;
     -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.1), 20, 0, 0, 5);
-    -fx-min-width: 220px; /* Tăng kích thước */
-    -fx-min-height: 200px; /* Tăng kích thước */
+    -fx-min-width: 220px;
+    -fx-min-height: 200px;
     -fx-cursor: hand;
 }
 
 .stat-tile:hover {
     -fx-effect: dropshadow(gaussian, rgba(30, 60, 114, 0.4), 25, 0, 0, 10);
-    -fx-translate-y: -8px; /* Nâng lên cao hơn khi hover */
+    -fx-translate-y: -8px;
 }
 
 .stat-icon {
-    -fx-font-size: 56px; /* Tăng từ 42px lên 56px */
+    -fx-font-size: 56px;
     -fx-padding: 0 0 12px 0;
 }
 
 .stat-value {
-    -fx-font-size: 48px; /* Tăng từ 36px lên 48px */
+    -fx-font-size: 48px;
     -fx-font-weight: bold;
     -fx-text-fill: #1e3c72;
 }
 
+/* --- BỔ SUNG: Class cho Stat Tile Cảnh báo (Tài sản/Sự cố) --- */
+.stat-value-warning {
+    -fx-font-size: 48px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #ff9800; /* Màu vàng cam */
+}
+.stat-value-info {
+    -fx-font-size: 48px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #17a2b8; /* Màu xanh info */
+}
+/* --- Kết thúc Bổ sung --- */
+
 .stat-label {
-    -fx-font-size: 16px; /* Tăng từ 14px lên 16px */
-    -fx-text-fill: #4a5568; /* Màu đậm hơn cho dễ đọc */
+    -fx-font-size: 16px;
+    -fx-text-fill: #4a5568;
     -fx-font-weight: 500;
 }
 
@@ -73,20 +86,20 @@
    ============================================ */
 .section-container {
     -fx-background-color: white;
-    -fx-padding: 30px 25px; /* Tăng padding */
-    -fx-background-radius: 15px; /* Bo góc lớn hơn */
+    -fx-padding: 30px 25px;
+    -fx-background-radius: 15px;
     -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.08), 15, 0, 0, 4);
 }
 
 .section-title {
-    -fx-font-size: 22px; /* Tăng từ 18px lên 22px */
+    -fx-font-size: 22px;
     -fx-font-weight: bold;
     -fx-text-fill: #1e3c72;
-    -fx-padding: 0 0 20px 0; /* Tăng spacing */
+    -fx-padding: 0 0 20px 0;
 }
 
 /* ============================================
-   BUTTONS
+   BUTTONS (Chung)
    ============================================ */
 .btn-primary {
     -fx-background-color: #1e3c72;
@@ -99,12 +112,10 @@
     -fx-min-height: 35px;
     -fx-wrap-text: false;
 }
-
 .btn-primary:hover {
     -fx-background-color: #2a5298;
     -fx-translate-y: -3px;
 }
-
 .btn-primary:pressed {
     -fx-translate-y: 0px;
     -fx-effect: dropshadow(gaussian, rgba(30, 60, 114, 0.2), 5, 0, 0, 2);
@@ -121,12 +132,10 @@
     -fx-min-height: 35px;
     -fx-wrap-text: false;
 }
-
 .btn-danger:hover {
     -fx-background-color: #c82333;
     -fx-translate-y: -3px;
 }
-
 .btn-danger:pressed {
     -fx-translate-y: 0px;
 }
@@ -142,34 +151,66 @@
     -fx-min-height: 35px;
     -fx-wrap-text: false;
 }
-
 .btn-success:hover {
     -fx-background-color: #218838;
     -fx-translate-y: -3px;
 }
-
 .btn-success:pressed {
     -fx-translate-y: 0px;
 }
 
+/* --- BỔ SUNG: Class cho nút Lịch sử và Chỉnh sửa --- */
+.btn-info {
+    -fx-background-color: #17a2b8;
+    -fx-text-fill: white;
+    -fx-font-size: 13px;
+    -fx-font-weight: bold;
+    -fx-background-radius: 8px;
+    -fx-padding: 10px 20px;
+    -fx-cursor: hand;
+    -fx-min-height: 35px;
+    -fx-wrap-text: false;
+}
+.btn-info:hover {
+    -fx-background-color: #138496;
+    -fx-translate-y: -3px;
+}
+.btn-warning {
+    -fx-background-color: #ffc107;
+    -fx-text-fill: black;
+    -fx-font-size: 13px;
+    -fx-font-weight: bold;
+    -fx-background-radius: 8px;
+    -fx-padding: 10px 20px;
+    -fx-cursor: hand;
+    -fx-min-height: 35px;
+    -fx-wrap-text: false;
+}
+.btn-warning:hover {
+    -fx-background-color: #e0a800;
+    -fx-translate-y: -3px;
+}
+/* --- Kết thúc Bổ sung --- */
+
+
 /* Button với full width */
 .btn-full-width {
-    -fx-min-height: 75px; /* Tăng từ 65px lên 75px */
+    -fx-min-height: 75px;
     -fx-max-width: Infinity;
-    -fx-font-size: 16px; /* Tăng font size */
+    -fx-font-size: 16px;
 }
 
 /* ============================================
    VBOX & HBOX SPACING
    ============================================ */
 .vbox-spacing {
-    -fx-spacing: 35px; /* Tăng từ 25px lên 35px */
-    -fx-padding: 40px 60px; /* Tăng padding */
+    -fx-spacing: 35px;
+    -fx-padding: 40px 60px;
     -fx-background-color: #f5f7fa;
 }
 
 .hbox-spacing {
-    -fx-spacing: 30px; /* Tăng từ 20px lên 30px */
+    -fx-spacing: 30px;
     -fx-alignment: center;
 }
 
@@ -191,8 +232,8 @@
     -fx-background-color: transparent;
     -fx-text-fill: white;
     -fx-font-weight: bold;
-    -fx-font-size: 15px; /* Tăng từ 13px lên 15px */
-    -fx-padding: 15px; /* Tăng từ 10px lên 15px */
+    -fx-font-size: 15px;
+    -fx-padding: 15px;
 }
 
 .table-view .column-header .label {
@@ -229,10 +270,10 @@
 .hamburger-button {
     -fx-background-color: transparent;
     -fx-text-fill: white;
-    -fx-font-size: 30px; /* Tăng từ 24px lên 30px */
+    -fx-font-size: 30px;
     -fx-font-weight: bold;
     -fx-cursor: hand;
-    -fx-padding: 15px; /* Tăng padding */
+    -fx-padding: 15px;
     -fx-background-radius: 8px;
     -fx-min-width: 50px;
     -fx-min-height: 50px;
@@ -244,21 +285,23 @@
 
 .sidebar {
     -fx-background-color: #1e3c72;
-    -fx-pref-width: 280px; /* Tăng từ 250px lên 280px */
+    -fx-pref-width: 280px;
     -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.3), 15, 0, 0, 0);
 }
 
+/* --- SỬA LỖI TRÀN MÀN HÌNH Ở ĐÂY --- */
 .sidebar-menu-item {
     -fx-background-color: transparent;
     -fx-text-fill: white;
-    -fx-font-size: 17px; /* Tăng từ 15px lên 17px */
-    -fx-font-weight: 500; /* Tăng độ đậm */
+    -fx-font-size: 15px; /* Giảm từ 17px */
+    -fx-font-weight: 500;
     -fx-alignment: CENTER_LEFT;
-    -fx-padding: 20px 25px; /* Tăng padding */
+    -fx-padding: 12px 25px; /* Giảm padding trên/dưới (từ 20px) */
     -fx-cursor: hand;
     -fx-border-width: 0;
-    -fx-min-height: 55px; /* Tăng chiều cao */
+    -fx-min-height: 45px; /* Giảm chiều cao */
 }
+/* --- KẾT THÚC SỬA LỖI --- */
 
 .sidebar-menu-item:hover {
     -fx-background-color: #2a5298;
@@ -270,30 +313,31 @@
 
 .sidebar-user-section {
     -fx-background-color: #1a2f5a;
+    -fx-padding: 15px 20px 10px 20px; /* Giảm padding */
 }
 
 .sidebar-user-name {
     -fx-text-fill: white;
-    -fx-font-size: 20px; /* Tăng từ 16px lên 20px */
+    -fx-font-size: 18px; /* Giảm từ 20px */
     -fx-font-weight: bold;
 }
 
 .sidebar-user-role {
-    -fx-text-fill: rgba(255, 255, 255, 0.9); /* Tăng độ sáng */
-    -fx-font-size: 15px; /* Tăng từ 13px lên 15px */
+    -fx-text-fill: rgba(255, 255, 255, 0.9);
+    -fx-font-size: 14px; /* Giảm từ 15px */
     -fx-font-weight: 500;
 }
 
 .sidebar-logout-btn {
     -fx-background-color: #dc3545;
     -fx-text-fill: white;
-    -fx-font-size: 16px; /* Tăng từ 14px lên 16px */
+    -fx-font-size: 15px; /* Giảm từ 16px */
     -fx-font-weight: bold;
     -fx-background-radius: 10px;
-    -fx-padding: 16px; /* Tăng padding */
+    -fx-padding: 12px; /* Giảm padding */
     -fx-cursor: hand;
     -fx-alignment: CENTER;
-    -fx-min-height: 50px; /* Tăng chiều cao */
+    -fx-min-height: 45px; /* Giảm chiều cao */
 }
 
 .sidebar-logout-btn:hover {
@@ -323,7 +367,7 @@
 }
 
 .chart-title {
-    -fx-font-size: 20px; /* Tăng font size */
+    -fx-font-size: 20px;
     -fx-font-weight: bold;
     -fx-text-fill: #1e3c72;
     -fx-padding: 0 0 15px 0;
@@ -434,12 +478,26 @@
     -fx-bar-fill: #ffc107;
 }
 
+/* --- BỔ SUNG: Sửa lỗi Biểu đồ Dân cư (US7_2_1) --- */
+.bar-chart .chart-bar {
+    /* Đặt chiều rộng tối đa (độ mỏng) của mỗi cột */
+    -fx-max-width: 60px; /* <--- Điều chỉnh độ mỏng ở đây (ví dụ 60px) */
+}
+
+.bar-chart .category-axis {
+    /* Đặt khoảng cách giữa các "ô" (Categories)
+       (Giúp tạo khoảng cách giữa cột "Chuyển vào" và "Chuyển đi") */
+    -fx-category-gap: 60px; /* <--- Điều chỉnh khoảng cách ở đây */
+}
+/* --- KẾT THÚC BỔ SUNG --- */
+
+
 .debt-chart-container {
     -fx-padding: 30px 20px;
 }
 
 .debt-paid-value {
-    -fx-font-size: 36px; /* Tăng font size */
+    -fx-font-size: 36px;
     -fx-font-weight: bold;
     -fx-text-fill: #28a745;
 }
@@ -450,7 +508,7 @@
 }
 
 .debt-progress {
-    -fx-pref-height: 25px; /* Tăng chiều cao progress bar */
+    -fx-pref-height: 25px;
 }
 
 .debt-progress .track {
@@ -466,4 +524,3 @@
 /* ============================================
    TRANSITIONS (sử dụng trong Java code)
    ============================================ */
-
