@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.control.cell.PropertyValueFactory?>
+<?import javafx.scene.layout.*?>
+
+<VBox spacing="15.0" style="-fx-padding: 20; -fx-background-color: #f8f9fa;"
+      xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="com.example.quanlytoanha.controller.DebtReportController">
+    <children>
+
+        <HBox alignment="CENTER_LEFT" spacing="10.0">
+            <Label text="💰 BÁO CÁO CÔNG NỢ CHI TIẾT"
+                   style="-fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: #1e3c72;"/>
+        </HBox>
+
+        <HBox spacing="10.0" alignment="BOTTOM_LEFT" styleClass="filter-box">
+            <VBox>
+                <Label text="Lọc theo Ngày Đến Hạn (Từ ngày):" style="-fx-font-weight: bold;"/>
+                <DatePicker fx:id="dpStartDate" prefWidth="170.0"/>
+            </VBox>
+            <VBox>
+                <Label text="Đến ngày:" style="-fx-font-weight: bold;"/>
+                <DatePicker fx:id="dpEndDate" prefWidth="170.0"/>
+            </VBox>
+            <Button fx:id="btnGenerateReport" text="Tạo Báo cáo" onAction="#handleGenerateReport" styleClass="btn-primary"/>
+
+            <Button fx:id="btnExportPDF" text="Xuất PDF" onAction="#handleExportPDF" styleClass="btn-success"/>
+        </HBox>
+
+        <TableView fx:id="debtTable" VBox.vgrow="ALWAYS" prefHeight="500.0">
+            <columns>
+                <TableColumn text="Căn hộ" prefWidth="80.0">
+                    <cellValueFactory><PropertyValueFactory property="apartmentId" /></cellValueFactory>
+                </TableColumn>
+                <TableColumn text="Chủ hộ" prefWidth="180.0">
+                    <cellValueFactory><PropertyValueFactory property="ownerName" /></cellValueFactory>
+                </TableColumn>
+                <TableColumn text="Điện thoại" prefWidth="120.0">
+                    <cellValueFactory><PropertyValueFactory property="phoneNumber" /></cellValueFactory>
+                </TableColumn>
+                <TableColumn text="Ngày đến hạn" prefWidth="120.0">
+                    <cellValueFactory><PropertyValueFactory property="earliestDueDate" /></cellValueFactory>
+                </TableColumn>
+                <TableColumn text="Tổng tiền (VNĐ)" prefWidth="150.0">
+                    <cellValueFactory><PropertyValueFactory property="totalDue" /></cellValueFactory>
+                </TableColumn>
+            </columns>
+            <columnResizePolicy><TableView fx:constant="CONSTRAINED_RESIZE_POLICY" /></columnResizePolicy>
+        </TableView>
+
+    </children>
+</VBox>

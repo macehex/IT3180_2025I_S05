@@ -2,14 +2,21 @@ package com.example.quanlytoanha.controller;
 
 import com.example.quanlytoanha.dao.ResidentDAO;
 import com.example.quanlytoanha.model.Resident;
+import javafx.beans.property.SimpleStringProperty; // Cần import
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader; // Cần import
 import javafx.fxml.Initializable;
+import javafx.scene.Parent; // Cần import
+import javafx.scene.Scene; // Cần import
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.text.Text;
+import javafx.stage.Modality; // Cần import
+import javafx.stage.Stage; // Cần import
 
+import java.io.IOException; // Cần import
 import java.net.URL;
 import java.sql.SQLException;
 import java.text.SimpleDateFormat;
@@ -17,8 +24,6 @@ import java.util.List;
 import java.util.ResourceBundle;
 
 public class ResidentListController implements Initializable {
-
-    // FXML Components - Header
 
     // FXML Components - Search Section
     @FXML private TextField txtSearchName;
@@ -29,7 +34,7 @@ public class ResidentListController implements Initializable {
     @FXML private Label lblResultCount;
     @FXML private Text txtStatusMessage;
 
-    // FXML Components - Table
+    // FXML Components - Table & Actions
     @FXML private TableView<Resident> tableView;
     @FXML private TableColumn<Resident, Integer> colId;
     @FXML private TableColumn<Resident, String> colFullName;
@@ -40,6 +45,12 @@ public class ResidentListController implements Initializable {
     @FXML private TableColumn<Resident, String> colPhone;
     @FXML private TableColumn<Resident, String> colEmail;
     @FXML private TableColumn<Resident, String> colMoveInDate;
+    @FXML private TableColumn<Resident, Void> colActions; // Cột này không dùng nếu nút ở dưới
+
+    // --- BỔ SUNG: Nút thao tác ---
+    @FXML private Button btnEditResident;
+    @FXML private Button btnViewHistory;
+    @FXML private Button btnDeleteResident;
 
     // Data
     private ObservableList<Resident> residentList;
@@ -48,19 +59,15 @@ public class ResidentListController implements Initializable {
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        // Initialize DAO
         residentDAO = new ResidentDAO();
-        
-        // Initialize resident list
         residentList = FXCollections.observableArrayList();
-        
-        // Setup table columns
+
         setupTableColumns();
-        
-        // Setup status combo box
         setupStatusComboBox();
-        
-        // Load initial data
+
+        // --- BỔ SUNG: Logic kích hoạt nút ---
+        setupButtonListeners();
+
         loadAllResidents();
     }
 
@@ -71,44 +78,48 @@ public class ResidentListController implements Initializable {
         colStatus.setCellValueFactory(new PropertyValueFactory<>("status"));
         colRelationship.setCellValueFactory(new PropertyValueFactory<>("relationship"));
         colIdCard.setCellValueFactory(new PropertyValueFactory<>("idCardNumber"));
-        
-        // Custom cell factories for phone, email, and move-in date
-        colPhone.setCellValueFactory(cellData -> {
-            Resident resident = cellData.getValue();
-            return new javafx.beans.property.SimpleStringProperty(
-                resident.getPhoneNumber() != null ? resident.getPhoneNumber() : ""
-            );
-        });
-        
-        colEmail.setCellValueFactory(cellData -> {
-            Resident resident = cellData.getValue();
-            return new javafx.beans.property.SimpleStringProperty(
-                resident.getEmail() != null ? resident.getEmail() : ""
-            );
-        });
-        
+
+        // Custom cell factories
+        colPhone.setCellValueFactory(cellData -> new SimpleStringProperty(
+                cellData.getValue().getPhoneNumber() != null ? cellData.getValue().getPhoneNumber() : ""
+        ));
+
+        colEmail.setCellValueFactory(cellData -> new SimpleStringProperty(
+                cellData.getValue().getEmail() != null ? cellData.getValue().getEmail() : ""
+        ));
+
         colMoveInDate.setCellValueFactory(cellData -> {
-            Resident resident = cellData.getValue();
-            if (resident.getMoveInDate() != null) {
-                return new javafx.beans.property.SimpleStringProperty(
-                    dateFormat.format(resident.getMoveInDate())
+            if (cellData.getValue().getMoveInDate() != null) {
+                return new SimpleStringProperty(
+                        dateFormat.format(cellData.getValue().getMoveInDate())
                 );
             }
-            return new javafx.beans.property.SimpleStringProperty("");
+            return new SimpleStringProperty("");
         });
-        
-        // Set table data
+
         tableView.setItems(residentList);
+    }
+
+    // --- BỔ SUNG: Logic kích hoạt nút khi chọn dòng ---
+    private void setupButtonListeners() {
+        tableView.getSelectionModel().selectedItemProperty().addListener(
+                (obs, oldSelection, newSelection) -> {
+                    boolean isSelected = newSelection != null;
+
+                    btnEditResident.setDisable(!isSelected);
+                    btnViewHistory.setDisable(!isSelected); // <-- Kích hoạt nút Lịch sử
+                    btnDeleteResident.setDisable(!isSelected);
+                }
+        );
     }
 
     private void setupStatusComboBox() {
         ObservableList<String> statusOptions = FXCollections.observableArrayList(
-            "Tất cả", "RESIDING", "MOVED_OUT", "TEMPORARY"
+                "Tất cả", "RESIDING", "MOVED_OUT", "TEMPORARY"
         );
         cmbStatus.setItems(statusOptions);
         cmbStatus.setValue("Tất cả");
     }
-
 
     @FXML
     private void handleSearch() {
@@ -116,7 +127,7 @@ public class ResidentListController implements Initializable {
             String name = txtSearchName.getText().trim();
             String apartmentText = txtSearchApartment.getText().trim();
             String status = cmbStatus.getValue();
-            
+
             Integer apartmentId = null;
             if (!apartmentText.isEmpty()) {
                 try {
@@ -126,25 +137,24 @@ public class ResidentListController implements Initializable {
                     return;
                 }
             }
-            
+
             String searchStatus = null;
             if (status != null && !status.equals("Tất cả")) {
                 searchStatus = status;
             }
-            
-            // Sử dụng phương thức searchResidents thực sự thay vì getAllResidents
+
             List<Resident> results = residentDAO.searchResidents(
-                name.isEmpty() ? null : name, 
-                apartmentId, 
-                searchStatus
+                    name.isEmpty() ? null : name,
+                    apartmentId,
+                    searchStatus
             );
             residentList.clear();
             residentList.addAll(results);
-            
+
             lblResultCount.setText("Kết quả: " + results.size());
             txtStatusMessage.setText("Tìm kiếm thành công");
             txtStatusMessage.setStyle("-fx-fill: green");
-            
+
         } catch (SQLException e) {
             e.printStackTrace();
             showAlert(Alert.AlertType.ERROR, "Lỗi", "Không thể tìm kiếm cư dân: " + e.getMessage());
@@ -161,17 +171,90 @@ public class ResidentListController implements Initializable {
             List<Resident> residents = residentDAO.getAllResidents();
             residentList.clear();
             residentList.addAll(residents);
-            
+
             lblResultCount.setText("Kết quả: " + residents.size());
             txtStatusMessage.setText("Tải dữ liệu thành công");
             txtStatusMessage.setStyle("-fx-fill: green");
-            
+
         } catch (SQLException e) {
             e.printStackTrace();
             showAlert(Alert.AlertType.ERROR, "Lỗi", "Không thể tải danh sách cư dân: " + e.getMessage());
             txtStatusMessage.setText("Lỗi tải dữ liệu");
             txtStatusMessage.setStyle("-fx-fill: red");
         }
+    }
+
+    // --- BỔ SUNG: Hàm mở Form Chỉnh sửa (Dùng AddResidentController) ---
+    @FXML
+    private void handleEditResident() {
+        Resident selectedResident = tableView.getSelectionModel().getSelectedItem();
+        if (selectedResident != null) {
+            // Logic mở AddResidentController ở chế độ sửa
+            // (Giả định bạn có thể mở AddResidentController dưới dạng modal)
+            try {
+                FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/example/quanlytoanha/view/add_resident_form.fxml"));
+                Parent root = loader.load();
+
+                AddResidentController controller = loader.getController();
+
+                // Cần lấy Resident ĐẦY ĐỦ nhất trước khi gửi sang Form Edit
+                Resident fullResidentData = residentDAO.getResidentByUserId(selectedResident.getUserId());
+
+                controller.setResident(fullResidentData);
+
+                Stage stage = new Stage();
+                stage.setTitle("Cập nhật Hồ sơ Cư dân");
+                stage.initModality(Modality.WINDOW_MODAL);
+                stage.initOwner(tableView.getScene().getWindow());
+                stage.setScene(new Scene(root, 700, 600)); // Kích thước form add
+                stage.showAndWait();
+
+                // Sau khi Form đóng, tải lại dữ liệu
+                loadAllResidents();
+
+            } catch (Exception e) {
+                e.printStackTrace();
+                showAlert(Alert.AlertType.ERROR, "Lỗi", "Không thể mở form chỉnh sửa: " + e.getMessage());
+            }
+        }
+    }
+
+    // --- BỔ SUNG: Hàm mở Lịch sử Thay đổi (US1_1_1.4) ---
+    @FXML
+    private void handleViewHistory() {
+        Resident selectedResident = tableView.getSelectionModel().getSelectedItem();
+        if (selectedResident != null) {
+            try {
+                FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/example/quanlytoanha/view/resident_history_view.fxml"));
+                Parent root = loader.load();
+
+                ResidentHistoryController controller = loader.getController();
+
+                // Lấy Resident ID (rất quan trọng)
+                int residentId = selectedResident.getResidentId();
+                String residentName = selectedResident.getFullName();
+
+                // Truyền dữ liệu cho Controller Lịch sử
+                controller.setResidentData(residentId, residentName);
+
+                Stage stage = new Stage();
+                stage.setTitle("Lịch sử Thay đổi Hồ sơ: " + residentName);
+                stage.initModality(Modality.WINDOW_MODAL);
+                stage.initOwner(tableView.getScene().getWindow());
+                stage.setScene(new Scene(root, 1100, 650)); // Kích thước màn hình lịch sử
+                stage.show(); // Không cần showAndWait
+
+            } catch (IOException e) {
+                e.printStackTrace();
+                showAlert(Alert.AlertType.ERROR, "Lỗi", "Không thể mở màn hình lịch sử: " + e.getMessage());
+            }
+        }
+    }
+
+    @FXML
+    private void handleDeleteResident() {
+        // TODO: Triển khai logic xóa cư dân
+        showAlert(Alert.AlertType.INFORMATION, "Thông báo", "Chức năng xóa chưa được triển khai.");
     }
 
     private void showAlert(Alert.AlertType type, String title, String message) {

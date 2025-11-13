@@ -1,6 +1,8 @@
+// Vị trí: src/main/java/com/example/quanlytoanha/service/DashboardService.java
 package com.example.quanlytoanha.service;
 
 import com.example.quanlytoanha.dao.DashboardDAO;
+import com.example.quanlytoanha.dao.ServiceRequestDAO; // <-- BỔ SUNG: Import DAO mới
 import com.example.quanlytoanha.model.Role; // Enum Role của bạn
 import com.example.quanlytoanha.model.User;
 import com.example.quanlytoanha.session.SessionManager;
@@ -13,6 +15,9 @@ import java.util.Map;
 public class DashboardService {
 
     private final DashboardDAO dashboardDAO = new DashboardDAO();
+
+    // --- BỔ SUNG: Khởi tạo ServiceRequestDAO ---
+    private final ServiceRequestDAO serviceRequestDAO = new ServiceRequestDAO();
 
     /**
      * Lấy tất cả các số liệu thống kê cho Dashboard Admin.
@@ -33,6 +38,9 @@ public class DashboardService {
         stats.put("totalApartments", dashboardDAO.getTotalApartments());
         stats.put("totalDebt", dashboardDAO.getTotalUnpaidDebt());
         stats.put("totalUnpaidInvoices", dashboardDAO.getTotalUnpaidInvoices());
+
+        // --- BỔ SUNG (US7_1_1): Lấy số lượng sự cố/yêu cầu đang chờ ---
+        stats.put("pendingRequests", serviceRequestDAO.countPendingServiceRequests());
 
         return stats;
     }

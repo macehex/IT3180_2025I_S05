@@ -13,6 +13,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.sql.Date; // <-- BỔ SUNG: Import java.sql.Date cho hàm mới
 
 
 public class FinancialDAO {
@@ -136,5 +137,69 @@ public class FinancialDAO {
             e.printStackTrace();
         }
         return new ArrayList<>(invoiceMap.values());
+    }
+
+
+    // --- BỔ SUNG: HÀM MỚI CHO BÁO CÁO CÔNG NỢ (US7_2_1) ---
+
+    /**
+     * BÁO CÁO CÔNG NỢ (US7_2_1):
+     * Lấy danh sách HÓA ĐƠN CHI TIẾT theo căn hộ DỰA TRÊN KHOẢNG THỜI GIAN
+     * (lọc theo ngày đến hạn - due_date).
+     * @param startDate Ngày bắt đầu (java.sql.Date)
+     * @param endDate Ngày kết thúc (java.sql.Date)
+     * @return Danh sách các mục công nợ (ApartmentDebt)
+     */
+    public List<ApartmentDebt> getDebtReportByDateRange(Date startDate, Date endDate) {
+        List<ApartmentDebt> debtList = new ArrayList<>();
+        // SQL này lấy CÁC HÓA ĐƠN RIÊNG LẺ (không gộp)
+        // và lọc theo 'due_date' (ngày đến hạn)
+        String sql = """
+            SELECT
+                a.apartment_id,
+                u.full_name AS owner_name,
+                u.phone_number,
+                u.user_id AS owner_user_id,
+                i.invoice_id,
+                i.due_date,
+                i.total_amount,
+                i.status
+            FROM invoices i
+            JOIN apartments a ON i.apartment_id = a.apartment_id
+            JOIN users u ON a.owner_id = u.user_id
+            WHERE i.due_date BETWEEN ? AND ?
+            ORDER BY a.apartment_id, i.due_date DESC;
+        """;
+
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setDate(1, startDate);
+            stmt.setDate(2, endDate);
+
+            ResultSet rs = stmt.executeQuery();
+
+            while (rs.next()) {
+                ApartmentDebt debt = new ApartmentDebt();
+                // Tái sử dụng model ApartmentDebt
+                debt.setApartmentId(rs.getInt("apartment_id"));
+                debt.setOwnerName(rs.getString("owner_name"));
+                debt.setPhoneNumber(rs.getString("phone_number"));
+                debt.setOwnerUserId(rs.getInt("owner_user_id"));
+
+                // Gán TotalDue = total_amount của 1 hóa đơn
+                debt.setTotalDue(rs.getBigDecimal("total_amount"));
+                // Gán EarliestDueDate = due_date của 1 hóa đơn
+                debt.setEarliestDueDate(rs.getDate("due_date"));
+
+                // (Bạn có thể thêm trường status và invoice_id vào model ApartmentDebt
+                // để hiển thị trạng thái PAID/UNPAID nếu muốn)
+
+                debtList.add(debt);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return debtList;
     }
 }

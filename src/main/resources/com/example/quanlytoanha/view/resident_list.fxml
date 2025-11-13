@@ -1,189 +1,34 @@
-<?xml version="1.0" encoding="UTF-8"?>package com.example.quanlytoanha.controller;
-
-import com.example.quanlytoanha.model.User;
-import com.example.quanlytoanha.session.SessionManager;
-import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
-import javafx.fxml.Initializable;
-import javafx.scene.Parent;
-import javafx.scene.Scene;
-import javafx.scene.control.Alert;
-import javafx.scene.control.Button;
-import javafx.scene.control.Label;
-import javafx.stage.Modality;
-import javafx.stage.Stage;
-
-import java.io.IOException;
-import java.net.URL;
-import java.util.ResourceBundle;
-
-public class ResidentDashboardController implements Initializable {
-
-    @FXML
-    private Label welcomeLabel;
-
-    @FXML
-    private Button invoiceHistoryButton;
-
-    @FXML
-    private Button notificationButton;
-
-    @FXML
-    private Button loginHistoryButton;
-
-    // --- Nút chung ---
-    @FXML private Button btnLogout;
-    @Override
-    public void initialize(URL location, ResourceBundle resources) {
-        User currentUser = SessionManager.getInstance().getCurrentUser();
-        if (currentUser != null) {
-            welcomeLabel.setText("Xin chào, " + currentUser.getUsername() + " (Cư dân)");
-        }
-
-        // Add hover effects for buttons
-        setupButtonHoverEffects();
-    }
-
-    private void setupButtonHoverEffects() {
-        // Invoice History Button hover effect
-        String invoiceOriginalStyle = "-fx-background-color: white; -fx-background-radius: 35; -fx-text-fill: #1D3C72; -fx-font-size: 24px; -fx-font-weight: bold;";
-        String invoiceHoverStyle = "-fx-background-color: #f0f0f0; -fx-background-radius: 35; -fx-text-fill: #1D3C72; -fx-font-size: 24px; -fx-font-weight: bold; -fx-cursor: hand;";
-
-        invoiceHistoryButton.setOnMouseEntered(e -> invoiceHistoryButton.setStyle(invoiceHoverStyle));
-        invoiceHistoryButton.setOnMouseExited(e -> invoiceHistoryButton.setStyle(invoiceOriginalStyle));
-
-        // Login History Button hover effect
-        String loginOriginalStyle = "-fx-background-color: white; -fx-background-radius: 35; -fx-text-fill: #388e3c; -fx-font-size: 24px; -fx-font-weight: bold;";
-        String loginHoverStyle = "-fx-background-color: #f0f0f0; -fx-background-radius: 35; -fx-text-fill: #388e3c; -fx-font-size: 24px; -fx-font-weight: bold; -fx-cursor: hand;";
-
-        loginHistoryButton.setOnMouseEntered(e -> loginHistoryButton.setStyle(loginHoverStyle));
-        loginHistoryButton.setOnMouseExited(e -> loginHistoryButton.setStyle(loginOriginalStyle));
-
-        // Notification Button hover effect
-        String notificationOriginalStyle = "-fx-background-color: white; -fx-background-radius: 35; -fx-text-fill: #f57c00; -fx-font-size: 24px; -fx-font-weight: bold;";
-        String notificationHoverStyle = "-fx-background-color: #f0f0f0; -fx-background-radius: 35; -fx-text-fill: #f57c00; -fx-font-size: 24px; -fx-font-weight: bold; -fx-cursor: hand;";
-
-        notificationButton.setOnMouseEntered(e -> notificationButton.setStyle(notificationHoverStyle));
-        notificationButton.setOnMouseExited(e -> notificationButton.setStyle(notificationOriginalStyle));
-
-        // Logout Button hover effect
-        String logoutOriginalStyle = "-fx-background-color: #d32f2f; -fx-background-radius: 35; -fx-text-fill: white; -fx-font-size: 24px; -fx-font-weight: bold;";
-        String logoutHoverStyle = "-fx-background-color: #b71c1c; -fx-background-radius: 35; -fx-text-fill: white; -fx-font-size: 24px; -fx-font-weight: bold; -fx-cursor: hand;";
-
-        btnLogout.setOnMouseEntered(e -> btnLogout.setStyle(logoutHoverStyle));
-        btnLogout.setOnMouseExited(e -> btnLogout.setStyle(logoutOriginalStyle));
-    }
-
-    @FXML
-    private void handleInvoiceHistoryButton() {
-        try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/example/quanlytoanha/view/invoice_history.fxml"));
-            Parent root = loader.load();
-
-            Stage stage = new Stage();
-            stage.setTitle("Hóa đơn và Lịch sử giao dịch");
-            stage.setScene(new Scene(root));
-            stage.show();
-
-        } catch (IOException e) {
-            e.printStackTrace();
-            // Optionally, show an error alert to the user
-        }
-    }
-
-    @FXML
-    private void handleLoginHistoryButton() {
-        try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/example/quanlytoanha/view/login_management.fxml"));
-            Parent root = loader.load();
-
-            Stage stage = new Stage();
-            stage.setTitle("Quản lý đăng nhập");
-            stage.setScene(new Scene(root));
-            stage.show();
-
-        } catch (IOException e) {
-            e.printStackTrace();
-            // Optionally, show an error alert to the user
-        }
-    }
-
-    @FXML
-    private void handleNotificationButton() {
-        try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/example/quanlytoanha/view/notification_view.fxml"));
-            Parent root = loader.load();
-
-            // Không cần lấy controller ở đây vì nó tự load dữ liệu trong initialize()
-
-            Stage stage = new Stage();
-            stage.setTitle("Thông Báo");
-            stage.initModality(Modality.APPLICATION_MODAL); // Mở dạng modal
-            stage.initOwner(notificationButton.getScene().getWindow()); // Đặt cửa sổ cha
-            stage.setScene(new Scene(root));
-            stage.showAndWait(); // Hiển thị và chờ
-
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    /**
-     * Xử lý sự kiện đăng xuất.
-     */
-    @FXML
-    private void handleLogout() {
-        SessionManager.getInstance().logout();
-        Stage currentStage = (Stage) btnLogout.getScene().getWindow();
-        currentStage.close();
-
-        try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/example/quanlytoanha/view/login.fxml"));
-            Parent root = loader.load();
-            Stage loginStage = new Stage();
-            loginStage.setTitle("Quản lý Tòa nhà - Đăng nhập");
-            loginStage.setScene(new Scene(root, 400, 300));
-            loginStage.show();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-}
+<?xml version="1.0" encoding="UTF-8"?>
 
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.*?>
+<?import javafx.scene.control.cell.PropertyValueFactory?>
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.text.*?>
 
-<BorderPane xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" 
+<BorderPane xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1"
             fx:controller="com.example.quanlytoanha.controller.ResidentListController"
             style="-fx-background-color: #f8f9fa;">
 
-    <!-- TOP: Header with title -->
     <top>
-        <HBox alignment="CENTER_LEFT" spacing="20.0" 
+        <HBox alignment="CENTER_LEFT" spacing="20.0"
               style="-fx-background-color: linear-gradient(to right, #1e3c72 0%, #2a5298 100%); -fx-padding: 20;">
             <children>
-                <Label text="🏢 QUẢN LÝ DANH SÁCH CƯ DÂN" 
+                <Label text="🏢 QUẢN LÝ DANH SÁCH CƯ DÂN"
                        style="-fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: white;"/>
             </children>
         </HBox>
     </top>
 
-    <!-- CENTER: Main content -->
     <center>
         <VBox spacing="0.0">
-            
-            <!-- Search and Filter Section -->
+
             <VBox spacing="20.0" style="-fx-background-color: white; -fx-padding: 25;">
                 <children>
-                    <!-- Search title -->
-                    <Label text="🔍 Tìm kiếm cư dân" 
+                    <Label text="🔍 Tìm kiếm cư dân"
                            style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #1e3c72;">
                     </Label>
 
-                    <!-- Filter controls -->
                     <GridPane hgap="15.0" vgap="15.0">
                         <columnConstraints>
                             <ColumnConstraints hgrow="SOMETIMES" minWidth="200.0" prefWidth="250.0" />
@@ -193,65 +38,78 @@ public class ResidentDashboardController implements Initializable {
                         <rowConstraints>
                             <RowConstraints minHeight="40.0" prefHeight="40.0" vgrow="SOMETIMES" />
                         </rowConstraints>
-                        
+
                         <children>
-                            <TextField fx:id="txtSearchName" promptText="Nhập tên cư dân..." 
+                            <TextField fx:id="txtSearchName" promptText="Nhập tên cư dân..."
                                        style="-fx-background-radius: 8; -fx-padding: 10;"/>
-                            <TextField fx:id="txtSearchApartment" promptText="Nhập số căn hộ..." 
+                            <TextField fx:id="txtSearchApartment" promptText="Nhập số căn hộ..."
                                        style="-fx-background-radius: 8; -fx-padding: 10;" GridPane.columnIndex="1"/>
-                            <ComboBox fx:id="cmbStatus" promptText="Chọn trạng thái" 
+                            <ComboBox fx:id="cmbStatus" promptText="Chọn trạng thái"
                                       style="-fx-background-radius: 8;" GridPane.columnIndex="2"/>
                         </children>
                     </GridPane>
 
-                    <!-- Action buttons -->
                     <HBox spacing="15.0" alignment="CENTER_LEFT">
                         <children>
-                            <Button fx:id="btnSearch" text="🔍 Tìm kiếm" onAction="#handleSearch" 
+                            <Button fx:id="btnSearch" text="🔍 Tìm kiếm" onAction="#handleSearch"
                                     prefHeight="40.0" prefWidth="150.0"
                                     style="-fx-background-color: #28a745; -fx-text-fill: white; -fx-font-size: 14px; -fx-font-weight: bold; -fx-background-radius: 8; -fx-padding: 10;"/>
-                            <Button fx:id="btnShowAll" text="🔄 Hiển thị tất cả" onAction="#handleShowAll" 
+                            <Button fx:id="btnShowAll" text="🔄 Hiển thị tất cả" onAction="#handleShowAll"
                                     prefHeight="40.0" prefWidth="170.0"
                                     style="-fx-background-color: #1e3c72; -fx-text-fill: white; -fx-font-size: 14px; -fx-font-weight: bold; -fx-background-radius: 8; -fx-padding: 10;"/>
                         </children>
                     </HBox>
 
-                    <!-- Results info -->
                     <HBox alignment="CENTER_LEFT" spacing="20.0" style="-fx-background-color: #f8f9fa; -fx-padding: 10; -fx-background-radius: 8;">
                         <children>
-                            <Label fx:id="lblResultCount" text="Kết quả: 0" 
+                            <Label fx:id="lblResultCount" text="Kết quả: 0"
                                    style="-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #495057;"/>
                             <Region HBox.hgrow="ALWAYS"/>
-                            <Text fx:id="txtStatusMessage" text="Tải dữ liệu thành công" 
+                            <Text fx:id="txtStatusMessage" text="Tải dữ liệu thành công"
                                   style="-fx-fill: #28a745; -fx-font-size: 14px; -fx-font-weight: bold;"/>
                         </children>
                     </HBox>
                 </children>
             </VBox>
 
-            <!-- Table Section -->
-            <TableView fx:id="tableView" 
-                      style="-fx-background-color: white; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 10, 0, 0, 2);">
-                <columns>
-                    <TableColumn fx:id="colId" text="ID" prefWidth="60.0" 
-                                  style="-fx-alignment: CENTER; -fx-font-weight: bold;"/>
-                    <TableColumn fx:id="colFullName" text="Họ tên" prefWidth="180.0" 
-                                  style="-fx-font-weight: bold;"/>
-                    <TableColumn fx:id="colApartment" text="Căn hộ" prefWidth="100.0" 
-                                  style="-fx-alignment: CENTER;"/>
-                    <TableColumn fx:id="colStatus" text="Trạng thái" prefWidth="120.0" 
-                                  style="-fx-alignment: CENTER;"/>
-                    <TableColumn fx:id="colRelationship" text="Quan hệ" prefWidth="120.0" 
-                                  style="-fx-alignment: CENTER;"/>
-                    <TableColumn fx:id="colIdCard" text="CMND/CCCD" prefWidth="140.0" 
-                                  style="-fx-alignment: CENTER;"/>
-                    <TableColumn fx:id="colPhone" text="Số điện thoại" prefWidth="130.0" 
-                                  style="-fx-alignment: CENTER;"/>
-                    <TableColumn fx:id="colEmail" text="Email" prefWidth="200.0"/>
-                    <TableColumn fx:id="colMoveInDate" text="Ngày vào" prefWidth="120.0" 
-                                  style="-fx-alignment: CENTER;"/>
-                </columns>
-            </TableView>
+            <VBox VBox.vgrow="ALWAYS" spacing="10.0" style="-fx-padding: 10;">
+                <TableView fx:id="tableView" VBox.vgrow="ALWAYS"
+                           style="-fx-background-color: white; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 10, 0, 0, 2);">
+                    <columns>
+                        <TableColumn fx:id="colId" text="ID" prefWidth="60.0"
+                                     style="-fx-alignment: CENTER; -fx-font-weight: bold;"/>
+                        <TableColumn fx:id="colFullName" text="Họ tên" prefWidth="180.0"
+                                     style="-fx-font-weight: bold;"/>
+                        <TableColumn fx:id="colApartment" text="Căn hộ" prefWidth="100.0"
+                                     style="-fx-alignment: CENTER;"/>
+                        <TableColumn fx:id="colStatus" text="Trạng thái" prefWidth="120.0"
+                                     style="-fx-alignment: CENTER;"/>
+                        <TableColumn fx:id="colRelationship" text="Quan hệ" prefWidth="120.0"
+                                     style="-fx-alignment: CENTER;"/>
+                        <TableColumn fx:id="colIdCard" text="CMND/CCCD" prefWidth="140.0"
+                                     style="-fx-alignment: CENTER;"/>
+                        <TableColumn fx:id="colPhone" text="Số điện thoại" prefWidth="130.0"
+                                     style="-fx-alignment: CENTER;"/>
+                        <TableColumn fx:id="colEmail" text="Email" prefWidth="200.0"/>
+                        <TableColumn fx:id="colMoveInDate" text="Ngày vào" prefWidth="120.0"
+                                     style="-fx-alignment: CENTER;"/>
+                    </columns>
+                </TableView>
+
+                <HBox spacing="10.0" alignment="CENTER_LEFT">
+                    <Button fx:id="btnEditResident" text="✏️ Chỉnh sửa" onAction="#handleEditResident"
+                            style="-fx-background-color: #ffc107; -fx-text-fill: black; -fx-font-weight: bold; -fx-background-radius: 6;"
+                            disable="true" />
+
+                    <Button fx:id="btnViewHistory" text="📜 Xem Lịch sử" onAction="#handleViewHistory"
+                            style="-fx-background-color: #17a2b8; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 6;"
+                            disable="true" />
+
+                    <Button fx:id="btnDeleteResident" text="🗑️ Xóa Hồ sơ" onAction="#handleDeleteResident"
+                            style="-fx-background-color: #dc3545; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 6;"
+                            disable="true" />
+                </HBox>
+            </VBox>
         </VBox>
     </center>
 

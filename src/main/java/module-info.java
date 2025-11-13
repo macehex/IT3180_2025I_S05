@@ -13,6 +13,8 @@ module com.example.quanlytoanha {
     requires java.desktop;
     requires spring.security.core;
     requires java.prefs;
+    requires com.google.gson;
+    requires org.apache.pdfbox;
 
     opens com.example.quanlytoanha to javafx.fxml, javafx.graphics;
     opens com.example.quanlytoanha.controller to javafx.fxml;
