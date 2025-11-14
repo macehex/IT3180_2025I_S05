@@ -54,7 +54,7 @@ public class UserDAO {
                         user = new Accountant(userId, username, email, fullName, userRole, createdAt, lastLogin, phone);
                         break;
                     case POLICE:
-                        // (Tương tự, tạo new Police(...))
+                        user = new Police(userId, username, email, fullName, userRole, createdAt, lastLogin, phone);
                         break;
                     case RESIDENT:
                         user = new Resident(userId, username, email, fullName, userRole, createdAt, lastLogin, phone,
@@ -101,6 +101,9 @@ public class UserDAO {
                         break;
                     case ACCOUNTANT:
                         user = new Accountant(userId, username, email, fullName, userRole, createdAt, lastLogin, phone);
+                        break;
+                    case POLICE:
+                        user = new Police(userId, username, email, fullName, userRole, createdAt, lastLogin, phone);
                         break;
                     case RESIDENT:
                         user = new Resident(userId, username, email, fullName, userRole, createdAt, lastLogin, phone,

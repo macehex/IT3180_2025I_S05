@@ -138,6 +138,10 @@ public class LoginController {
             } else if (user.getRole() == Role.ACCOUNTANT) {
                 fxmlFile = "/com/example/quanlytoanha/view/accountant_dashboard.fxml";
             }
+            else if (user.getRole() == Role.POLICE) {
+                fxmlFile = "/com/example/quanlytoanha/view/police_dashboard.fxml";
+                // (Thêm CSS cho police nếu có)
+            }
             else {
                 // (Bạn có thể thêm case cho Kế toán, Công an...)
                 // Fallback (dự phòng)
