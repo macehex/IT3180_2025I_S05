@@ -24,7 +24,7 @@ public class FinancialService {
             return false;
         }
         // Giả sử Role của bạn là Enum hoặc có hằng số
-        return currentUser.getRole() == Role.ACCOUNTANT || currentUser.getRole() == Role.ADMIN;
+        return currentUser.getRole() == Role.ACCOUNTANT || currentUser.getRole() == Role.ADMIN || currentUser.getRole() == Role.POLICE;
     }
 
     /**
