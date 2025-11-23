@@ -20,44 +20,27 @@ import java.util.ResourceBundle;
 
 public class ResidentDashboardController implements Initializable {
 
-    @FXML
-    private Label welcomeLabel;
+    @FXML private Label welcomeLabel;
+    @FXML private Label pageTitle;
+    @FXML private Label debtAmountLabel;
+    @FXML private Label paidAmountLabel;
+    @FXML private Label notificationCountLabel;
+    @FXML private VBox contentContainer;
+    @FXML private VBox dashboardContent;
 
-    @FXML
-    private Label pageTitle;
+    // --- CÁC NÚT MENU (MaterialFX) ---
+    @FXML private MFXButton homeButton;
+    @FXML private MFXButton invoiceHistoryButton;
+    @FXML private MFXButton loginHistoryButton;
+    @FXML private MFXButton notificationButton;
+    @FXML private MFXButton viewMyRequestsButton;
 
-    @FXML
-    private Label debtAmountLabel;
+    // MỚI: Thêm khai báo cho nút Tạo Phản Ánh (Lỗi cũ do thiếu dòng này)
+    @FXML private MFXButton createRequestButton;
 
-    @FXML
-    private Label paidAmountLabel;
+    @FXML private MFXButton btnLogout;
 
-    @FXML
-    private Label notificationCountLabel;
-
-    @FXML
-    private VBox contentContainer;
-
-    @FXML
-    private VBox dashboardContent;
-
-    // MaterialFX components
-    @FXML
-    private MFXButton homeButton;
-
-    @FXML
-    private MFXButton invoiceHistoryButton;
-
-    @FXML
-    private MFXButton loginHistoryButton;
-
-    @FXML
-    private MFXButton notificationButton;
-
-    @FXML
-    private MFXButton btnLogout;
-
-    // Track current active button for visual feedback
+    // Biến theo dõi nút đang được chọn
     private MFXButton currentActiveButton = null;
 
     @Override
@@ -67,85 +50,65 @@ public class ResidentDashboardController implements Initializable {
             welcomeLabel.setText("Xin chào, " + currentUser.getUsername());
         }
 
-        // Setup hover effects for MaterialFX components
+        // Thiết lập hiệu ứng hover cho tất cả các nút
         setupButtonHoverEffects();
 
-        // Initialize dashboard data (you can add your own logic here)
         loadDashboardData();
-
-        // Show dashboard content by default
         showDashboardContent();
     }
 
+    /**
+     * CẬP NHẬT: Hàm này giờ gọn hơn, gọi hàm chung cho từng nút
+     */
     private void setupButtonHoverEffects() {
-        // Home Button hover effect
-        homeButton.setOnMouseEntered(e -> {
-            if (currentActiveButton != homeButton) {
-                homeButton.setStyle("-fx-background-color: rgba(255,255,255,0.25); -fx-background-radius: 12; -fx-text-fill: white; -fx-font-size: 17px; -fx-font-weight: 500; -fx-font-family: 'DejaVu Sans';");
-            }
-        });
-        homeButton.setOnMouseExited(e -> {
-            if (currentActiveButton != homeButton) {
-                homeButton.setStyle("-fx-background-color: rgba(255,255,255,0.15); -fx-background-radius: 12; -fx-text-fill: white; -fx-font-size: 17px; -fx-font-weight: 500; -fx-font-family: 'DejaVu Sans';");
+        setupSingleButtonHover(homeButton);
+        setupSingleButtonHover(invoiceHistoryButton);
+        setupSingleButtonHover(loginHistoryButton);
+        setupSingleButtonHover(notificationButton);
+        setupSingleButtonHover(viewMyRequestsButton);
+
+        // MỚI: Đăng ký hiệu ứng cho nút Tạo Phản Ánh
+        setupSingleButtonHover(createRequestButton);
+
+        // Nút Đăng xuất (Logout) có màu riêng nên xử lý riêng
+        if (btnLogout != null) {
+            btnLogout.setOnMouseEntered(e ->
+                    btnLogout.setStyle("-fx-background-color: rgba(244,67,54,1.0); -fx-background-radius: 12; -fx-text-fill: white; -fx-font-size: 17px; -fx-font-weight: 600; -fx-cursor: hand; -fx-font-family: 'DejaVu Sans'; -fx-alignment: CENTER;")
+            );
+            btnLogout.setOnMouseExited(e ->
+                    btnLogout.setStyle("-fx-background-color: rgba(244,67,54,0.9); -fx-background-radius: 12; -fx-text-fill: white; -fx-font-size: 17px; -fx-font-weight: 600; -fx-font-family: 'DejaVu Sans'; -fx-alignment: CENTER;")
+            );
+        }
+    }
+
+    /**
+     * MỚI: Hàm dùng chung để xử lý hiệu ứng Hover cho các nút menu
+     * Giúp code không bị lặp lại và dễ sửa đổi style
+     */
+    private void setupSingleButtonHover(MFXButton button) {
+        if (button == null) return; // Tránh lỗi NullPointerException
+
+        // Khi chuột đi vào: Sáng hơn + Căn giữa (CENTER)
+        button.setOnMouseEntered(e -> {
+            if (currentActiveButton != button) {
+                button.setStyle("-fx-background-color: rgba(255,255,255,0.25); -fx-background-radius: 12; -fx-text-fill: white; -fx-font-size: 17px; -fx-font-weight: 500; -fx-font-family: 'DejaVu Sans'; -fx-alignment: CENTER;");
             }
         });
 
-        // Invoice History Button hover effect
-        invoiceHistoryButton.setOnMouseEntered(e -> {
-            if (currentActiveButton != invoiceHistoryButton) {
-                invoiceHistoryButton.setStyle("-fx-background-color: rgba(255,255,255,0.25); -fx-background-radius: 12; -fx-text-fill: white; -fx-font-size: 17px; -fx-font-weight: 500; -fx-font-family: 'DejaVu Sans';");
+        // Khi chuột đi ra: Tối hơn + Căn trái (CENTER_LEFT)
+        button.setOnMouseExited(e -> {
+            if (currentActiveButton != button) {
+                button.setStyle("-fx-background-color: rgba(255,255,255,0.15); -fx-background-radius: 12; -fx-text-fill: white; -fx-font-size: 17px; -fx-font-weight: 500; -fx-font-family: 'DejaVu Sans'; -fx-alignment: CENTER_LEFT;");
             }
         });
-        invoiceHistoryButton.setOnMouseExited(e -> {
-            if (currentActiveButton != invoiceHistoryButton) {
-                invoiceHistoryButton.setStyle("-fx-background-color: rgba(255,255,255,0.15); -fx-background-radius: 12; -fx-text-fill: white; -fx-font-size: 17px; -fx-font-weight: 500; -fx-font-family: 'DejaVu Sans';");
-            }
-        });
-
-        // Login History Button hover effect
-        loginHistoryButton.setOnMouseEntered(e -> {
-            if (currentActiveButton != loginHistoryButton) {
-                loginHistoryButton.setStyle("-fx-background-color: rgba(255,255,255,0.25); -fx-background-radius: 12; -fx-text-fill: white; -fx-font-size: 17px; -fx-font-weight: 500; -fx-font-family: 'DejaVu Sans';");
-            }
-        });
-        loginHistoryButton.setOnMouseExited(e -> {
-            if (currentActiveButton != loginHistoryButton) {
-                loginHistoryButton.setStyle("-fx-background-color: rgba(255,255,255,0.15); -fx-background-radius: 12; -fx-text-fill: white; -fx-font-size: 17px; -fx-font-weight: 500; -fx-font-family: 'DejaVu Sans';");
-            }
-        });
-
-        // Notification Button hover effect
-        notificationButton.setOnMouseEntered(e -> {
-            if (currentActiveButton != notificationButton) {
-                notificationButton.setStyle("-fx-background-color: rgba(255,255,255,0.25); -fx-background-radius: 12; -fx-text-fill: white; -fx-font-size: 17px; -fx-font-weight: 500; -fx-font-family: 'DejaVu Sans';");
-            }
-        });
-        notificationButton.setOnMouseExited(e -> {
-            if (currentActiveButton != notificationButton) {
-                notificationButton.setStyle("-fx-background-color: rgba(255,255,255,0.15); -fx-background-radius: 12; -fx-text-fill: white; -fx-font-size: 17px; -fx-font-weight: 500; -fx-font-family: 'DejaVu Sans';");
-            }
-        });
-
-        // Logout Button hover effect
-        btnLogout.setOnMouseEntered(e ->
-                btnLogout.setStyle("-fx-background-color: rgba(244,67,54,1.0); -fx-background-radius: 12; -fx-text-fill: white; -fx-font-size: 17px; -fx-font-weight: 600; -fx-cursor: hand; -fx-font-family: 'DejaVu Sans';")
-        );
-        btnLogout.setOnMouseExited(e ->
-                btnLogout.setStyle("-fx-background-color: rgba(244,67,54,0.9); -fx-background-radius: 12; -fx-text-fill: white; -fx-font-size: 17px; -fx-font-weight: 600; -fx-font-family: 'DejaVu Sans';")
-        );
     }
 
     private void loadDashboardData() {
-        // Example: Load debt amount, paid amount, notification count
-        // Replace with your actual data loading logic
         debtAmountLabel.setText("0 VND");
         paidAmountLabel.setText("0 VND");
         notificationCountLabel.setText("0");
     }
 
-    /**
-     * Show the default dashboard content
-     */
     private void showDashboardContent() {
         contentContainer.getChildren().clear();
         contentContainer.getChildren().add(dashboardContent);
@@ -153,39 +116,35 @@ public class ResidentDashboardController implements Initializable {
         setActiveButton(homeButton);
     }
 
-    /**
-     * Load content from an FXML file and display it in the content container
-     */
-    private void loadContentFromFxml(String fxmlPath, String title, MFXButton activeButton) {
+    private void loadContentFromFxml(String fXMLPath, String title, MFXButton activeButton) {
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource(fxmlPath));
+            FXMLLoader loader = new FXMLLoader(getClass().getResource(fXMLPath));
             Node content = loader.load();
-            
+
             contentContainer.getChildren().clear();
             contentContainer.getChildren().add(content);
             pageTitle.setText(title);
             setActiveButton(activeButton);
-            
+
         } catch (IOException e) {
             e.printStackTrace();
-            // On error, show dashboard content
             showDashboardContent();
         }
     }
 
     /**
-     * Set visual feedback for active button
+     * CẬP NHẬT: Đảm bảo nút Active cũng được căn giữa và có viền
      */
     private void setActiveButton(MFXButton activeButton) {
-        // Reset previous active button
+        // Reset nút cũ (trả về lề trái)
         if (currentActiveButton != null) {
-            currentActiveButton.setStyle("-fx-background-color: rgba(255,255,255,0.15); -fx-background-radius: 12; -fx-text-fill: white; -fx-font-size: 17px; -fx-font-weight: 500; -fx-font-family: 'DejaVu Sans';");
+            currentActiveButton.setStyle("-fx-background-color: rgba(255,255,255,0.15); -fx-background-radius: 12; -fx-text-fill: white; -fx-font-size: 17px; -fx-font-weight: 500; -fx-font-family: 'DejaVu Sans'; -fx-alignment: CENTER_LEFT;");
         }
 
-        // Set new active button
+        // Set nút mới (Căn giữa + Viền sáng)
         currentActiveButton = activeButton;
         if (currentActiveButton != null) {
-            currentActiveButton.setStyle("-fx-background-color: rgba(255,255,255,0.35); -fx-background-radius: 12; -fx-text-fill: white; -fx-font-size: 17px; -fx-font-weight: 600; -fx-font-family: 'DejaVu Sans'; -fx-border-color: rgba(255,255,255,0.5); -fx-border-width: 2; -fx-border-radius: 12;");
+            currentActiveButton.setStyle("-fx-background-color: rgba(255,255,255,0.35); -fx-background-radius: 12; -fx-text-fill: white; -fx-font-size: 17px; -fx-font-weight: 600; -fx-font-family: 'DejaVu Sans'; -fx-border-color: rgba(255,255,255,0.5); -fx-border-width: 2; -fx-border-radius: 12; -fx-alignment: CENTER;");
         }
     }
 
@@ -196,35 +155,62 @@ public class ResidentDashboardController implements Initializable {
 
     @FXML
     private void handleInvoiceHistoryButton() {
-        loadContentFromFxml("/com/example/quanlytoanha/view/invoice_history_embedded.fxml", 
-                           "Hóa đơn và Lịch sử giao dịch", 
-                           invoiceHistoryButton);
+        loadContentFromFxml("/com/example/quanlytoanha/view/invoice_history_embedded.fxml", "Hóa đơn và Lịch sử giao dịch", invoiceHistoryButton);
     }
 
     @FXML
     private void handleLoginHistoryButton() {
-        loadContentFromFxml("/com/example/quanlytoanha/view/login_management_embedded.fxml", 
-                           "Quản lý đăng nhập", 
-                           loginHistoryButton);
+        loadContentFromFxml("/com/example/quanlytoanha/view/login_management_embedded.fxml", "Quản lý đăng nhập", loginHistoryButton);
     }
 
     @FXML
     private void handleNotificationButton() {
-        loadContentFromFxml("/com/example/quanlytoanha/view/notification_view_embedded.fxml", 
-                           "Thông báo", 
-                           notificationButton);
+        loadContentFromFxml("/com/example/quanlytoanha/view/notification_view_embedded.fxml", "Thông báo", notificationButton);
     }
 
+    @FXML
+    private void handleCreateRequestButton() {
+        User currentUser = SessionManager.getInstance().getCurrentUser();
+        if (currentUser == null) return;
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/example/quanlytoanha/view/CreateServiceRequest.fxml"));
+            Parent root = loader.load();
+            CreateServiceRequestController controller = loader.getController();
+            controller.setCurrentResidentId(currentUser.getUserId());
+            Stage stage = new Stage();
+            stage.setTitle("Tạo Yêu Cầu Mới");
+            stage.setScene(new Scene(root));
+            stage.initModality(Modality.APPLICATION_MODAL);
+            stage.showAndWait();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 
-    /**
-     * Xử lý sự kiện đăng xuất.
-     */
+    @FXML
+    private void handleViewMyRequestsButton() {
+        User currentUser = SessionManager.getInstance().getCurrentUser();
+        if (currentUser == null) return;
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/example/quanlytoanha/view/MyRequestsList.fxml"));
+            Node content = loader.load();
+            MyRequestsListController controller = loader.getController();
+            controller.loadDataForResident(currentUser.getUserId());
+            contentContainer.getChildren().clear();
+            contentContainer.getChildren().add(content);
+            pageTitle.setText("Yêu Cầu Của Tôi");
+            setActiveButton(viewMyRequestsButton);
+        } catch (IOException e) {
+            e.printStackTrace();
+            showDashboardContent();
+        }
+    }
+
     @FXML
     private void handleLogout() {
         SessionManager.getInstance().logout();
         Stage currentStage = (Stage) btnLogout.getScene().getWindow();
         currentStage.close();
-
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/example/quanlytoanha/view/login.fxml"));
             Parent root = loader.load();
