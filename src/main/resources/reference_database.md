@@ -264,8 +264,75 @@ review_notes TEXT
 
 }
 
+1. Asset Status History (US2_1_1)
 
+Table name: asset_status_history
 
+Columns: history_id, asset_id, changed_by_user_id, old_status, new_status, changed_at, notes
+
+Primary Key (PK): history_id
+
+Foreign Keys (FK):
+
+asset_id → references assets(asset_id)
+
+changed_by_user_id → references users(user_id)
+
+2. Maintenance History (US2_2_1)
+
+Table name: maintenance_history
+
+Columns: maintenance_id, asset_id, status, scheduled_date, maintenance_date, description, cost, performed_by, created_by_user_id
+
+Primary Key (PK): maintenance_id
+
+Foreign Keys (FK):
+
+asset_id → references assets(asset_id)
+
+created_by_user_id → references users(user_id)
+
+3. Resident Change History (US1_1_1.4)
+
+Table name: resident_history
+
+Columns: history_id, resident_id, changed_by_user_id, changed_at, old_data (JSONB), new_data (JSONB), change_reason
+
+Primary Key (PK): history_id
+
+Foreign Keys (FK):
+
+resident_id → references residents(resident_id)
+
+changed_by_user_id → references users(user_id)
+
+4. Visitor Logs (Walk-ins) (US8_1_1)
+
+Table name: visitor_logs
+
+Columns: log_id, visitor_name, id_card_number, contact_phone, reason, apartment_id (nullable), check_in_time, check_out_time, guard_user_id
+
+Primary Key (PK): log_id
+
+Foreign Keys (FK):
+
+apartment_id → references apartments(apartment_id)
+
+guard_user_id → references users(user_id)
+
+5. Vehicle Access Logs (US8_1_1)
+
+Table name: vehicle_access_logs
+
+Columns: log_id, license_plate, vehicle_type, resident_id (nullable), access_type (IN/OUT), access_time, guard_user_id, notes
+
+Primary Key (PK): log_id
+
+Foreign Keys (FK):
+
+resident_id → references residents(resident_id)
+
+guard_user_id → references users(user_id)
 // Relationships
 
 users.user_id - residents.user_id// "has"
