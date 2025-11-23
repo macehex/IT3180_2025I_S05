@@ -6,7 +6,7 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.text.Font?>
 
-<AnchorPane prefHeight="700.0" prefWidth="1000.0" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.quanlytoanha.controller.AccountantDashboardController" styleClass="bg-light">
+<AnchorPane prefHeight="700.0" prefWidth="1000.0" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.quanlytoanha.controller.AccountantDashboardController" styleClass="bg-light">
     <children>
         <VBox spacing="10.0" AnchorPane.bottomAnchor="10.0" AnchorPane.leftAnchor="10.0" AnchorPane.rightAnchor="10.0" AnchorPane.topAnchor="10.0">
             <children>
@@ -52,12 +52,12 @@
                                             <children>
                                                 <TableView fx:id="debtTable" styleClass="table-view" VBox.vgrow="ALWAYS">
                                                     <columns>
-                                                        <TableColumn prefWidth="110.0" text="Căn hộ ID"><cellValueFactory><PropertyValueFactory property="apartmentId" /></cellValueFactory></TableColumn>
-                                                        <TableColumn prefWidth="220.0" text="Tên chủ hộ"><cellValueFactory><PropertyValueFactory property="ownerName" /></cellValueFactory></TableColumn>
-                                                        <TableColumn prefWidth="150.0" text="Số điện thoại"><cellValueFactory><PropertyValueFactory property="phoneNumber" /></cellValueFactory></TableColumn>
-                                                        <TableColumn prefWidth="120.0" text="Số HĐ nợ"><cellValueFactory><PropertyValueFactory property="unpaidCount" /></cellValueFactory></TableColumn>
-                                                        <TableColumn prefWidth="190.0" text="Tổng nợ (VNĐ)"><cellValueFactory><PropertyValueFactory property="totalDue" /></cellValueFactory></TableColumn>
-                                                        <TableColumn prefWidth="170.0" text="Hạn trả sớm nhất"><cellValueFactory><PropertyValueFactory property="earliestDueDate" /></cellValueFactory></TableColumn>
+                                                        <TableColumn fx:id="colApartmentId" prefWidth="110.0" text="Căn hộ ID" />
+                                                        <TableColumn fx:id="colOwnerName" prefWidth="220.0" text="Tên chủ hộ" />
+                                                        <TableColumn fx:id="colPhoneNumber" prefWidth="150.0" text="Số điện thoại" />
+                                                        <TableColumn fx:id="colUnpaidCount" prefWidth="120.0" text="Số HĐ nợ" />
+                                                        <TableColumn fx:id="colTotalDue" prefWidth="190.0" text="Tổng nợ (VNĐ)" />
+                                                        <TableColumn fx:id="colEarliestDueDate" prefWidth="170.0" text="Hạn trả sớm nhất" />
                                                     </columns>
                                                 </TableView>
 

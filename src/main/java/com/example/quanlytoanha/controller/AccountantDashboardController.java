@@ -37,6 +37,12 @@ public class AccountantDashboardController {
     @FXML private Label lblUnpaidInvoices;
     @FXML private Button btnLogout;
     @FXML private TableView<ApartmentDebt> debtTable;
+    @FXML private TableColumn<ApartmentDebt, Integer> colApartmentId;
+    @FXML private TableColumn<ApartmentDebt, String> colOwnerName;
+    @FXML private TableColumn<ApartmentDebt, String> colPhoneNumber;
+    @FXML private TableColumn<ApartmentDebt, Integer> colUnpaidCount;
+    @FXML private TableColumn<ApartmentDebt, BigDecimal> colTotalDue;
+    @FXML private TableColumn<ApartmentDebt, java.util.Date> colEarliestDueDate;
     @FXML private TableView<FeeType> feeTable;
     @FXML private TableColumn<FeeType, String> colFeeName;
     @FXML private TableColumn<FeeType, BigDecimal> colFeePrice;
@@ -80,6 +86,7 @@ public class AccountantDashboardController {
         // ---------------------------
 
         loadDashboardData();
+        configureDebtTableColumns();
         configureFeeTableColumns();
         loadFeeData();
         applyUIStyles();
@@ -174,6 +181,15 @@ public class AccountantDashboardController {
         alert.setContentText(message);
         alert.showAndWait();
     }
+    private void configureDebtTableColumns() {
+        colApartmentId.setCellValueFactory(new PropertyValueFactory<>("apartmentId"));
+        colOwnerName.setCellValueFactory(new PropertyValueFactory<>("ownerName"));
+        colPhoneNumber.setCellValueFactory(new PropertyValueFactory<>("phoneNumber"));
+        colUnpaidCount.setCellValueFactory(new PropertyValueFactory<>("unpaidCount"));
+        colTotalDue.setCellValueFactory(new PropertyValueFactory<>("totalDue"));
+        colEarliestDueDate.setCellValueFactory(new PropertyValueFactory<>("earliestDueDate"));
+    }
+    
     private void configureFeeTableColumns() {
         colFeeName.setCellValueFactory(new PropertyValueFactory<>("feeName"));
         colFeePrice.setCellValueFactory(new PropertyValueFactory<>("unitPrice"));
