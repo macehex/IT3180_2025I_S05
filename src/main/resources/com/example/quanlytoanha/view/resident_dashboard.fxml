@@ -10,7 +10,7 @@
       xmlns:fx="http://javafx.com/fxml/1"
       fx:controller="com.example.quanlytoanha.controller.ResidentDashboardController"
       prefWidth="1000.0" prefHeight="700.0"
-      stylesheets="@../styles.css"
+      stylesheets="@styles/access_control_view_styles.css"
       style="-fx-font-family: 'DejaVu Sans'">
 
     <!-- Left Sidebar -->

@@ -1,0 +1,157 @@
+/* --- KHUNG CHÍNH --- */
+.root-container {
+    -fx-padding: 25;
+    -fx-background-color: #f4f6f8; /* Xám nhạt hiện đại */
+}
+
+/* --- TIÊU ĐỀ & HEADER --- */
+.header-box {
+    -fx-border-color: transparent transparent #e0e0e0 transparent;
+    -fx-border-width: 0 0 1 0;
+    -fx-padding: 0 0 15 0;
+}
+
+.page-title {
+    -fx-font-family: "Segoe UI", sans-serif;
+    -fx-font-size: 24px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #1e3c72; /* Xanh đậm chủ đạo */
+}
+
+.section-title {
+    -fx-font-family: "Segoe UI", sans-serif;
+    -fx-font-size: 16px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #333333;
+}
+
+.field-label {
+    -fx-font-weight: bold;
+    -fx-text-fill: #555555;
+    -fx-font-size: 13px;
+}
+
+/* --- CARDS (Vùng chứa nội dung trắng) --- */
+.card-pane {
+    -fx-background-color: white;
+    -fx-background-radius: 10;
+    -fx-border-radius: 10;
+    -fx-padding: 20;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.05), 10, 0, 0, 3);
+}
+
+/* --- INPUT FIELDS --- */
+.text-field, .date-picker, .combo-box {
+    -fx-background-color: white;
+    -fx-background-radius: 5;
+    -fx-border-color: #ced4da;
+    -fx-border-radius: 5;
+    -fx-padding: 6;
+    -fx-font-size: 13px;
+}
+
+.text-field:focused, .date-picker:focused, .combo-box:focused {
+    -fx-border-color: #1e3c72;
+    -fx-effect: dropshadow(three-pass-box, rgba(30,60,114,0.2), 5, 0, 0, 0);
+}
+
+/* --- BUTTONS --- */
+.action-button {
+    -fx-font-size: 13px;
+    -fx-font-weight: bold;
+    -fx-background-radius: 5;
+    -fx-cursor: hand;
+    -fx-padding: 8 15;
+}
+
+/* Nút Tải lại (Viền, nền trắng) */
+.btn-outline-primary {
+    -fx-background-color: white;
+    -fx-text-fill: #1e3c72;
+    -fx-border-color: #1e3c72;
+    -fx-border-radius: 5;
+}
+.btn-outline-primary:hover {
+    -fx-background-color: #e3f2fd;
+}
+
+/* Nút Lập lịch (Xanh lá) */
+.btn-success {
+    -fx-background-color: #2e7d32;
+    -fx-text-fill: white;
+    -fx-effect: dropshadow(three-pass-box, rgba(46,125,50,0.3), 5, 0, 0, 2);
+}
+.btn-success:hover {
+    -fx-background-color: #388e3c;
+    -fx-effect: dropshadow(three-pass-box, rgba(46,125,50,0.4), 8, 0, 0, 3);
+}
+
+/* Nút Ghi nhận (Xanh dương đậm) */
+.btn-primary {
+    -fx-background-color: #1e3c72;
+    -fx-text-fill: white;
+    -fx-effect: dropshadow(three-pass-box, rgba(30,60,114,0.3), 5, 0, 0, 2);
+}
+.btn-primary:hover {
+    -fx-background-color: #2a5298;
+}
+.btn-primary:disabled {
+    -fx-opacity: 0.6;
+    -fx-background-color: #9e9e9e;
+    -fx-effect: none;
+}
+
+/* --- TABLE VIEW --- */
+.table-view {
+    -fx-background-color: white;
+    -fx-background-radius: 5;
+    -fx-border-color: #dee2e6;
+    -fx-border-radius: 5;
+}
+
+.table-view .column-header-background {
+    -fx-background-color: #f8f9fa;
+    -fx-border-width: 0 0 1 0;
+    -fx-border-color: #dee2e6;
+}
+
+.table-view .column-header {
+    -fx-background-color: transparent;
+    -fx-size: 40px; /* Chiều cao header */
+}
+
+.table-view .column-header .label {
+    -fx-text-fill: #495057;
+    -fx-font-weight: bold;
+    -fx-font-size: 12px;
+    -fx-alignment: CENTER-LEFT;
+}
+
+.table-row-cell {
+    -fx-background-color: white;
+    -fx-border-color: transparent transparent #f1f3f5 transparent;
+}
+
+.table-row-cell:odd {
+    -fx-background-color: #fafafa; /* Zebra striping */
+}
+
+.table-row-cell:selected {
+    -fx-background-color: #e3f2fd;
+    -fx-text-fill: #1e3c72;
+}
+
+/* --- ACTION BAR (Thanh dưới cùng) --- */
+.action-bar {
+    -fx-background-color: #e8f0fe;
+    -fx-padding: 15;
+    -fx-background-radius: 8;
+    -fx-border-color: #1e3c72;
+    -fx-border-width: 0 0 0 4; /* Viền xanh bên trái làm điểm nhấn */
+}
+
+.hint-label {
+    -fx-font-style: italic;
+    -fx-text-fill: #555555;
+    -fx-font-size: 13px;
+}

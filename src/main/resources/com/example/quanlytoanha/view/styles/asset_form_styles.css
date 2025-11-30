@@ -1,0 +1,104 @@
+/* asset_form_styles.css */
+
+/* --- Cấu trúc khung chính --- */
+.root-container {
+    -fx-padding: 25;
+    -fx-background-color: #f8f9fa;
+    -fx-background-radius: 12;
+    -fx-border-color: #e0e0e0;
+    -fx-border-width: 1;
+    -fx-border-radius: 12;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.05), 10, 0, 0, 2); /* Đổ bóng nhẹ cho toàn bộ form */
+}
+
+/* --- Header --- */
+.header-box {
+    -fx-border-color: transparent transparent #1e3c72 transparent;
+    -fx-border-width: 0 0 2 0;
+    -fx-padding: 0 0 10 0;
+}
+
+.header-icon {
+    -fx-font-size: 24px;
+}
+
+.header-title {
+    -fx-font-size: 20px;
+    -fx-font-family: "Segoe UI", sans-serif; /* Hoặc System */
+    -fx-font-weight: bold;
+    -fx-text-fill: #1e3c72;
+}
+
+/* --- Nhãn (Labels) --- */
+.form-label {
+    -fx-font-weight: bold;
+    -fx-text-fill: #333333;
+    -fx-font-size: 13px;
+}
+
+/* --- Ô nhập liệu (TextField, TextArea, DatePicker, ComboBox) --- */
+.text-field, .text-area, .date-picker, .combo-box {
+    -fx-background-color: white;
+    -fx-background-radius: 5;
+    -fx-border-color: #ced4da;
+    -fx-border-radius: 5;
+    -fx-padding: 5; /* Padding bên trong ô */
+    -fx-font-size: 13px;
+}
+
+/* Hiệu ứng khi click vào ô nhập liệu (Focus) */
+.text-field:focused, .text-area:focused, .date-picker:focused, .combo-box:focused {
+    -fx-border-color: #1e3c72;
+    -fx-background-color: #ffffff;
+    -fx-effect: dropshadow(three-pass-box, rgba(30, 60, 114, 0.2), 5, 0, 0, 0); /* Phát sáng nhẹ màu xanh */
+}
+
+/* Tùy chỉnh riêng cho ComboBox để nền trắng sạch sẽ */
+.combo-box .list-cell {
+    -fx-background-color: white;
+    -fx-text-fill: #333;
+}
+.combo-box .list-cell:hover {
+    -fx-background-color: #e9ecef;
+}
+
+/* --- Các nút bấm (Buttons) --- */
+.action-button {
+    -fx-font-size: 13px;
+    -fx-font-weight: bold;
+    -fx-background-radius: 20; /* Bo tròn nhiều */
+    -fx-cursor: hand;
+    -fx-padding: 8 20; /* Tạo độ dày cho nút */
+}
+
+/* Nút Hủy (Secondary) */
+.btn-cancel {
+    -fx-background-color: white;
+    -fx-text-fill: #555555;
+    -fx-border-color: #cccccc;
+    -fx-border-radius: 20;
+}
+
+.btn-cancel:hover {
+    -fx-background-color: #e9ecef; /* Xám nhẹ khi di chuột */
+    -fx-border-color: #b3b3b3;
+}
+
+/* Nút Lưu (Primary) */
+.btn-save {
+    /* Gradient màu xanh */
+    -fx-background-color: linear-gradient(to right, #1e3c72, #2a5298);
+    -fx-text-fill: white;
+    -fx-effect: dropshadow(three-pass-box, rgba(0, 0, 0, 0.2), 5, 0, 0, 2);
+}
+
+.btn-save:hover {
+    /* Đổi màu gradient nhẹ khi di chuột */
+    -fx-background-color: linear-gradient(to right, #2a5298, #1e3c72);
+    -fx-effect: dropshadow(three-pass-box, rgba(0, 0, 0, 0.3), 8, 0, 0, 3);
+}
+
+.btn-save:pressed {
+    -fx-background-color: #162d55;
+    -fx-effect: none; /* Mất bóng khi nhấn xuống */
+}

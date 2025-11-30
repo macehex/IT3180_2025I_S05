@@ -3,48 +3,54 @@
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
-<?import javafx.scene.text.Font?>
 
-<VBox spacing="15.0" style="-fx-padding: 20; -fx-background-color: white; -fx-background-radius: 8; -fx-border-color: #1e3c72;"
+<VBox spacing="20.0" styleClass="root-container"
+      stylesheets="@styles/asset_form_styles.css"
       xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1"
-      fx:controller="com.example.quanlytoanha.controller.AssetFormController">
+      fx:controller="com.example.quanlytoanha.controller.AssetFormController"
+      prefWidth="500.0">
 
-    <Label fx:id="lblTitle" text="TẠO HỒ SƠ TÀI SẢN MỚI"
-           style="-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #1e3c72;"/>
+    <HBox alignment="CENTER_LEFT" spacing="10" styleClass="header-box">
+        <Label text="📦" styleClass="header-icon" />
+        <Label fx:id="lblTitle" text="QUẢN LÝ HỒ SƠ TÀI SẢN" styleClass="header-title"/>
+    </HBox>
 
     <GridPane hgap="15" vgap="15">
         <columnConstraints>
-            <ColumnConstraints hgrow="NEVER" minWidth="120.0" />
+            <ColumnConstraints hgrow="NEVER" minWidth="130.0" />
             <ColumnConstraints hgrow="ALWAYS" />
         </columnConstraints>
 
         <TextField fx:id="txtAssetId" visible="false" managed="false" GridPane.columnIndex="1" GridPane.rowIndex="0" />
 
-        <Label text="Tên Tài sản (*):" GridPane.columnIndex="0" GridPane.rowIndex="1" style="-fx-font-weight: bold;"/>
-        <TextField fx:id="txtAssetType" promptText="VD: Thang máy, Máy bơm" GridPane.columnIndex="1" GridPane.rowIndex="1" style="-fx-background-radius: 4;"/>
+        <Label text="Tên Tài sản (*):" GridPane.columnIndex="0" GridPane.rowIndex="1" styleClass="form-label"/>
+        <TextField fx:id="txtAssetType" promptText="VD: Thang máy, Máy phát điện" GridPane.columnIndex="1" GridPane.rowIndex="1" />
 
-        <Label text="Vị trí (*):" GridPane.columnIndex="0" GridPane.rowIndex="2" style="-fx-font-weight: bold;"/>
-        <TextField fx:id="txtLocation" promptText="VD: Tầng hầm B1, Tòa A" GridPane.columnIndex="1" GridPane.rowIndex="2" style="-fx-background-radius: 4;"/>
+        <Label text="Vị trí (*):" GridPane.columnIndex="0" GridPane.rowIndex="2" styleClass="form-label"/>
+        <TextField fx:id="txtLocation" promptText="VD: Tầng hầm B1, Sảnh A" GridPane.columnIndex="1" GridPane.rowIndex="2" />
 
-        <Label text="Chi phí ban đầu (*):" GridPane.columnIndex="0" GridPane.rowIndex="3" style="-fx-font-weight: bold;"/>
-        <TextField fx:id="txtInitialCost" promptText="Chỉ nhập số (VNĐ)" GridPane.columnIndex="1" GridPane.rowIndex="3" style="-fx-background-radius: 4;"/>
+        <Label text="Chi phí ban đầu (*):" GridPane.columnIndex="0" GridPane.rowIndex="3" styleClass="form-label"/>
+        <TextField fx:id="txtInitialCost" promptText="Nhập số tiền (VNĐ)" GridPane.columnIndex="1" GridPane.rowIndex="3" />
 
-        <Label text="Ngày mua:" GridPane.columnIndex="0" GridPane.rowIndex="4" style="-fx-font-weight: bold;"/>
-        <DatePicker fx:id="dpPurchaseDate" GridPane.columnIndex="1" GridPane.rowIndex="4" style="-fx-background-radius: 4;"/>
+        <Label text="Ngày mua:" GridPane.columnIndex="0" GridPane.rowIndex="4" styleClass="form-label"/>
+        <DatePicker fx:id="dpPurchaseDate" promptText="Chọn ngày mua" maxWidth="Infinity" GridPane.columnIndex="1" GridPane.rowIndex="4" />
 
-        <Label text="Tình trạng (*):" GridPane.columnIndex="0" GridPane.rowIndex="5" style="-fx-font-weight: bold;"/>
-        <ComboBox fx:id="cmbStatus" promptText="Chọn tình trạng" prefWidth="250.0" GridPane.columnIndex="1" GridPane.rowIndex="5" style="-fx-background-radius: 4;"/>
+        <Label text="Tình trạng (*):" GridPane.columnIndex="0" GridPane.rowIndex="5" styleClass="form-label"/>
+        <ComboBox fx:id="cmbStatus" promptText="-- Chọn trạng thái --" maxWidth="Infinity" GridPane.columnIndex="1" GridPane.rowIndex="5" />
 
-        <Label text="Mô tả:" GridPane.columnIndex="0" GridPane.rowIndex="6" style="-fx-font-weight: bold;"/>
-        <TextArea fx:id="txtDescription" prefHeight="80.0" wrapText="true" GridPane.columnIndex="1" GridPane.rowIndex="6" style="-fx-background-radius: 4;"/>
+        <Label text="Mô tả chi tiết:" GridPane.columnIndex="0" GridPane.rowIndex="6" GridPane.valignment="TOP" styleClass="form-label"/>
+        <TextArea fx:id="txtDescription" promptText="Ghi chú thêm về tình trạng, lịch sử bảo trì..." prefHeight="100.0" wrapText="true" GridPane.columnIndex="1" GridPane.rowIndex="6" />
     </GridPane>
 
-    <HBox alignment="CENTER_RIGHT" spacing="15.0" style="-fx-padding: 10 0 0 0;">
-        <Button fx:id="btnSave" text="💾 Lưu"
-                onAction="#handleSaveAction"
-                style="-fx-background-color: #1e3c72; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 6; -fx-cursor: hand;"/>
-        <Button fx:id="btnCancel" text="❌ Hủy"
+    <HBox alignment="CENTER_RIGHT" spacing="15.0" style="-fx-padding: 15 0 0 0; -fx-border-color: #e0e0e0 transparent transparent transparent; -fx-border-width: 1 0 0 0;">
+        <Button fx:id="btnCancel" text="Hủy bỏ"
                 onAction="#handleCancelAction"
-                style="-fx-background-color: #dc3545; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 6; -fx-cursor: hand;"/>
+                prefWidth="100.0"
+                styleClass="action-button, btn-cancel"/>
+
+        <Button fx:id="btnSave" text="Lưu Hồ Sơ"
+                onAction="#handleSaveAction"
+                prefWidth="120.0"
+                styleClass="action-button, btn-save"/>
     </HBox>
 </VBox>

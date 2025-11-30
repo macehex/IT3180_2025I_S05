@@ -60,7 +60,6 @@ public class AssetFormController {
             cmbStatus.setValue(asset.getStatus());
             txtDescription.setText(asset.getDescription());
 
-            // --- SỬA LỖI java.sql.Date.toInstant() ---
             if (asset.getPurchaseDate() != null) {
                 // 1. Lấy java.sql.Date (dưới dạng java.util.Date)
                 java.util.Date sqlDate = asset.getPurchaseDate();
@@ -72,7 +71,6 @@ public class AssetFormController {
                 // 3. Bây giờ .toInstant() sẽ hoạt động
                 dpPurchaseDate.setValue(utilDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDate());
             }
-            // --- KẾT THÚC SỬA LỖI ---
 
         } else {
             // Chế độ Tạo mới

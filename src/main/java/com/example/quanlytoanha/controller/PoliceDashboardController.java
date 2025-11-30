@@ -98,7 +98,7 @@ public class PoliceDashboardController {
             previewTable.getItems().clear(); // Xóa dữ liệu cũ
 
             previewTable.setItems(FXCollections.observableArrayList()); // Set list rỗng mới
-            
+
             // Lấy dữ liệu mới
             switch (reportType) {
                 case "Báo cáo Công nợ Chi tiết":
