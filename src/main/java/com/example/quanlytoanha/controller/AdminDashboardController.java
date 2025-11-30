@@ -388,8 +388,27 @@ public class AdminDashboardController {
         showAlert(Alert.AlertType.INFORMATION, "Thông báo", "Chức năng Tạo thông báo chưa được triển khai.");
     }
 
+    @FXML
     private void handleXemYeuCauDichVu() {
-        showAlert(Alert.AlertType.INFORMATION, "Thông báo", "Chức năng Xem yêu cầu dịch vụ chưa được triển khai.");
+        try {
+            // Đảm bảo bạn đã tạo file AdminRequestList.fxml trong thư mục view
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/example/quanlytoanha/view/admin_request_list.fxml"));
+            Parent root = loader.load();
+
+            Stage stage = new Stage();
+            stage.setTitle("Quản Lý Các Phản Ánh / Yêu Cầu Dịch Vụ");
+            stage.initModality(Modality.WINDOW_MODAL);
+            stage.initOwner(btnXemYeuCauDichVu.getScene().getWindow());
+
+            // Kích thước rộng một chút để hiển thị bảng (Table) rõ ràng
+            stage.setScene(new Scene(root, 1000, 600));
+            stage.setResizable(true);
+            stage.showAndWait();
+
+        } catch (IOException e) {
+            e.printStackTrace();
+            showAlert(Alert.AlertType.ERROR, "Lỗi", "Không thể tải màn hình Quản lý Yêu cầu: " + e.getMessage());
+        }
     }
 
     @FXML

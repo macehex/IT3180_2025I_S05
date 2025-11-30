@@ -31,11 +31,13 @@ public class ServiceRequestDAO {
 
     /**
      * CƯ DÂN (US3_1_1): Tạo một yêu cầu dịch vụ/báo cáo sự cố mới. (CẬP NHẬT)
+     *
      * @param request Đối tượng ServiceRequest chứa đầy đủ thông tin
+     * @return
      */
-    public void createServiceRequest(ServiceRequest request) {
+    public boolean createServiceRequest(ServiceRequest request) {
         String sql = "INSERT INTO service_requests (req_user_id, req_type, req_title, description, status, created_at, asset_id, image_url) " +
-                "VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+                     "VALUES (?, ?::request_type_enum, ?, ?, ?::request_status_enum, ?, ?, ?)";
 
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
@@ -44,27 +46,28 @@ public class ServiceRequestDAO {
             pstmt.setString(2, request.getReqType());
             pstmt.setString(3, request.getReqTitle());
             pstmt.setString(4, request.getDescription());
-            pstmt.setString(5, request.getStatus());
+            pstmt.setString(5, request.getStatus()); // Java gửi String "PENDING", SQL sẽ ép kiểu
             pstmt.setDate(6, request.getCreatedAt());
 
-            // Xử lý cho asset_id có thể là NULL
             if (request.getAssetId() != null) {
                 pstmt.setInt(7, request.getAssetId());
             } else {
                 pstmt.setNull(7, java.sql.Types.INTEGER);
             }
 
-            // MỚI: Thêm tham số 8 cho image_url (có thể null)
             if (request.getImageUrl() != null) {
                 pstmt.setString(8, request.getImageUrl());
             } else {
                 pstmt.setNull(8, java.sql.Types.VARCHAR);
             }
 
-            pstmt.executeUpdate();
+            int rows = pstmt.executeUpdate();
+            return rows > 0;
 
         } catch (SQLException e) {
+            System.err.println("Lỗi khi tạo Service Request: " + e.getMessage());
             e.printStackTrace();
+            return false;
         }
     }
 
@@ -112,5 +115,68 @@ public class ServiceRequestDAO {
         }
 
         return requestList;
+    }
+
+    /**
+     * ADMIN: Lấy TOÀN BỘ danh sách yêu cầu (để quản lý)
+     * Sắp xếp: Mới nhất lên đầu.
+     */
+    public List<ServiceRequest> getAllServiceRequests() {
+        List<ServiceRequest> requestList = new ArrayList<>();
+        String sql = "SELECT * FROM service_requests ORDER BY created_at DESC";
+
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql);
+             ResultSet rs = pstmt.executeQuery()) {
+
+            while (rs.next()) {
+                ServiceRequest request = new ServiceRequest();
+                request.setRequestId(rs.getInt("request_id"));
+                request.setReqUserId(rs.getInt("req_user_id"));
+                request.setReqType(rs.getString("req_type"));
+                request.setReqTitle(rs.getString("req_title"));
+                request.setDescription(rs.getString("description"));
+                request.setStatus(rs.getString("status"));
+                request.setCreatedAt(rs.getDate("created_at"));
+                request.setCompletedAt(rs.getDate("completed_at"));
+
+                int assetId = rs.getInt("asset_id");
+                if (rs.wasNull()) {
+                    request.setAssetId(null);
+                } else {
+                    request.setAssetId(assetId);
+                }
+
+                request.setImageUrl(rs.getString("image_url"));
+
+                requestList.add(request);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return requestList;
+    }
+
+    /**
+     * ADMIN (US5_2_1): Cập nhật trạng thái xử lý của yêu cầu
+     * @param requestId ID của yêu cầu
+     * @param newStatus Trạng thái mới (ví dụ: "IN_PROGRESS", "COMPLETED")
+     */
+    public boolean updateRequestStatus(int requestId, String newStatus) {
+        String sql = "UPDATE service_requests SET status = ?::request_status_enum WHERE request_id = ?";
+
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+            pstmt.setString(1, newStatus);
+            pstmt.setInt(2, requestId);
+
+            int rows = pstmt.executeUpdate();
+            return rows > 0;
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
     }
 }

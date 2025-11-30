@@ -215,7 +215,7 @@ public class ResidentDashboardController implements Initializable {
         User currentUser = SessionManager.getInstance().getCurrentUser();
         if (currentUser == null) return;
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/example/quanlytoanha/view/CreateServiceRequest.fxml"));
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/example/quanlytoanha/view/create_service_request.fxml"));
             Parent root = loader.load();
             CreateServiceRequestController controller = loader.getController();
             controller.setCurrentResidentId(currentUser.getUserId());
@@ -234,7 +234,7 @@ public class ResidentDashboardController implements Initializable {
         User currentUser = SessionManager.getInstance().getCurrentUser();
         if (currentUser == null) return;
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/example/quanlytoanha/view/MyRequestsList.fxml"));
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/example/quanlytoanha/view/my_requests_list.fxml"));
             Node content = loader.load();
             MyRequestsListController controller = loader.getController();
             controller.loadDataForResident(currentUser.getUserId());

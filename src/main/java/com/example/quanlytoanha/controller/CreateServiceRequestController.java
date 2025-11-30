@@ -56,10 +56,10 @@ public class CreateServiceRequestController implements Initializable {
      */
     private void setupRequestTypeComboBox() {
         ObservableList<RequestTypeItem> requestTypes = FXCollections.observableArrayList(
-                new RequestTypeItem("Sửa chữa / Bảo trì", "SUACHUA"),
-                new RequestTypeItem("An ninh", "ANNINH"),
-                new RequestTypeItem("Gửi xe", "GUIXE"),
-                new RequestTypeItem("Phàn nàn / Khiếu nại", "PHANNAN"),
+                new RequestTypeItem("Sửa chữa / Bảo trì", "SUA_CHUA"),
+                new RequestTypeItem("An ninh", "AN_NINH"),
+                new RequestTypeItem("Gửi xe", "GUI_XE"),
+                new RequestTypeItem("Phàn nàn / Khiếu nại", "PHAN_NAN"),
                 new RequestTypeItem("Yêu cầu khác", "KHAC")
         );
 

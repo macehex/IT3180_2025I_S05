@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.cell.PropertyValueFactory?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
+
+<VBox fx:id="rootPane"
+      fx:controller="com.example.quanlytoanha.controller.AdminRequestListController"
+      prefHeight="600.0" prefWidth="800.0" spacing="10.0"
+      xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1">
+    <padding>
+        <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
+    </padding>
+    <children>
+        <Label text="Quản Lý Phản Ánh Cư Dân">
+            <font>
+                <Font name="System Bold" size="20.0" />
+            </font>
+        </Label>
+
+        <TableView fx:id="requestTable" VBox.vgrow="ALWAYS">
+            <columns>
+                <TableColumn fx:id="colId" prefWidth="50.0" text="ID">
+                    <cellValueFactory><PropertyValueFactory property="requestId" /></cellValueFactory>
+                </TableColumn>
+
+                <TableColumn fx:id="colUserId" prefWidth="80.0" text="User ID">
+                    <cellValueFactory><PropertyValueFactory property="reqUserId" /></cellValueFactory>
+                </TableColumn>
+
+                <TableColumn fx:id="colType" prefWidth="120.0" text="Loại">
+                    <cellValueFactory><PropertyValueFactory property="reqType" /></cellValueFactory>
+                </TableColumn>
+
+                <TableColumn fx:id="colTitle" prefWidth="200.0" text="Tiêu đề">
+                    <cellValueFactory><PropertyValueFactory property="reqTitle" /></cellValueFactory>
+                </TableColumn>
+
+                <TableColumn fx:id="colStatus" prefWidth="100.0" text="Trạng thái">
+                    <cellValueFactory><PropertyValueFactory property="status" /></cellValueFactory>
+                </TableColumn>
+
+                <TableColumn fx:id="colDate" prefWidth="120.0" text="Ngày tạo">
+                    <cellValueFactory><PropertyValueFactory property="createdAt" /></cellValueFactory>
+                </TableColumn>
+            </columns>
+        </TableView>
+    </children>
+</VBox>
