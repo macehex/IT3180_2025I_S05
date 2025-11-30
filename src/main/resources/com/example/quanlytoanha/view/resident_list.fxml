@@ -97,15 +97,18 @@
                 </TableView>
 
                 <HBox spacing="10.0" alignment="CENTER_LEFT">
-                    <Button fx:id="btnEditResident" text="✏️ Chỉnh sửa" onAction="#handleEditResident"
+                    <Button fx:id="btnProfileChangeRequests" text="Yêu cầu chỉnh sửa" onAction="#handleProfileChangeRequests"
+                            style="-fx-background-color: #6f42c1; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 6;" />
+
+                    <Button fx:id="btnEditResident" text="Chỉnh sửa" onAction="#handleEditResident"
                             style="-fx-background-color: #ffc107; -fx-text-fill: black; -fx-font-weight: bold; -fx-background-radius: 6;"
                             disable="true" />
 
-                    <Button fx:id="btnViewHistory" text="📜 Xem Lịch sử" onAction="#handleViewHistory"
+                    <Button fx:id="btnViewHistory" text="Xem Lịch sử" onAction="#handleViewHistory"
                             style="-fx-background-color: #17a2b8; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 6;"
                             disable="true" />
 
-                    <Button fx:id="btnDeleteResident" text="🗑️ Xóa Hồ sơ" onAction="#handleDeleteResident"
+                    <Button fx:id="btnDeleteResident" text="Xóa Hồ sơ" onAction="#handleDeleteResident"
                             style="-fx-background-color: #dc3545; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 6;"
                             disable="true" />
                 </HBox>

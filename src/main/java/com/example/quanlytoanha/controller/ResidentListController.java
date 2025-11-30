@@ -48,6 +48,7 @@ public class ResidentListController implements Initializable {
     @FXML private TableColumn<Resident, Void> colActions; // Cột này không dùng nếu nút ở dưới
 
     // --- BỔ SUNG: Nút thao tác ---
+    @FXML private Button btnProfileChangeRequests;
     @FXML private Button btnEditResident;
     @FXML private Button btnViewHistory;
     @FXML private Button btnDeleteResident;
@@ -255,6 +256,24 @@ public class ResidentListController implements Initializable {
     private void handleDeleteResident() {
         // TODO: Triển khai logic xóa cư dân
         showAlert(Alert.AlertType.INFORMATION, "Thông báo", "Chức năng xóa chưa được triển khai.");
+    }
+
+    @FXML
+    private void handleProfileChangeRequests() {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/example/quanlytoanha/view/admin_profile_change_requests.fxml"));
+            Parent root = loader.load();
+            
+            Stage stage = new Stage();
+            stage.setTitle("Quản lý yêu cầu thay đổi thông tin cư dân");
+            stage.setScene(new Scene(root, 1200, 800));
+            stage.initModality(Modality.APPLICATION_MODAL);
+            stage.showAndWait();
+            
+        } catch (IOException e) {
+            e.printStackTrace();
+            showAlert(Alert.AlertType.ERROR, "Lỗi", "Không thể mở cửa sổ quản lý yêu cầu thay đổi thông tin!");
+        }
     }
 
     private void showAlert(Alert.AlertType type, String title, String message) {

@@ -63,6 +63,9 @@ public class ResidentDashboardController implements Initializable {
 
     // MỚI: Thêm khai báo cho nút Tạo Phản Ánh (Lỗi cũ do thiếu dòng này)
     @FXML private MFXButton createRequestButton;
+    
+    // Nút yêu cầu thay đổi thông tin cá nhân
+    @FXML private MFXButton profileChangeRequestButton;
 
     @FXML private MFXButton btnLogout;
 
@@ -111,6 +114,7 @@ public class ResidentDashboardController implements Initializable {
 
         // MỚI: Đăng ký hiệu ứng cho nút Tạo Phản Ánh
         setupSingleButtonHover(createRequestButton);
+        setupSingleButtonHover(profileChangeRequestButton);
 
         // Nút Đăng xuất (Logout) có màu riêng nên xử lý riêng
         if (btnLogout != null) {
@@ -216,16 +220,17 @@ public class ResidentDashboardController implements Initializable {
         if (currentUser == null) return;
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/example/quanlytoanha/view/create_service_request.fxml"));
-            Parent root = loader.load();
+            Node content = loader.load();
             CreateServiceRequestController controller = loader.getController();
             controller.setCurrentResidentId(currentUser.getUserId());
-            Stage stage = new Stage();
-            stage.setTitle("Tạo Yêu Cầu Mới");
-            stage.setScene(new Scene(root));
-            stage.initModality(Modality.APPLICATION_MODAL);
-            stage.showAndWait();
+            
+            contentContainer.getChildren().clear();
+            contentContainer.getChildren().add(content);
+            pageTitle.setText("Tạo Phản Ánh");
+            setActiveButton(createRequestButton);
         } catch (IOException e) {
             e.printStackTrace();
+            showDashboardContent();
         }
     }
 
@@ -242,6 +247,26 @@ public class ResidentDashboardController implements Initializable {
             contentContainer.getChildren().add(content);
             pageTitle.setText("Yêu Cầu Của Tôi");
             setActiveButton(viewMyRequestsButton);
+        } catch (IOException e) {
+            e.printStackTrace();
+            showDashboardContent();
+        }
+    }
+
+    @FXML
+    private void handleProfileChangeRequestButton() {
+        User currentUser = SessionManager.getInstance().getCurrentUser();
+        if (currentUser == null) return;
+        
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/example/quanlytoanha/view/profile_change_request.fxml"));
+            Node content = loader.load();
+            
+            contentContainer.getChildren().clear();
+            contentContainer.getChildren().add(content);
+            pageTitle.setText("Thay Đổi Thông Tin");
+            setActiveButton(profileChangeRequestButton);
+            
         } catch (IOException e) {
             e.printStackTrace();
             showDashboardContent();

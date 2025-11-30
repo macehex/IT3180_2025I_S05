@@ -372,3 +372,23 @@ assets.asset_id < service_requests.asset_id // "is subject of"
 update_requests.user_id > users.user_id // "submitted by"
 
 update_requests.reviewed_by > users.user_id // "reviewed by"
+CREATE TABLE IF NOT EXISTS profile_change_requests (                                                                
+request_id SERIAL PRIMARY KEY,                                                                                
+user_id INTEGER NOT NULL REFERENCES users(user_id),                                                         
+_request_type VARCHAR(50) DEFAULT 'PROFILE_CHANGE',                                                        
+status VARCHAR(20) DEFAULT 'PENDING' CHECK (status IN ('PENDING', 'APPROVED', 'REJECTED')),              
+created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,                                                                
+processed_at TIMESTAMP,                                                                                        
+processed_by INTEGER REFERENCES users(user_id),                                                              
+admin_comment TEXT,_
+
+      -- current and new values for all user/resident fields                                                              
+
+      current_username VARCHAR(255), new_username VARCHAR(255),                                                       
+      current_phone_number VARCHAR(20), new_phone_number VARCHAR(20),                                                 
+        current_email VARCHAR(255), new_email VARCHAR(255),                                                            
+      current_full_name VARCHAR(255), new_full_name VARCHAR(255),                                                     
+      current_relationship VARCHAR(100), new_relationship VARCHAR(100),                                             
+      current_date_of_birth DATE, new_date_of_birth DATE,                                                          
+      current_id_card_number VARCHAR(20), new_id_card_number VARCHAR(20)                                            
+);                                                                                                                
