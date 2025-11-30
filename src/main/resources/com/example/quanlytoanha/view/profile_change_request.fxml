@@ -1,0 +1,155 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<BorderPane xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.example.quanlytoanha.controller.ProfileChangeRequestController"
+            style="-fx-background-color: #f8f9fa;">
+
+    <top>
+        <HBox alignment="CENTER_LEFT" spacing="20.0"
+              style="-fx-background-color: linear-gradient(to right, #1e3c72 0%, #2a5298 100%); -fx-padding: 20;">
+            <children>
+                <Label text="YÊU CẦU THAY ĐỔI THÔNG TIN CÁ NHÂN"
+                       style="-fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: white;"/>
+            </children>
+        </HBox>
+    </top>
+
+    <center>
+        <ScrollPane fitToWidth="true" style="-fx-background-color: transparent;">
+            <VBox spacing="20.0" style="-fx-padding: 30;">
+                
+                <!-- Instructions -->
+                <VBox spacing="10.0" style="-fx-background-color: #e3f2fd; -fx-padding: 20; -fx-background-radius: 10;">
+                    <Label text="Hướng dẫn" style="-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #1565c0;"/>
+                    <Label text="• Điền thông tin mới bạn muốn thay đổi vào các trường bên dưới" wrapText="true"
+                           style="-fx-text-fill: #424242;"/>
+                    <Label text="• Những trường không muốn thay đổi có thể để nguyên giá trị hiện tại" wrapText="true"
+                           style="-fx-text-fill: #424242;"/>
+                    <Label text="• Yêu cầu sẽ được gửi đến admin để xem xét và phê duyệt" wrapText="true"
+                           style="-fx-text-fill: #424242;"/>
+                    <Label text="• Bạn sẽ nhận được thông báo khi yêu cầu được xử lý" wrapText="true"
+                           style="-fx-text-fill: #424242;"/>
+                </VBox>
+
+                <!-- Current vs New Information -->
+                <GridPane hgap="30.0" vgap="20.0">
+                    <columnConstraints>
+                        <ColumnConstraints hgrow="SOMETIMES" prefWidth="400.0"/>
+                        <ColumnConstraints hgrow="SOMETIMES" prefWidth="400.0"/>
+                    </columnConstraints>
+                    
+                    <!-- Current Information Column -->
+                    <VBox spacing="15.0" style="-fx-background-color: white; -fx-padding: 25; -fx-background-radius: 10; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 10, 0, 0, 2);">
+                        <Label text="THÔNG TIN HIỆN TẠI" style="-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #1e3c72;"/>
+                        
+                        <VBox spacing="10.0">
+                            <Label text="Tên đăng nhập:" style="-fx-font-weight: bold;"/>
+                            <Label fx:id="lblCurrentUsername" style="-fx-background-color: #f8f9fa; -fx-padding: 10; -fx-background-radius: 5;"/>
+                        </VBox>
+                        
+                        <VBox spacing="10.0">
+                            <Label text="Số điện thoại:" style="-fx-font-weight: bold;"/>
+                            <Label fx:id="lblCurrentPhoneNumber" style="-fx-background-color: #f8f9fa; -fx-padding: 10; -fx-background-radius: 5;"/>
+                        </VBox>
+                        
+                        <VBox spacing="10.0">
+                            <Label text="Email:" style="-fx-font-weight: bold;"/>
+                            <Label fx:id="lblCurrentEmail" style="-fx-background-color: #f8f9fa; -fx-padding: 10; -fx-background-radius: 5;"/>
+                        </VBox>
+                        
+                        <VBox spacing="10.0">
+                            <Label text="Họ và tên:" style="-fx-font-weight: bold;"/>
+                            <Label fx:id="lblCurrentFullName" style="-fx-background-color: #f8f9fa; -fx-padding: 10; -fx-background-radius: 5;"/>
+                        </VBox>
+                        
+                        <VBox spacing="10.0">
+                            <Label text="Quan hệ với chủ hộ:" style="-fx-font-weight: bold;"/>
+                            <Label fx:id="lblCurrentRelationship" style="-fx-background-color: #f8f9fa; -fx-padding: 10; -fx-background-radius: 5;"/>
+                        </VBox>
+                        
+                        <VBox spacing="10.0">
+                            <Label text="Ngày sinh:" style="-fx-font-weight: bold;"/>
+                            <Label fx:id="lblCurrentDateOfBirth" style="-fx-background-color: #f8f9fa; -fx-padding: 10; -fx-background-radius: 5;"/>
+                        </VBox>
+                        
+                        <VBox spacing="10.0">
+                            <Label text="Số CMND/CCCD:" style="-fx-font-weight: bold;"/>
+                            <Label fx:id="lblCurrentIdCardNumber" style="-fx-background-color: #f8f9fa; -fx-padding: 10; -fx-background-radius: 5;"/>
+                        </VBox>
+                    </VBox>
+                    
+                    <!-- New Information Column -->
+                    <VBox spacing="15.0" style="-fx-background-color: white; -fx-padding: 25; -fx-background-radius: 10; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 10, 0, 0, 2);" GridPane.columnIndex="1">
+                        <Label text="THÔNG TIN MỚI" style="-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #1e3c72;"/>
+                        
+                        <VBox spacing="10.0">
+                            <Label text="Tên đăng nhập: *" style="-fx-font-weight: bold;"/>
+                            <TextField fx:id="txtUsername" promptText="Nhập tên đăng nhập mới"
+                                     style="-fx-background-radius: 8; -fx-padding: 10;"/>
+                        </VBox>
+                        
+                        <VBox spacing="10.0">
+                            <Label text="Số điện thoại:" style="-fx-font-weight: bold;"/>
+                            <TextField fx:id="txtPhoneNumber" promptText="Nhập số điện thoại mới"
+                                     style="-fx-background-radius: 8; -fx-padding: 10;"/>
+                        </VBox>
+                        
+                        <VBox spacing="10.0">
+                            <Label text="Email:" style="-fx-font-weight: bold;"/>
+                            <TextField fx:id="txtEmail" promptText="Nhập email mới"
+                                     style="-fx-background-radius: 8; -fx-padding: 10;"/>
+                        </VBox>
+                        
+                        <VBox spacing="10.0">
+                            <Label text="Họ và tên: *" style="-fx-font-weight: bold;"/>
+                            <TextField fx:id="txtFullName" promptText="Nhập họ tên mới"
+                                     style="-fx-background-radius: 8; -fx-padding: 10;"/>
+                        </VBox>
+                        
+                        <VBox spacing="10.0">
+                            <Label text="Quan hệ với chủ hộ:" style="-fx-font-weight: bold;"/>
+                            <ComboBox fx:id="cmbRelationship" promptText="Chọn quan hệ với chủ hộ"
+                                    maxWidth="Infinity" prefHeight="40.0"
+                                    style="-fx-background-radius: 8;"/>
+                        </VBox>
+                        
+                        <VBox spacing="10.0">
+                            <Label text="Ngày sinh:" style="-fx-font-weight: bold;"/>
+                            <DatePicker fx:id="datePicker" promptText="Chọn ngày sinh"
+                                      style="-fx-background-radius: 8;"/>
+                        </VBox>
+                        
+                        <VBox spacing="10.0">
+                            <Label text="Số CMND/CCCD:" style="-fx-font-weight: bold;"/>
+                            <TextField fx:id="txtIdCardNumber" promptText="Nhập số CMND/CCCD mới"
+                                     style="-fx-background-radius: 8; -fx-padding: 10;"/>
+                        </VBox>
+                    </VBox>
+                </GridPane>
+
+                <!-- Note -->
+                <VBox spacing="10.0" style="-fx-background-color: #fff3cd; -fx-padding: 20; -fx-background-radius: 10;">
+                    <Label text="Lưu ý quan trọng" style="-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #856404;"/>
+                    <Label text="• Các trường có dấu (*) là bắt buộc" wrapText="true" style="-fx-text-fill: #856404;"/>
+                    <Label text="• Thông tin sẽ chỉ được cập nhật sau khi admin phê duyệt" wrapText="true" style="-fx-text-fill: #856404;"/>
+                    <Label text="• Bạn chỉ có thể gửi một yêu cầu tại một thời điểm" wrapText="true" style="-fx-text-fill: #856404;"/>
+                    <Label text="• Vui lòng kiểm tra kỹ thông tin trước khi gửi yêu cầu" wrapText="true" style="-fx-text-fill: #856404;"/>
+                </VBox>
+
+                <!-- Buttons -->
+                <HBox spacing="15.0" alignment="CENTER">
+                    <Button fx:id="btnSubmit" text="Gửi yêu cầu" onAction="#handleSubmit"
+                            prefHeight="45.0" prefWidth="200.0"
+                            style="-fx-background-color: linear-gradient(to right, #1e3c72 0%, #2a5298 100%); -fx-text-fill: white; -fx-font-size: 14px; -fx-font-weight: bold; -fx-background-radius: 8;"/>
+                    <Button fx:id="btnCancel" text="Hủy bỏ" onAction="#handleCancel"
+                            prefHeight="45.0" prefWidth="150.0"
+                            style="-fx-background-color: #6c757d; -fx-text-fill: white; -fx-font-size: 14px; -fx-font-weight: bold; -fx-background-radius: 8;"/>
+                </HBox>
+            </VBox>
+        </ScrollPane>
+    </center>
+</BorderPane>

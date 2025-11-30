@@ -35,6 +35,9 @@ public class CreateServiceRequestController implements Initializable {
     @FXML
     private Button submitButton;
 
+    @FXML
+    private Button cancelButton;
+
     // MỚI: Cần khai báo nút này để đổi tên nút sau khi chọn ảnh & lấy Stage
     @FXML
     private Button chooseImageButton;
@@ -174,6 +177,25 @@ public class CreateServiceRequestController implements Initializable {
      */
     public void setCurrentResidentId(int currentResidentId) {
         this.currentResidentId = currentResidentId;
+    }
+
+    @FXML
+    private void handleCancelButton() {
+        // Clear the form
+        clearForm();
+    }
+
+    private void clearForm() {
+        reqTypeComboBox.setValue(null);
+        titleField.clear();
+        descriptionArea.clear();
+        selectedImageFile = null;
+        chooseImageButton.setText("Chọn ảnh...");
+        // Clear image preview if exists
+        if (chooseImageButton.getScene().lookup("#imagePreview") != null) {
+            javafx.scene.image.ImageView imagePreview = (javafx.scene.image.ImageView) chooseImageButton.getScene().lookup("#imagePreview");
+            imagePreview.setImage(null);
+        }
     }
 
     // =======================================================================

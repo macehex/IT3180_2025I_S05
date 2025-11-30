@@ -1,44 +1,110 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import javafx.geometry.Insets?>
-<?import javafx.scene.control.Button?>
-<?import javafx.scene.control.ComboBox?>
-<?import javafx.scene.control.Label?>
-<?import javafx.scene.control.TextArea?>
-<?import javafx.scene.control.TextField?>
+<?import javafx.scene.control.*?>
 <?import javafx.scene.image.ImageView?>
-<?import javafx.scene.layout.VBox?>
-<?import javafx.scene.text.Font?>
+<?import javafx.scene.layout.*?>
 
-<VBox fx:id="rootPane" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefWidth="400.0" spacing="10.0" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.quanlytoanha.controller.CreateServiceRequestController">
-    <padding>
-        <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
-    </padding>
-    <children>
-        <Label text="Báo cáo Sự cố / Yêu cầu">
-            <font>
-                <Font name="System Bold" size="18.0" />
-            </font>
-        </Label>
+<BorderPane xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.example.quanlytoanha.controller.CreateServiceRequestController"
+            style="-fx-background-color: #f8f9fa;">
 
-        <Label text="Loại yêu cầu (*):" />
-        <ComboBox fx:id="reqTypeComboBox" prefWidth="150.0" promptText="Chọn loại..." />
+    <top>
+        <HBox alignment="CENTER_LEFT" spacing="20.0"
+              style="-fx-background-color: linear-gradient(to right, #1e3c72 0%, #2a5298 100%); -fx-padding: 20;">
+            <children>
+                <Label text="TẠO PHẢN ÁNH / YÊU CẦU"
+                       style="-fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: white;"/>
+            </children>
+        </HBox>
+    </top>
 
-        <Label text="Tiêu đề (*):" />
-        <TextField fx:id="titleField" promptText="Ví dụ: Đèn hành lang tầng 5 bị hỏng" />
+    <center>
+        <ScrollPane fitToWidth="true" style="-fx-background-color: transparent;">
+            <VBox spacing="20.0" style="-fx-padding: 30;">
+                
+                <!-- Instructions -->
+                <VBox spacing="10.0" style="-fx-background-color: #e3f2fd; -fx-padding: 20; -fx-background-radius: 10;">
+                    <Label text="Hướng dẫn" style="-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #1565c0;"/>
+                    <Label text="• Vui lòng mô tả rõ ràng vấn đề hoặc yêu cầu của bạn" wrapText="true"
+                           style="-fx-text-fill: #424242;"/>
+                    <Label text="• Đính kèm hình ảnh minh chứng nếu có thể để hỗ trợ xử lý tốt hơn" wrapText="true"
+                           style="-fx-text-fill: #424242;"/>
+                    <Label text="• Yêu cầu sẽ được chuyển đến bộ phận quản lý để xử lý" wrapText="true"
+                           style="-fx-text-fill: #424242;"/>
+                    <Label text="• Bạn có thể theo dõi trạng thái xử lý trong mục 'Yêu Cầu Của Tôi'" wrapText="true"
+                           style="-fx-text-fill: #424242;"/>
+                </VBox>
 
-        <Label text="Mô tả chi tiết (*):" />
-        <TextArea fx:id="descriptionArea" prefHeight="100.0" promptText="Mô tả rõ sự cố bạn gặp phải..." wrapText="true" />
+                <!-- Main Form -->
+                <VBox spacing="25.0" style="-fx-background-color: white; -fx-padding: 30; -fx-background-radius: 10; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 10, 0, 0, 2);">
+                    <Label text="THÔNG TIN YÊU CẦU" style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #1e3c72;"/>
+                    
+                    <!-- Request Type -->
+                    <VBox spacing="10.0">
+                        <Label text="Loại yêu cầu: *" style="-fx-font-weight: bold; -fx-font-size: 14px;"/>
+                        <ComboBox fx:id="reqTypeComboBox" promptText="Chọn loại yêu cầu..." 
+                                maxWidth="Infinity" prefHeight="40.0"
+                                style="-fx-background-radius: 8; -fx-font-size: 14px;"/>
+                    </VBox>
+                    
+                    <!-- Title -->
+                    <VBox spacing="10.0">
+                        <Label text="Tiêu đề: *" style="-fx-font-weight: bold; -fx-font-size: 14px;"/>
+                        <TextField fx:id="titleField" promptText="Ví dụ: Đèn hành lang tầng 5 bị hỏng"
+                                 prefHeight="40.0"
+                                 style="-fx-background-radius: 8; -fx-font-size: 14px; -fx-padding: 10;"/>
+                    </VBox>
+                    
+                    <!-- Description -->
+                    <VBox spacing="10.0">
+                        <Label text="Mô tả chi tiết: *" style="-fx-font-weight: bold; -fx-font-size: 14px;"/>
+                        <TextArea fx:id="descriptionArea" promptText="Mô tả rõ ràng vấn đề bạn gặp phải, vị trí cụ thể, mức độ nghiêm trọng..."
+                                wrapText="true" prefRowCount="5"
+                                style="-fx-background-radius: 8; -fx-font-size: 14px;"/>
+                    </VBox>
+                    
+                    <!-- Image Upload -->
+                    <VBox spacing="15.0">
+                        <Label text="Hình ảnh minh chứng:" style="-fx-font-weight: bold; -fx-font-size: 14px;"/>
+                        <HBox spacing="15.0" alignment="CENTER_LEFT">
+                            <Button fx:id="chooseImageButton" text="Chọn ảnh..." onAction="#handleChooseImageButton"
+                                    prefHeight="40.0" prefWidth="150.0"
+                                    style="-fx-background-color: #6c757d; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 8;"/>
+                            <Label text="(Tùy chọn - Hỗ trợ: JPG, PNG, GIF)" 
+                                   style="-fx-text-fill: #6c757d; -fx-font-style: italic;"/>
+                        </HBox>
+                        
+                        <!-- Image Preview -->
+                        <VBox fx:id="imageContainer" spacing="10.0" style="-fx-background-color: #f8f9fa; -fx-padding: 15; -fx-background-radius: 8;">
+                            <Label text="Xem trước hình ảnh:" style="-fx-font-weight: bold; -fx-text-fill: #495057;"/>
+                            <ImageView fx:id="imagePreview" fitHeight="200.0" fitWidth="300.0" 
+                                     pickOnBounds="true" preserveRatio="true" 
+                                     style="-fx-background-color: white; -fx-background-radius: 8;"/>
+                        </VBox>
+                    </VBox>
+                </VBox>
 
-        <Label text="Hình ảnh minh chứng:" />
-        <Button fx:id="chooseImageButton" mnemonicParsing="false" onAction="#handleChooseImageButton" text="Chọn ảnh..." />
+                <!-- Important Notes -->
+                <VBox spacing="10.0" style="-fx-background-color: #fff3cd; -fx-padding: 20; -fx-background-radius: 10;">
+                    <Label text="Lưu ý quan trọng" style="-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #856404;"/>
+                    <Label text="• Các trường có dấu (*) là bắt buộc" wrapText="true" style="-fx-text-fill: #856404;"/>
+                    <Label text="• Vui lòng kiểm tra thông tin trước khi gửi yêu cầu" wrapText="true" style="-fx-text-fill: #856404;"/>
+                    <Label text="• Yêu cầu sẽ được xử lý trong thời gian sớm nhất có thể" wrapText="true" style="-fx-text-fill: #856404;"/>
+                    <Label text="• Trong trường hợp khẩn cấp, vui lòng liên hệ trực tiếp ban quản lý" wrapText="true" style="-fx-text-fill: #856404;"/>
+                </VBox>
 
-        <ImageView fx:id="imagePreview" fitHeight="100.0" fitWidth="150.0" pickOnBounds="true" preserveRatio="true" />
+                <!-- Action Buttons -->
+                <HBox spacing="15.0" alignment="CENTER">
+                    <Button fx:id="submitButton" text="Gửi yêu cầu" onAction="#handleSubmitButton"
+                            prefHeight="45.0" prefWidth="200.0"
+                            style="-fx-background-color: linear-gradient(to right, #1e3c72 0%, #2a5298 100%); -fx-text-fill: white; -fx-font-size: 14px; -fx-font-weight: bold; -fx-background-radius: 8;"/>
 
-        <Button fx:id="submitButton" layoutX="30.0" layoutY="385.0" mnemonicParsing="false" onAction="#handleSubmitButton" prefHeight="35.0" prefWidth="360.0" text="Gửi Yêu Cầu">
-            <font>
-                <Font name="System Bold" size="14.0" />
-            </font>
-        </Button>
-    </children>
-</VBox>
+                    <Button fx:id="cancelButton" text="Hủy bỏ" onAction="#handleCancelButton"
+                            prefHeight="45.0" prefWidth="150.0"
+                            style="-fx-background-color: #6c757d; -fx-text-fill: white; -fx-font-size: 16px; -fx-font-weight: bold; -fx-background-radius: 8;"/>
+                </HBox>
+            </VBox>
+        </ScrollPane>
+    </center>
+</BorderPane>

@@ -29,42 +29,43 @@
         <!-- Navigation Section -->
         <VBox spacing="14.0">
 
-            <!-- Trang chủ -->
+            <!-- 1. Trang Chủ -->
             <MFXButton fx:id="homeButton"
                        onAction="#handleHomeButton"
-                       text="Trang chủ"
+                       text="Trang Chủ"
                        prefHeight="60.0"
                        maxWidth="Infinity"
                        style="-fx-background-color: rgba(255,255,255,0.15); -fx-background-radius: 12; -fx-text-fill: white; -fx-font-size: 17px; -fx-font-weight: 500; -fx-font-family: 'DejaVu Sans'; -fx-alignment: center-left; -fx-content-display: left;">
             </MFXButton>
 
-            <!-- Hóa đơn, tra cứu lịch sử -->
+            <!-- 2. Tra Cứu Hóa Đơn, Lịch Sử -->
             <MFXButton fx:id="invoiceHistoryButton"
                        onAction="#handleInvoiceHistoryButton"
-                       text="Hóa đơn, tra cứu lịch sử"
+                       text="Tra Cứu Hóa Đơn, Lịch Sử"
                        prefHeight="60.0"
                        maxWidth="Infinity"
                        style="-fx-background-color: rgba(255,255,255,0.15); -fx-background-radius: 12; -fx-text-fill: white; -fx-font-size: 17px; -fx-font-weight: 500; -fx-font-family: 'DejaVu Sans'; -fx-alignment: center-left;">
             </MFXButton>
 
-            <!-- Quản lý lịch sử đăng nhập -->
-            <MFXButton fx:id="loginHistoryButton"
-                       onAction="#handleLoginHistoryButton"
-                       text="Quản lý lịch sử đăng nhập"
-                       prefHeight="60.0"
-                       maxWidth="Infinity"
-                       style="-fx-background-color: rgba(255,255,255,0.15); -fx-background-radius: 12; -fx-text-fill: white; -fx-font-size: 17px; -fx-font-weight: 500; -fx-font-family: 'DejaVu Sans'; -fx-alignment: center-left;">
-            </MFXButton>
-
-            <!-- Xem thông báo -->
+            <!-- 3. Xem Thông Báo -->
             <MFXButton fx:id="notificationButton"
                        onAction="#handleNotificationButton"
-                       text="Xem thông báo"
+                       text="Xem Thông Báo"
                        prefHeight="60.0"
                        maxWidth="Infinity"
                        style="-fx-background-color: rgba(255,255,255,0.15); -fx-background-radius: 12; -fx-text-fill: white; -fx-font-size: 17px; -fx-font-weight: 500; -fx-font-family: 'DejaVu Sans'; -fx-alignment: center-left;">
             </MFXButton>
 
+            <!-- 4. Yêu Cầu Của Tôi -->
+            <MFXButton fx:id="viewMyRequestsButton"
+                       onAction="#handleViewMyRequestsButton"
+                       text="Yêu Cầu Của Tôi"
+                       prefHeight="60.0"
+                       maxWidth="Infinity"
+                       style="-fx-background-color: rgba(255,255,255,0.15); -fx-background-radius: 12; -fx-text-fill: white; -fx-font-size: 17px; -fx-font-weight: 500; -fx-font-family: 'DejaVu Sans'; -fx-alignment: center-left;">
+            </MFXButton>
+
+            <!-- 5. Tạo Phản Ánh -->
             <MFXButton fx:id="createRequestButton"
                        onAction="#handleCreateRequestButton"
                        text="Tạo Phản Ánh"
@@ -73,9 +74,19 @@
                        style="-fx-background-color: rgba(255,255,255,0.15); -fx-background-radius: 12; -fx-text-fill: white; -fx-font-size: 17px; -fx-font-weight: 500; -fx-font-family: 'DejaVu Sans'; -fx-alignment: center-left;">
             </MFXButton>
 
-            <MFXButton fx:id="viewMyRequestsButton"
-                       onAction="#handleViewMyRequestsButton"
-                       text="Yêu Cầu Của Tôi"
+            <!-- 6. Thay Đổi Thông Tin -->
+            <MFXButton fx:id="profileChangeRequestButton"
+                       onAction="#handleProfileChangeRequestButton"
+                       text="Thay Đổi Thông Tin"
+                       prefHeight="60.0"
+                       maxWidth="Infinity"
+                       style="-fx-background-color: rgba(255,255,255,0.15); -fx-background-radius: 12; -fx-text-fill: white; -fx-font-size: 17px; -fx-font-weight: 500; -fx-font-family: 'DejaVu Sans'; -fx-alignment: center-left;">
+            </MFXButton>
+
+            <!-- 7. Quản Lý Đăng Nhập -->
+            <MFXButton fx:id="loginHistoryButton"
+                       onAction="#handleLoginHistoryButton"
+                       text="Quản Lý Đăng Nhập"
                        prefHeight="60.0"
                        maxWidth="Infinity"
                        style="-fx-background-color: rgba(255,255,255,0.15); -fx-background-radius: 12; -fx-text-fill: white; -fx-font-size: 17px; -fx-font-weight: 500; -fx-font-family: 'DejaVu Sans'; -fx-alignment: center-left;">
