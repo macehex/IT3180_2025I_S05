@@ -1,0 +1,134 @@
+/* ============================================
+   ASSET REPORT STYLES - Báo cáo Tài sản
+   ============================================ */
+
+/* Root */
+.root {
+    -fx-font-family: "Segoe UI", "System", sans-serif;
+}
+
+/* Filter Box */
+.filter-box {
+    -fx-background-color: white;
+    -fx-padding: 15px;
+    -fx-background-radius: 8px;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.05), 10, 0, 0, 2);
+}
+
+/* Buttons */
+.btn-primary {
+    -fx-background-color: #007bff;
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-background-radius: 6px;
+    -fx-padding: 8px 20px;
+    -fx-cursor: hand;
+    -fx-effect: dropshadow(gaussian, rgba(0, 123, 255, 0.3), 8, 0, 0, 3);
+}
+
+.btn-primary:hover {
+    -fx-background-color: #0056b3;
+    -fx-effect: dropshadow(gaussian, rgba(0, 123, 255, 0.5), 12, 0, 0, 5);
+    -fx-translate-y: -2px;
+}
+
+.btn-success {
+    -fx-background-color: #28a745;
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-background-radius: 6px;
+    -fx-padding: 8px 20px;
+    -fx-cursor: hand;
+    -fx-effect: dropshadow(gaussian, rgba(40, 167, 69, 0.3), 8, 0, 0, 3);
+}
+
+.btn-success:hover {
+    -fx-background-color: #218838;
+    -fx-effect: dropshadow(gaussian, rgba(40, 167, 69, 0.5), 12, 0, 0, 5);
+    -fx-translate-y: -2px;
+}
+
+/* Table View */
+.table-view {
+    -fx-background-color: white;
+    -fx-border-color: #dee2e6;
+    -fx-border-width: 1px;
+    -fx-border-radius: 6px;
+}
+
+.table-view .column-header-background {
+    -fx-background-color: #f8f9fa;
+    -fx-border-color: #dee2e6;
+    -fx-border-width: 0 0 1 0;
+}
+
+.table-view .column-header {
+    -fx-background-color: #f8f9fa;
+    -fx-font-weight: bold;
+    -fx-text-fill: #495057;
+    -fx-padding: 10px;
+}
+
+.table-view .table-cell {
+    -fx-padding: 8px;
+    -fx-border-color: #dee2e6;
+    -fx-border-width: 0 0 1 0;
+}
+
+.table-row-cell:odd {
+    -fx-background-color: #f8f9fa;
+}
+
+.table-row-cell:selected {
+    -fx-background-color: #007bff;
+    -fx-text-fill: white;
+}
+
+.table-row-cell:hover {
+    -fx-background-color: #e9ecef;
+}
+
+/* Chart Styles */
+.chart {
+    -fx-background-color: white;
+    -fx-padding: 10px;
+}
+
+.chart-title {
+    -fx-font-size: 16px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #1e3c72;
+}
+
+.chart-legend {
+    -fx-background-color: transparent;
+}
+
+/* Pie Chart */
+.pie-chart {
+    -fx-legend-side: right;
+}
+
+/* Bar Chart */
+.bar-chart {
+    -fx-background-color: white;
+}
+
+.bar-chart .chart-bar {
+    -fx-bar-fill: #007bff;
+}
+
+.bar-chart .chart-bar:hover {
+    -fx-bar-fill: #0056b3;
+}
+
+/* Labels */
+.label {
+    -fx-font-size: 14px;
+}
+
+/* VBox và HBox containers */
+VBox, HBox {
+    -fx-spacing: 10px;
+}
+

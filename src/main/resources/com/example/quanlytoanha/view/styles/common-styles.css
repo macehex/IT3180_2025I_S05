@@ -128,3 +128,126 @@
     -fx-background-color: #667eea;
 }
 
+/* ============================================
+   BUTTON STYLES - Bổ sung
+   ============================================ */
+.btn-primary {
+    -fx-background-color: #1e3c72;
+    -fx-text-fill: white;
+    -fx-font-size: 13px;
+    -fx-font-weight: bold;
+    -fx-background-radius: 8px;
+    -fx-padding: 10px 20px;
+    -fx-cursor: hand;
+    -fx-min-height: 35px;
+}
+
+.btn-primary:hover {
+    -fx-background-color: #2a5298;
+    -fx-translate-y: -3px;
+}
+
+.btn-success {
+    -fx-background-color: #28a745;
+    -fx-text-fill: white;
+    -fx-font-size: 13px;
+    -fx-font-weight: bold;
+    -fx-background-radius: 8px;
+    -fx-padding: 10px 20px;
+    -fx-cursor: hand;
+    -fx-min-height: 35px;
+}
+
+.btn-success:hover {
+    -fx-background-color: #218838;
+    -fx-translate-y: -3px;
+}
+
+.btn-danger {
+    -fx-background-color: #dc3545;
+    -fx-text-fill: white;
+    -fx-font-size: 13px;
+    -fx-font-weight: bold;
+    -fx-background-radius: 8px;
+    -fx-padding: 10px 20px;
+    -fx-cursor: hand;
+    -fx-min-height: 35px;
+}
+
+.btn-danger:hover {
+    -fx-background-color: #c82333;
+    -fx-translate-y: -3px;
+}
+
+.btn-warning {
+    -fx-background-color: #ffc107;
+    -fx-text-fill: black;
+    -fx-font-size: 13px;
+    -fx-font-weight: bold;
+    -fx-background-radius: 8px;
+    -fx-padding: 10px 20px;
+    -fx-cursor: hand;
+    -fx-min-height: 35px;
+}
+
+.btn-warning:hover {
+    -fx-background-color: #e0a800;
+    -fx-translate-y: -3px;
+}
+
+/* ListView */
+.list-view {
+    -fx-background-color: #f7fafc;
+    -fx-background-radius: 6px;
+    -fx-border-color: #cbd5e0;
+    -fx-border-radius: 6px;
+    -fx-border-width: 1px;
+}
+
+.list-view .list-cell {
+    -fx-padding: 8px;
+    -fx-background-color: transparent;
+}
+
+.list-view .list-cell:selected {
+    -fx-background-color: #667eea;
+    -fx-text-fill: white;
+}
+
+/* TableView */
+.table-view {
+    -fx-background-color: white;
+    -fx-background-radius: 8px;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.06), 10, 0, 0, 2);
+}
+
+.table-view .column-header-background {
+    -fx-background-color: #1e3c72;
+    -fx-background-radius: 8px 8px 0 0;
+}
+
+.table-view .column-header {
+    -fx-background-color: transparent;
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-font-size: 13px;
+    -fx-padding: 10px;
+}
+
+.table-view .column-header .label {
+    -fx-text-fill: white;
+}
+
+.table-row-cell {
+    -fx-background-color: white;
+}
+
+.table-row-cell:odd {
+    -fx-background-color: #f8f9fa;
+}
+
+.table-row-cell:selected {
+    -fx-background-color: #cfe2ff;
+    -fx-text-fill: #000;
+}
+

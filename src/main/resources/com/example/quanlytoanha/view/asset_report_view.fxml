@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.chart.BarChart?>
+<?import javafx.scene.chart.CategoryAxis?>
+<?import javafx.scene.chart.NumberAxis?>
+<?import javafx.scene.chart.PieChart?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<BorderPane xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.example.quanlytoanha.controller.AssetReportController"
+            style="-fx-background-color: #f8f9fa;">
+    
+    <top>
+        <VBox spacing="15.0" style="-fx-padding: 20; -fx-background-color: #f8f9fa;">
+            <HBox alignment="CENTER_LEFT" spacing="10.0">
+                <Label text="📊 BÁO CÁO TÀI SẢN"
+                       style="-fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: #1e3c72;"/>
+            </HBox>
+
+            <HBox spacing="10.0" alignment="BOTTOM_LEFT" styleClass="filter-box">
+                <Button fx:id="btnRefresh" text="Làm mới" onAction="#handleGenerateReport" styleClass="btn-primary"/>
+                <Button fx:id="btnExportPDF" text="Xuất PDF" onAction="#handleExportPDF" styleClass="btn-success"/>
+            </HBox>
+
+            <!-- Tổng quan -->
+            <HBox spacing="20.0" alignment="CENTER" style="-fx-background-color: white; -fx-padding: 20; -fx-background-radius: 8;">
+                <VBox alignment="CENTER" style="-fx-border-color: #007bff; -fx-border-width: 2; -fx-padding: 15; -fx-background-radius: 5; -fx-min-width: 200;">
+                    <Label text="Tổng số tài sản" style="-fx-font-size: 14px; -fx-text-fill: #555;"/>
+                    <Label fx:id="lblTotalAssets" text="0" style="-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: #007bff;"/>
+                </VBox>
+                <VBox alignment="CENTER" style="-fx-border-color: #28a745; -fx-border-width: 2; -fx-padding: 15; -fx-background-radius: 5; -fx-min-width: 200;">
+                    <Label text="Tổng giá trị ban đầu" style="-fx-font-size: 14px; -fx-text-fill: #555;"/>
+                    <Label fx:id="lblTotalInitialCost" text="0 VNĐ" style="-fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: #28a745;"/>
+                </VBox>
+                <VBox alignment="CENTER" style="-fx-border-color: #dc3545; -fx-border-width: 2; -fx-padding: 15; -fx-background-radius: 5; -fx-min-width: 200;">
+                    <Label text="Tổng chi phí bảo trì" style="-fx-font-size: 14px; -fx-text-fill: #555;"/>
+                    <Label fx:id="lblTotalMaintenanceCost" text="0 VNĐ" style="-fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: #dc3545;"/>
+                </VBox>
+            </HBox>
+        </VBox>
+    </top>
+
+    <center>
+        <ScrollPane fitToWidth="true" hbarPolicy="NEVER" vbarPolicy="AS_NEEDED" 
+                    style="-fx-background-color: transparent;">
+            <content>
+                <HBox spacing="15.0" style="-fx-padding: 20;" HBox.hgrow="ALWAYS">
+                    <!-- Cột trái: Biểu đồ -->
+                    <VBox spacing="15.0" style="-fx-background-color: white; -fx-padding: 15; -fx-background-radius: 8; -fx-pref-width: 550;">
+                        <Label text="BÁO CÁO THEO TÌNH TRẠNG" style="-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #1e3c72;"/>
+                        <PieChart fx:id="statusPieChart" prefHeight="300.0" maxHeight="300.0"/>
+                        
+                        <Label text="BÁO CÁO THEO VỊ TRÍ" style="-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #1e3c72; -fx-padding: 10 0 0 0;"/>
+                        <BarChart fx:id="locationBarChart" title="Số lượng tài sản theo vị trí" prefHeight="250.0" maxHeight="250.0">
+                            <xAxis>
+                                <CategoryAxis label="Vị trí" />
+                            </xAxis>
+                            <yAxis>
+                                <NumberAxis label="Số lượng" side="LEFT" />
+                            </yAxis>
+                        </BarChart>
+
+                        <Label text="CHI PHÍ BẢO TRÌ THEO VỊ TRÍ" style="-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #1e3c72; -fx-padding: 10 0 0 0;"/>
+                        <BarChart fx:id="maintenanceCostBarChart" title="Chi phí bảo trì theo vị trí" prefHeight="250.0" maxHeight="250.0">
+                            <xAxis>
+                                <CategoryAxis label="Vị trí" />
+                            </xAxis>
+                            <yAxis>
+                                <NumberAxis label="Chi phí (VNĐ)" side="LEFT" />
+                            </yAxis>
+                        </BarChart>
+                    </VBox>
+
+                    <!-- Cột phải: Bảng -->
+                    <VBox spacing="15.0" HBox.hgrow="ALWAYS" style="-fx-background-color: white; -fx-padding: 15; -fx-background-radius: 8;">
+                        <Label text="CHI TIẾT BÁO CÁO" style="-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #1e3c72;"/>
+                        
+                        <Label text="Theo Tình trạng" style="-fx-font-size: 14px; -fx-font-weight: bold; -fx-padding: 10 0 5 0;"/>
+                        <TableView fx:id="statusTable" VBox.vgrow="NEVER" prefHeight="120.0" maxHeight="120.0">
+                            <columns>
+                                <TableColumn fx:id="colStatus" text="Tình trạng" prefWidth="150.0"/>
+                                <TableColumn fx:id="colStatusCount" text="Số lượng" prefWidth="100.0"/>
+                            </columns>
+                        </TableView>
+
+                        <Label text="Theo Vị trí" style="-fx-font-size: 14px; -fx-font-weight: bold; -fx-padding: 10 0 5 0;"/>
+                        <TableView fx:id="locationTable" VBox.vgrow="NEVER" prefHeight="120.0" maxHeight="120.0">
+                            <columns>
+                                <TableColumn fx:id="colLocation" text="Vị trí" prefWidth="150.0"/>
+                                <TableColumn fx:id="colLocationCount" text="Số lượng" prefWidth="100.0"/>
+                            </columns>
+                        </TableView>
+
+                        <Label text="Chi phí Bảo trì theo Vị trí" style="-fx-font-size: 14px; -fx-font-weight: bold; -fx-padding: 10 0 5 0;"/>
+                        <TableView fx:id="maintenanceCostTable" VBox.vgrow="ALWAYS" prefHeight="150.0">
+                            <columns>
+                                <TableColumn fx:id="colMaintenanceLocation" text="Vị trí" prefWidth="150.0"/>
+                                <TableColumn fx:id="colMaintenanceCost" text="Chi phí (VNĐ)" prefWidth="150.0"/>
+                            </columns>
+                        </TableView>
+                    </VBox>
+                </HBox>
+            </content>
+        </ScrollPane>
+    </center>
+</BorderPane>

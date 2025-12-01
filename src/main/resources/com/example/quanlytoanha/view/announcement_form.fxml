@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox spacing="20.0" style="-fx-padding: 25; -fx-background-color: #f8f9fa;"
+      xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="com.example.quanlytoanha.controller.AnnouncementController">
+    <children>
+
+        <Label text="📢 SOẠN THẢO THÔNG BÁO"
+               style="-fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: #1e3c72;"/>
+
+        <VBox spacing="15.0" style="-fx-background-color: white; -fx-padding: 20; -fx-background-radius: 8;">
+            <children>
+                <!-- Tiêu đề -->
+                <VBox spacing="5.0">
+                    <Label text="Tiêu đề thông báo *" style="-fx-font-weight: bold; -fx-font-size: 14px;"/>
+                    <TextField fx:id="txtTitle" promptText="Nhập tiêu đề thông báo" styleClass="form-text-field"/>
+                </VBox>
+
+                <!-- Nội dung -->
+                <VBox spacing="5.0">
+                    <Label text="Nội dung thông báo *" style="-fx-font-weight: bold; -fx-font-size: 14px;"/>
+                    <TextArea fx:id="txtContent" promptText="Nhập nội dung thông báo" 
+                              prefRowCount="8" wrapText="true" styleClass="form-text-area"/>
+                </VBox>
+
+                <!-- Khẩn cấp -->
+                <CheckBox fx:id="chkUrgent" text="Đánh dấu là thông báo khẩn cấp" 
+                          style="-fx-font-size: 14px;"/>
+
+                <Separator/>
+
+                <!-- Người nhận -->
+                <VBox spacing="10.0">
+                    <Label text="Gửi đến" style="-fx-font-weight: bold; -fx-font-size: 14px;"/>
+                    <VBox spacing="10.0" style="-fx-padding: 10;">
+                        <RadioButton fx:id="rbAllResidents" text="Toàn bộ cư dân" selected="true"/>
+                        <RadioButton fx:id="rbSpecificGroup" text="Nhóm cư dân cụ thể"/>
+                    </VBox>
+
+                    <!-- Danh sách căn hộ (ẩn khi chọn "Toàn bộ") -->
+                    <VBox spacing="5.0" fx:id="vboxApartmentList">
+                        <Label text="Chọn căn hộ:" style="-fx-font-size: 13px; -fx-text-fill: #555;"/>
+                        <ListView fx:id="listViewApartments" prefHeight="200.0" 
+                                  style="-fx-border-color: #dee2e6; -fx-border-radius: 4px;"/>
+                    </VBox>
+                </VBox>
+
+                <!-- Nút -->
+                <HBox spacing="10.0" alignment="CENTER_RIGHT" style="-fx-padding: 15 0 0 0;">
+                    <Button fx:id="btnCancel" text="Hủy" onAction="#handleCancel" styleClass="btn-cancel"/>
+                    <Button fx:id="btnSend" text="Gửi thông báo" onAction="#handleSend" styleClass="btn-save"/>
+                </HBox>
+            </children>
+        </VBox>
+
+    </children>
+</VBox>
+

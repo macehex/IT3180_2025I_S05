@@ -12,6 +12,8 @@ import java.sql.ResultSet;
 import java.sql.Timestamp;
 import java.sql.Statement;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 
 // (Giả sử bạn có một lớp DBConnection để kết nối)
 
@@ -369,5 +371,187 @@ public class UserDAO {
             e.printStackTrace();
             return false;
         }
+    }
+
+    // ==========================================================
+    // QUẢN LÝ TÀI KHOẢN NGƯỜI DÙNG - Các phương thức mới
+    // ==========================================================
+
+    /**
+     * Lấy tất cả người dùng trong hệ thống (không bao gồm password).
+     */
+    public List<User> getAllUsers() throws SQLException {
+        List<User> users = new ArrayList<>();
+        String sql = "SELECT * FROM users ORDER BY user_id";
+
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql);
+             ResultSet rs = pstmt.executeQuery()) {
+
+            while (rs.next()) {
+                int userId = rs.getInt("user_id");
+                int roleId = rs.getInt("role_id");
+                Role userRole = Role.fromId(roleId);
+
+                String username = rs.getString("username");
+                String email = rs.getString("email");
+                String fullName = rs.getString("full_name");
+                String phone = rs.getString("phone_number");
+                Timestamp createdAt = rs.getTimestamp("created_at");
+                Timestamp lastLogin = rs.getTimestamp("last_login");
+
+                User user;
+                switch (userRole) {
+                    case ADMIN:
+                        user = new Admin(userId, username, email, fullName, userRole, createdAt, lastLogin, phone);
+                        break;
+                    case ACCOUNTANT:
+                        user = new Accountant(userId, username, email, fullName, userRole, createdAt, lastLogin, phone);
+                        break;
+                    case POLICE:
+                        user = new Police(userId, username, email, fullName, userRole, createdAt, lastLogin, phone);
+                        break;
+                    case RESIDENT:
+                        user = new Resident(userId, username, email, fullName, userRole, createdAt, lastLogin, phone,
+                                0, 0, null, "", "");
+                        break;
+                    default:
+                        throw new IllegalStateException("Vai trò không xác định: " + userRole);
+                }
+                users.add(user);
+            }
+        }
+        return users;
+    }
+
+    /**
+     * Tạo một tài khoản người dùng mới (không phải Resident).
+     */
+    public int createUser(String username, String plainPassword, String email, String fullName, 
+                          String phoneNumber, Role role) throws SQLException {
+        String sql = "INSERT INTO users (username, password, email, full_name, phone_number, role_id, created_at) " +
+                     "VALUES (?, ?, ?, ?, ?, ?, ?)";
+
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+
+            String hashedPassword = PasswordUtil.hashPassword(plainPassword);
+
+            pstmt.setString(1, username);
+            pstmt.setString(2, hashedPassword);
+            pstmt.setString(3, email);
+            pstmt.setString(4, fullName);
+            pstmt.setString(5, phoneNumber);
+            pstmt.setInt(6, role.getRoleId());
+            pstmt.setTimestamp(7, Timestamp.from(Instant.now()));
+
+            pstmt.executeUpdate();
+
+            try (ResultSet rs = pstmt.getGeneratedKeys()) {
+                if (rs.next()) {
+                    return rs.getInt(1);
+                }
+            }
+        }
+        return -1;
+    }
+
+    /**
+     * Cập nhật thông tin tài khoản người dùng (bao gồm cả role).
+     */
+    public boolean updateUser(int userId, String email, String fullName, String phoneNumber, Role role) throws SQLException {
+        String sql = "UPDATE users SET email = ?, full_name = ?, phone_number = ?, role_id = ? WHERE user_id = ?";
+
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+            pstmt.setString(1, email);
+            pstmt.setString(2, fullName);
+            pstmt.setString(3, phoneNumber);
+            pstmt.setInt(4, role.getRoleId());
+            pstmt.setInt(5, userId);
+
+            int rowsAffected = pstmt.executeUpdate();
+            return rowsAffected > 0;
+        }
+    }
+
+    /**
+     * Cập nhật mật khẩu của người dùng từ plain text (dùng khi admin reset password).
+     * Phương thức này hash mật khẩu trước khi lưu vào database.
+     */
+    public boolean updateUserPasswordFromPlain(int userId, String plainPassword) throws SQLException {
+        String sql = "UPDATE users SET password = ? WHERE user_id = ?";
+
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+            String hashedPassword = PasswordUtil.hashPassword(plainPassword);
+            pstmt.setString(1, hashedPassword);
+            pstmt.setInt(2, userId);
+
+            int rowsAffected = pstmt.executeUpdate();
+            return rowsAffected > 0;
+        }
+    }
+
+    /**
+     * Xóa tài khoản người dùng (chỉ xóa nếu không phải Resident).
+     * Lưu ý: Cần kiểm tra ràng buộc trước khi xóa.
+     */
+    public boolean deleteUser(int userId) throws SQLException {
+        // Kiểm tra xem user có phải là Resident không
+        User user = getUserById(userId);
+        if (user != null && user.getRole() == Role.RESIDENT) {
+            throw new SQLException("Không thể xóa tài khoản cư dân từ đây. Vui lòng sử dụng chức năng quản lý cư dân.");
+        }
+
+        String sql = "DELETE FROM users WHERE user_id = ?";
+
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+            pstmt.setInt(1, userId);
+            int rowsAffected = pstmt.executeUpdate();
+            return rowsAffected > 0;
+        }
+    }
+
+    /**
+     * Kiểm tra username đã tồn tại chưa.
+     */
+    public boolean isUsernameExists(String username) throws SQLException {
+        String sql = "SELECT COUNT(*) FROM users WHERE username = ?";
+
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+            pstmt.setString(1, username);
+            try (ResultSet rs = pstmt.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt(1) > 0;
+                }
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Kiểm tra email đã tồn tại chưa.
+     */
+    public boolean isEmailExists(String email) throws SQLException {
+        String sql = "SELECT COUNT(*) FROM users WHERE email = ?";
+
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+            pstmt.setString(1, email);
+            try (ResultSet rs = pstmt.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt(1) > 0;
+                }
+            }
+        }
+        return false;
     }
 }

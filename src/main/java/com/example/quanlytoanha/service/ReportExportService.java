@@ -4,6 +4,7 @@ package com.example.quanlytoanha.service;
 import com.example.quanlytoanha.model.ApartmentDebt;
 import com.example.quanlytoanha.model.VehicleAccessLog;
 import com.example.quanlytoanha.model.VisitorLog;
+import com.example.quanlytoanha.model.AssetReport;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPage;
 import org.apache.pdfbox.pdmodel.PDPageContentStream;
@@ -327,6 +328,194 @@ public class ReportExportService {
             nextY -= rowHeight; // Xuống dòng
 
             // (TODO: Logic qua trang mới nếu 'nextY' quá thấp)
+        }
+    }
+
+    /**
+     * Xuất Báo cáo Tài sản ra file PDF
+     * Bao gồm: Báo cáo theo tình trạng, vị trí và chi phí bảo trì
+     */
+    public File exportAssetReport(Stage stage, com.example.quanlytoanha.model.AssetReport report) throws IOException {
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.setTitle("Lưu Báo cáo Tài sản");
+        fileChooser.setInitialFileName("BaoCaoTaiSan_" + LocalDate.now().format(dtf_dmy) + ".pdf");
+        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("PDF Files", "*.pdf"));
+        File file = fileChooser.showSaveDialog(stage);
+
+        if (file == null) throw new IOException("Người dùng đã hủy thao tác.");
+
+        try (PDDocument document = new PDDocument()) {
+            PDPage page = new PDPage();
+            document.addPage(page);
+            loadFonts(document);
+
+            PDPageContentStream contentStream = new PDPageContentStream(document, page);
+            float yPosition = 750;
+            final float rowHeight = 20f;
+            final float sectionSpacing = 50f; // Tăng khoảng cách giữa các phần
+
+            try {
+                // --- Tiêu đề ---
+                contentStream.beginText();
+                contentStream.setFont(fontBold, 18);
+                contentStream.newLineAtOffset(150, yPosition);
+                contentStream.showText("BÁO CÁO TÀI SẢN");
+                contentStream.endText();
+
+                yPosition -= 40;
+                contentStream.beginText();
+                contentStream.setFont(font, 12);
+                contentStream.newLineAtOffset(180, yPosition);
+                contentStream.showText("Ngày xuất: " + LocalDate.now().format(dtf_dmy));
+                contentStream.endText();
+
+                yPosition -= sectionSpacing;
+
+                // --- Tổng quan ---
+                contentStream.beginText();
+                contentStream.setFont(fontBold, 14);
+                contentStream.newLineAtOffset(30, yPosition);
+                contentStream.showText("TỔNG QUAN");
+                contentStream.endText();
+                yPosition -= 35;
+
+                List<String[]> overviewData = List.of(
+                    new String[]{"Tổng số tài sản", String.valueOf(report.getTotalAssets())},
+                    new String[]{"Tổng giá trị ban đầu", String.format("%,.0f VNĐ", report.getTotalInitialCost().doubleValue())},
+                    new String[]{"Tổng chi phí bảo trì", String.format("%,.0f VNĐ", report.getTotalMaintenanceCost().doubleValue())}
+                );
+                drawTable(contentStream, yPosition, new float[]{200, 200}, 
+                    new String[]{"Chỉ tiêu", "Giá trị"}, overviewData);
+                // Tính toán khoảng cách sau bảng: header (1 row) + data rows + padding
+                yPosition -= (overviewData.size() * rowHeight + rowHeight + 25);
+                yPosition -= sectionSpacing;
+
+                // --- Báo cáo theo Tình trạng ---
+                if (report.getStatusCounts() != null && !report.getStatusCounts().isEmpty()) {
+                    // Kiểm tra nếu còn đủ không gian, nếu không thì tạo trang mới
+                    if (yPosition < 150) {
+                        contentStream.close();
+                        page = new PDPage();
+                        document.addPage(page);
+                        contentStream = new PDPageContentStream(document, page);
+                        loadFonts(document);
+                        yPosition = 750;
+                    }
+                    
+                    contentStream.beginText();
+                    contentStream.setFont(fontBold, 14);
+                    contentStream.newLineAtOffset(30, yPosition);
+                    contentStream.showText("BÁO CÁO THEO TÌNH TRẠNG");
+                    contentStream.endText();
+                    yPosition -= 35;
+
+                    List<String[]> statusData = new java.util.ArrayList<>();
+                    for (Map.Entry<String, Integer> entry : report.getStatusCounts().entrySet()) {
+                        statusData.add(new String[]{entry.getKey(), String.valueOf(entry.getValue())});
+                    }
+                    drawTable(contentStream, yPosition, new float[]{200, 100}, 
+                        new String[]{"Tình trạng", "Số lượng"}, statusData);
+                    yPosition -= (statusData.size() * rowHeight + rowHeight + 25);
+                    yPosition -= sectionSpacing;
+                }
+
+                // --- Báo cáo theo Vị trí ---
+                if (report.getLocationCounts() != null && !report.getLocationCounts().isEmpty()) {
+                    if (yPosition < 150) {
+                        contentStream.close();
+                        page = new PDPage();
+                        document.addPage(page);
+                        contentStream = new PDPageContentStream(document, page);
+                        loadFonts(document);
+                        yPosition = 750;
+                    }
+                    
+                    contentStream.beginText();
+                    contentStream.setFont(fontBold, 14);
+                    contentStream.newLineAtOffset(30, yPosition);
+                    contentStream.showText("BÁO CÁO THEO VỊ TRÍ");
+                    contentStream.endText();
+                    yPosition -= 35;
+
+                    List<String[]> locationData = new java.util.ArrayList<>();
+                    for (Map.Entry<String, Integer> entry : report.getLocationCounts().entrySet()) {
+                        locationData.add(new String[]{entry.getKey(), String.valueOf(entry.getValue())});
+                    }
+                    drawTable(contentStream, yPosition, new float[]{200, 100}, 
+                        new String[]{"Vị trí", "Số lượng"}, locationData);
+                    yPosition -= (locationData.size() * rowHeight + rowHeight + 25);
+                    yPosition -= sectionSpacing;
+                }
+
+                // --- Chi phí bảo trì theo Vị trí ---
+                if (report.getMaintenanceCostByLocation() != null && !report.getMaintenanceCostByLocation().isEmpty()) {
+                    if (yPosition < 150) {
+                        contentStream.close();
+                        page = new PDPage();
+                        document.addPage(page);
+                        contentStream = new PDPageContentStream(document, page);
+                        loadFonts(document);
+                        yPosition = 750;
+                    }
+                    
+                    contentStream.beginText();
+                    contentStream.setFont(fontBold, 14);
+                    contentStream.newLineAtOffset(30, yPosition);
+                    contentStream.showText("CHI PHÍ BẢO TRÌ THEO VỊ TRÍ");
+                    contentStream.endText();
+                    yPosition -= 35;
+
+                    List<String[]> costByLocationData = new java.util.ArrayList<>();
+                    for (Map.Entry<String, BigDecimal> entry : report.getMaintenanceCostByLocation().entrySet()) {
+                        costByLocationData.add(new String[]{
+                            entry.getKey(), 
+                            String.format("%,.0f VNĐ", entry.getValue().doubleValue())
+                        });
+                    }
+                    drawTable(contentStream, yPosition, new float[]{200, 200}, 
+                        new String[]{"Vị trí", "Tổng chi phí"}, costByLocationData);
+                    yPosition -= (costByLocationData.size() * rowHeight + rowHeight + 25);
+                    yPosition -= sectionSpacing;
+                }
+
+                // --- Chi phí bảo trì theo Tình trạng ---
+                if (report.getMaintenanceCostByStatus() != null && !report.getMaintenanceCostByStatus().isEmpty()) {
+                    if (yPosition < 150) {
+                        contentStream.close();
+                        page = new PDPage();
+                        document.addPage(page);
+                        contentStream = new PDPageContentStream(document, page);
+                        loadFonts(document);
+                        yPosition = 750;
+                    }
+                    
+                    contentStream.beginText();
+                    contentStream.setFont(fontBold, 14);
+                    contentStream.newLineAtOffset(30, yPosition);
+                    contentStream.showText("CHI PHÍ BẢO TRÌ THEO TÌNH TRẠNG");
+                    contentStream.endText();
+                    yPosition -= 35;
+
+                    List<String[]> costByStatusData = new java.util.ArrayList<>();
+                    for (Map.Entry<String, BigDecimal> entry : report.getMaintenanceCostByStatus().entrySet()) {
+                        costByStatusData.add(new String[]{
+                            entry.getKey(), 
+                            String.format("%,.0f VNĐ", entry.getValue().doubleValue())
+                        });
+                    }
+                    drawTable(contentStream, yPosition, new float[]{200, 200}, 
+                        new String[]{"Tình trạng", "Tổng chi phí"}, costByStatusData);
+                }
+            } finally {
+                if (contentStream != null) {
+                    contentStream.close();
+                }
+            }
+            document.save(file);
+            return file;
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new IOException("Lỗi khi lưu file PDF: " + e.getMessage(), e);
         }
     }
 }

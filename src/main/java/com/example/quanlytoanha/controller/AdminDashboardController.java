@@ -59,6 +59,9 @@ public class AdminDashboardController {
     // --- BỔ SUNG (US8_1_1): Khai báo nút Kiểm soát Ra/Vào ---
     @FXML private Button btnKiemSoatRaVao;
 
+    // --- BỔ SUNG: Khai báo nút Báo cáo Tài sản ---
+    @FXML private Button btnBaoCaoTaiSan;
+
     // --- Khai báo Service ---
     private DashboardService dashboardService;
     private AssetService assetService;
@@ -98,7 +101,7 @@ public class AdminDashboardController {
             if (btnQuanLyHoaDon != null)
                 btnQuanLyHoaDon.setOnAction(event -> handleQuanLyHoaDon());
             if (btnTaoThongBao != null)
-                btnTaoThongBao.setOnAction(event -> handleTaoThongBao());
+                btnTaoThongBao.setOnAction(event -> handleOpenAnnouncementForm());
             if (btnXemYeuCauDichVu != null)
                 btnXemYeuCauDichVu.setOnAction(event -> handleXemYeuCauDichVu());
             if (btnXemDanhSachCuDan != null)
@@ -127,6 +130,11 @@ public class AdminDashboardController {
             // --- BỔ SUNG (US8_1_1): Gắn sự kiện cho nút Kiểm soát Ra/Vào ---
             if (btnKiemSoatRaVao != null) {
                 btnKiemSoatRaVao.setOnAction(event -> handleOpenAccessControl());
+            }
+
+            // --- BỔ SUNG: Gắn sự kiện cho nút Báo cáo Tài sản ---
+            if (btnBaoCaoTaiSan != null) {
+                btnBaoCaoTaiSan.setOnAction(event -> handleOpenAssetReport());
             }
         }
     }
@@ -338,6 +346,33 @@ public class AdminDashboardController {
         }
     }
 
+    // --- BỔ SUNG: Hàm mở màn hình Báo cáo Tài sản ---
+    @FXML
+    private void handleOpenAssetReport() {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/example/quanlytoanha/view/asset_report_view.fxml"));
+            Parent root = loader.load();
+
+            Scene scene = new Scene(root, 1100, 750);
+            // Load CSS từ Controller thay vì trong FXML
+            scene.getStylesheets().add(getClass().getResource("/com/example/quanlytoanha/view/styles/asset-report-styles.css").toExternalForm());
+
+            Stage stage = new Stage();
+            stage.setTitle("Báo cáo Tài sản");
+            stage.initModality(Modality.WINDOW_MODAL);
+            stage.initOwner(btnBaoCaoTaiSan.getScene().getWindow());
+            stage.setScene(scene);
+            stage.setResizable(true);
+            stage.setMinWidth(1000);
+            stage.setMinHeight(650);
+            stage.showAndWait();
+
+        } catch (IOException e) {
+            e.printStackTrace();
+            showAlert(Alert.AlertType.ERROR, "Lỗi", "Không thể tải màn hình Báo cáo Tài sản: " + e.getMessage());
+        }
+    }
+
     // --- CÁC HÀM XỬ LÝ KHÁC (GIỮ NGUYÊN) ---
 
     private void handleOpenAddResidentForm() {
@@ -360,23 +395,25 @@ public class AdminDashboardController {
 
     private void handleQuanLyTaiKhoan() {
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/example/quanlytoanha/view/UserManagement.fxml"));
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/example/quanlytoanha/view/user_account_management.fxml"));
             Parent root = loader.load();
 
-            Scene scene = new Scene(root, 900, 600);
-            scene.getStylesheets().add(getClass().getResource("/com/example/quanlytoanha/view/styles/admin-styles.css").toExternalForm());
+            Scene scene = new Scene(root, 1200, 750);
+            scene.getStylesheets().add(getClass().getResource("/com/example/quanlytoanha/view/styles/common-styles.css").toExternalForm());
 
             Stage stage = new Stage();
-            stage.setTitle("Quản lý tài khoản người dùng");
+            stage.setTitle("Quản lý Tài khoản Người dùng &amp; Phân quyền");
             stage.initModality(Modality.WINDOW_MODAL);
             stage.initOwner(btnQuanLyTaiKhoan.getScene().getWindow());
             stage.setScene(scene);
             stage.setResizable(true);
+            stage.setMinWidth(1000);
+            stage.setMinHeight(650);
             stage.showAndWait();
 
         } catch (IOException e) {
             e.printStackTrace();
-            showAlert(Alert.AlertType.ERROR, "Lỗi", "Không thể tải form quản lý tài khoản.");
+            showAlert(Alert.AlertType.ERROR, "Lỗi", "Không thể tải form quản lý tài khoản: " + e.getMessage());
         }
     }
 
@@ -384,8 +421,29 @@ public class AdminDashboardController {
         showAlert(Alert.AlertType.INFORMATION, "Thông báo", "Chức năng Quản lý hóa đơn chưa được triển khai.");
     }
 
-    private void handleTaoThongBao() {
-        showAlert(Alert.AlertType.INFORMATION, "Thông báo", "Chức năng Tạo thông báo chưa được triển khai.");
+    private void handleOpenAnnouncementForm() {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/example/quanlytoanha/view/announcement_form.fxml"));
+            Parent root = loader.load();
+
+            Scene scene = new Scene(root, 700, 650);
+            // Load CSS từ Controller thay vì trong FXML
+            scene.getStylesheets().add(getClass().getResource("/com/example/quanlytoanha/view/styles/common-styles.css").toExternalForm());
+
+            Stage stage = new Stage();
+            stage.setTitle("Soạn thảo Thông báo");
+            stage.initModality(Modality.WINDOW_MODAL);
+            stage.initOwner(btnTaoThongBao.getScene().getWindow());
+            stage.setScene(scene);
+            stage.setResizable(true);
+            stage.setMinWidth(600);
+            stage.setMinHeight(550);
+            stage.showAndWait();
+
+        } catch (IOException e) {
+            e.printStackTrace();
+            showAlert(Alert.AlertType.ERROR, "Lỗi", "Không thể tải form thông báo: " + e.getMessage());
+        }
     }
 
     @FXML

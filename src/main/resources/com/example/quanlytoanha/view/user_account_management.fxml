@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<BorderPane xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.example.quanlytoanha.controller.UserAccountManagementController"
+            style="-fx-background-color: #f8f9fa;">
+
+    <top>
+        <VBox spacing="10.0" style="-fx-padding: 25; -fx-background-color: #f8f9fa;">
+            <Label text="👤 QUẢN LÝ TÀI KHOẢN NGƯỜI DÙNG"
+                   style="-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: #1e3c72;"/>
+        </VBox>
+    </top>
+
+    <center>
+        <HBox spacing="30.0" style="-fx-padding: 30;">
+            <!-- Cột trái: Bảng danh sách -->
+            <VBox spacing="15.0" HBox.hgrow="ALWAYS" style="-fx-background-color: white; -fx-padding: 20; -fx-background-radius: 8;">
+                <HBox alignment="CENTER_LEFT" spacing="15.0">
+                    <Label text="Danh sách Tài khoản" style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #1e3c72;"/>
+                    <Region HBox.hgrow="ALWAYS"/>
+                    <Button fx:id="btnRefresh" text="🔄 Làm mới" onAction="#handleRefresh" styleClass="btn-primary" style="-fx-font-size: 14px; -fx-padding: 8 15;"/>
+                </HBox>
+
+                <TableView fx:id="userTable" VBox.vgrow="ALWAYS" prefHeight="420.0" style="-fx-font-size: 14px;">
+                    <columns>
+                        <TableColumn fx:id="colUserId" text="ID" prefWidth="50.0"/>
+                        <TableColumn fx:id="colUsername" text="Tên đăng nhập" prefWidth="130.0"/>
+                        <TableColumn fx:id="colFullName" text="Họ tên" prefWidth="150.0"/>
+                        <TableColumn fx:id="colEmail" text="Email" prefWidth="180.0"/>
+                        <TableColumn fx:id="colPhoneNumber" text="Số điện thoại" prefWidth="120.0"/>
+                        <TableColumn fx:id="colRole" text="Vai trò" prefWidth="120.0"/>
+                        <TableColumn fx:id="colCreatedAt" text="Ngày tạo" prefWidth="150.0"/>
+                        <TableColumn fx:id="colLastLogin" text="Đăng nhập cuối" prefWidth="150.0"/>
+                    </columns>
+                </TableView>
+            </VBox>
+
+            <!-- Cột phải: Form thêm/sửa -->
+            <VBox spacing="12.0" style="-fx-background-color: white; -fx-padding: 15; -fx-background-radius: 8; -fx-min-width: 320; -fx-max-width: 320;">
+                <Label text="Thông tin Tài khoản" style="-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #1e3c72;"/>
+
+                <VBox spacing="10.0">
+                    <VBox spacing="5.0">
+                        <Label text="Tên đăng nhập *" style="-fx-font-weight: bold; -fx-font-size: 13px;"/>
+                        <TextField fx:id="txtUsername" promptText="Nhập tên đăng nhập" style="-fx-font-size: 13px; -fx-padding: 6;"/>
+                    </VBox>
+
+                    <VBox spacing="5.0">
+                        <Label text="Mật khẩu *" style="-fx-font-weight: bold; -fx-font-size: 13px;"/>
+                        <PasswordField fx:id="txtPassword" promptText="Nhập mật khẩu" style="-fx-font-size: 13px; -fx-padding: 6;"/>
+                    </VBox>
+
+                    <VBox spacing="5.0">
+                        <Label text="Email *" style="-fx-font-weight: bold; -fx-font-size: 13px;"/>
+                        <TextField fx:id="txtEmail" promptText="Nhập email" style="-fx-font-size: 13px; -fx-padding: 6;"/>
+                    </VBox>
+
+                    <VBox spacing="5.0">
+                        <Label text="Họ tên" style="-fx-font-weight: bold; -fx-font-size: 13px;"/>
+                        <TextField fx:id="txtFullName" promptText="Nhập họ tên" style="-fx-font-size: 13px; -fx-padding: 6;"/>
+                    </VBox>
+
+                    <VBox spacing="5.0">
+                        <Label text="Số điện thoại" style="-fx-font-weight: bold; -fx-font-size: 13px;"/>
+                        <TextField fx:id="txtPhoneNumber" promptText="Nhập số điện thoại" style="-fx-font-size: 13px; -fx-padding: 6;"/>
+                    </VBox>
+
+                    <VBox spacing="5.0">
+                        <Label text="Vai trò *" style="-fx-font-weight: bold; -fx-font-size: 13px;"/>
+                        <ComboBox fx:id="comboRole" promptText="Chọn vai trò" style="-fx-font-size: 13px; -fx-padding: 6;"/>
+                    </VBox>
+                </VBox>
+
+                <Separator/>
+
+                <HBox spacing="8.0" alignment="CENTER">
+                    <Button fx:id="btnAddUser" text="➕ Thêm" onAction="#handleAddUser" styleClass="btn-success" HBox.hgrow="ALWAYS" style="-fx-font-size: 13px; -fx-padding: 8;"/>
+                    <Button fx:id="btnUpdateUser" text="✏️ Sửa" onAction="#handleUpdateUser" styleClass="btn-primary" HBox.hgrow="ALWAYS" style="-fx-font-size: 13px; -fx-padding: 8;"/>
+                </HBox>
+
+                <HBox spacing="8.0" alignment="CENTER">
+                    <Button fx:id="btnDeleteUser" text="🗑️ Xóa" onAction="#handleDeleteUser" styleClass="btn-danger" HBox.hgrow="ALWAYS" style="-fx-font-size: 13px; -fx-padding: 8;"/>
+                    <Button fx:id="btnResetPassword" text="🔑 Reset Mật khẩu" onAction="#handleResetPassword" styleClass="btn-warning" HBox.hgrow="ALWAYS" style="-fx-font-size: 13px; -fx-padding: 8;"/>
+                </HBox>
+            </VBox>
+        </HBox>
+    </center>
+</BorderPane>
+

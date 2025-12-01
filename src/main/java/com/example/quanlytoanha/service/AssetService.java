@@ -99,4 +99,77 @@ public class AssetService {
         // Chúng ta có thể thêm logic phức tạp hơn ở đây nếu cần
         return assetDAO.countTroubleAssets();
     }
+
+    // ==========================================================
+    // BÁO CÁO TÀI SẢN - Các phương thức mới
+    // ==========================================================
+
+    /**
+     * Tạo báo cáo tài sản đầy đủ với tất cả thông tin.
+     * @return AssetReport chứa tất cả dữ liệu báo cáo
+     * @throws SQLException nếu có lỗi database
+     */
+    public com.example.quanlytoanha.model.AssetReport generateAssetReport() throws SQLException {
+        com.example.quanlytoanha.model.AssetReport report = new com.example.quanlytoanha.model.AssetReport();
+        
+        // Lấy dữ liệu từ DAO
+        report.setStatusCounts(assetDAO.getAssetCountByStatus());
+        report.setLocationCounts(assetDAO.getAssetCountByLocation());
+        report.setMaintenanceCostByAsset(assetDAO.getMaintenanceCostByAsset());
+        report.setMaintenanceCostByLocation(assetDAO.getMaintenanceCostByLocation());
+        report.setMaintenanceCostByStatus(assetDAO.getMaintenanceCostByStatus());
+        report.setTotalMaintenanceCost(assetDAO.getTotalMaintenanceCost());
+        report.setTotalAssets(assetDAO.getTotalAssetCount());
+        report.setTotalInitialCost(assetDAO.getTotalInitialCost());
+        
+        return report;
+    }
+
+    /**
+     * Lấy báo cáo theo tình trạng.
+     * @return Map với key là status, value là số lượng
+     */
+    public java.util.Map<String, Integer> getAssetCountByStatus() throws SQLException {
+        return assetDAO.getAssetCountByStatus();
+    }
+
+    /**
+     * Lấy báo cáo theo vị trí.
+     * @return Map với key là location, value là số lượng
+     */
+    public java.util.Map<String, Integer> getAssetCountByLocation() throws SQLException {
+        return assetDAO.getAssetCountByLocation();
+    }
+
+    /**
+     * Lấy chi phí bảo trì theo tài sản.
+     * @return Map với key là assetId, value là tổng chi phí
+     */
+    public java.util.Map<Integer, java.math.BigDecimal> getMaintenanceCostByAsset() throws SQLException {
+        return assetDAO.getMaintenanceCostByAsset();
+    }
+
+    /**
+     * Lấy chi phí bảo trì theo vị trí.
+     * @return Map với key là location, value là tổng chi phí
+     */
+    public java.util.Map<String, java.math.BigDecimal> getMaintenanceCostByLocation() throws SQLException {
+        return assetDAO.getMaintenanceCostByLocation();
+    }
+
+    /**
+     * Lấy chi phí bảo trì theo tình trạng.
+     * @return Map với key là status, value là tổng chi phí
+     */
+    public java.util.Map<String, java.math.BigDecimal> getMaintenanceCostByStatus() throws SQLException {
+        return assetDAO.getMaintenanceCostByStatus();
+    }
+
+    /**
+     * Lấy tổng chi phí bảo trì.
+     * @return Tổng chi phí bảo trì
+     */
+    public java.math.BigDecimal getTotalMaintenanceCost() throws SQLException {
+        return assetDAO.getTotalMaintenanceCost();
+    }
 }

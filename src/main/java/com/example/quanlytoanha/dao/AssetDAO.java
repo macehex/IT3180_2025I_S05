@@ -215,4 +215,181 @@ public class AssetDAO {
         }
         return 0;
     }
+
+    // ==========================================================
+    // BÁO CÁO TÀI SẢN - Các phương thức mới
+    // ==========================================================
+
+    /**
+     * BÁO CÁO THEO TÌNH TRẠNG: Đếm số lượng tài sản theo từng tình trạng.
+     * @return Map với key là status, value là số lượng
+     */
+    public java.util.Map<String, Integer> getAssetCountByStatus() throws SQLException {
+        java.util.Map<String, Integer> statusCounts = new java.util.HashMap<>();
+        String sql = "SELECT status, COUNT(*) as count FROM assets GROUP BY status ORDER BY status";
+        
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql);
+             ResultSet rs = pstmt.executeQuery()) {
+            
+            while (rs.next()) {
+                String status = rs.getString("status");
+                int count = rs.getInt("count");
+                statusCounts.put(status, count);
+            }
+        }
+        return statusCounts;
+    }
+
+    /**
+     * BÁO CÁO THEO VỊ TRÍ: Đếm số lượng tài sản theo từng vị trí.
+     * @return Map với key là location, value là số lượng
+     */
+    public java.util.Map<String, Integer> getAssetCountByLocation() throws SQLException {
+        java.util.Map<String, Integer> locationCounts = new java.util.HashMap<>();
+        String sql = "SELECT location, COUNT(*) as count FROM assets GROUP BY location ORDER BY location";
+        
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql);
+             ResultSet rs = pstmt.executeQuery()) {
+            
+            while (rs.next()) {
+                String location = rs.getString("location");
+                int count = rs.getInt("count");
+                locationCounts.put(location != null ? location : "Chưa xác định", count);
+            }
+        }
+        return locationCounts;
+    }
+
+    /**
+     * BÁO CÁO CHI PHÍ BẢO TRÌ THEO TÀI SẢN: Tổng chi phí bảo trì cho mỗi tài sản.
+     * @return Map với key là assetId, value là tổng chi phí bảo trì
+     */
+    public java.util.Map<Integer, java.math.BigDecimal> getMaintenanceCostByAsset() throws SQLException {
+        java.util.Map<Integer, java.math.BigDecimal> costMap = new java.util.HashMap<>();
+        String sql = "SELECT asset_id, COALESCE(SUM(cost), 0) as total_cost " +
+                     "FROM maintenance_history " +
+                     "WHERE cost IS NOT NULL " +
+                     "GROUP BY asset_id " +
+                     "ORDER BY asset_id";
+        
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql);
+             ResultSet rs = pstmt.executeQuery()) {
+            
+            while (rs.next()) {
+                int assetId = rs.getInt("asset_id");
+                java.math.BigDecimal totalCost = rs.getBigDecimal("total_cost");
+                costMap.put(assetId, totalCost);
+            }
+        }
+        return costMap;
+    }
+
+    /**
+     * BÁO CÁO CHI PHÍ BẢO TRÌ THEO VỊ TRÍ: Tổng chi phí bảo trì cho mỗi vị trí.
+     * @return Map với key là location, value là tổng chi phí bảo trì
+     */
+    public java.util.Map<String, java.math.BigDecimal> getMaintenanceCostByLocation() throws SQLException {
+        java.util.Map<String, java.math.BigDecimal> costMap = new java.util.HashMap<>();
+        String sql = "SELECT a.location, COALESCE(SUM(mh.cost), 0) as total_cost " +
+                     "FROM assets a " +
+                     "LEFT JOIN maintenance_history mh ON a.asset_id = mh.asset_id " +
+                     "WHERE mh.cost IS NOT NULL " +
+                     "GROUP BY a.location " +
+                     "ORDER BY a.location";
+        
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql);
+             ResultSet rs = pstmt.executeQuery()) {
+            
+            while (rs.next()) {
+                String location = rs.getString("location");
+                java.math.BigDecimal totalCost = rs.getBigDecimal("total_cost");
+                costMap.put(location != null ? location : "Chưa xác định", totalCost);
+            }
+        }
+        return costMap;
+    }
+
+    /**
+     * BÁO CÁO CHI PHÍ BẢO TRÌ THEO TÌNH TRẠNG: Tổng chi phí bảo trì cho mỗi tình trạng.
+     * @return Map với key là status, value là tổng chi phí bảo trì
+     */
+    public java.util.Map<String, java.math.BigDecimal> getMaintenanceCostByStatus() throws SQLException {
+        java.util.Map<String, java.math.BigDecimal> costMap = new java.util.HashMap<>();
+        String sql = "SELECT a.status, COALESCE(SUM(mh.cost), 0) as total_cost " +
+                     "FROM assets a " +
+                     "LEFT JOIN maintenance_history mh ON a.asset_id = mh.asset_id " +
+                     "WHERE mh.cost IS NOT NULL " +
+                     "GROUP BY a.status " +
+                     "ORDER BY a.status";
+        
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql);
+             ResultSet rs = pstmt.executeQuery()) {
+            
+            while (rs.next()) {
+                String status = rs.getString("status");
+                java.math.BigDecimal totalCost = rs.getBigDecimal("total_cost");
+                costMap.put(status, totalCost);
+            }
+        }
+        return costMap;
+    }
+
+    /**
+     * TỔNG CHI PHÍ BẢO TRÌ: Tổng chi phí bảo trì của tất cả tài sản.
+     * @return Tổng chi phí bảo trì
+     */
+    public java.math.BigDecimal getTotalMaintenanceCost() throws SQLException {
+        String sql = "SELECT COALESCE(SUM(cost), 0) as total_cost FROM maintenance_history WHERE cost IS NOT NULL";
+        
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql);
+             ResultSet rs = pstmt.executeQuery()) {
+            
+            if (rs.next()) {
+                return rs.getBigDecimal("total_cost");
+            }
+        }
+        return java.math.BigDecimal.ZERO;
+    }
+
+    /**
+     * TỔNG SỐ TÀI SẢN: Đếm tổng số tài sản trong hệ thống.
+     * @return Tổng số tài sản
+     */
+    public int getTotalAssetCount() throws SQLException {
+        String sql = "SELECT COUNT(*) as total FROM assets";
+        
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql);
+             ResultSet rs = pstmt.executeQuery()) {
+            
+            if (rs.next()) {
+                return rs.getInt("total");
+            }
+        }
+        return 0;
+    }
+
+    /**
+     * TỔNG GIÁ TRỊ BAN ĐẦU: Tổng giá trị ban đầu của tất cả tài sản.
+     * @return Tổng giá trị ban đầu
+     */
+    public java.math.BigDecimal getTotalInitialCost() throws SQLException {
+        String sql = "SELECT COALESCE(SUM(initial_cost), 0) as total_cost FROM assets";
+        
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql);
+             ResultSet rs = pstmt.executeQuery()) {
+            
+            if (rs.next()) {
+                return rs.getBigDecimal("total_cost");
+            }
+        }
+        return java.math.BigDecimal.ZERO;
+    }
 }
