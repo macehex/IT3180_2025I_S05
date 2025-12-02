@@ -153,7 +153,7 @@ public class CreateServiceRequestController implements Initializable {
 
             // Đóng cửa sổ (stage) hiện tại
             Stage stage = (Stage) submitButton.getScene().getWindow();
-            stage.close();
+            //stage.close();
 
         } catch (Exception e) {
             e.printStackTrace();
