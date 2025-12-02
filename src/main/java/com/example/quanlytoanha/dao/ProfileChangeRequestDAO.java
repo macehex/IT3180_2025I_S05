@@ -11,16 +11,18 @@ public class ProfileChangeRequestDAO {
 
     /**
      * Create a new profile change request
+     * ĐÃ SỬA: Bỏ 'status' và 'created_at' ra khỏi câu lệnh INSERT để Database tự điền Default.
      */
     public boolean createProfileChangeRequest(ProfileChangeRequest request) {
+        // SỬA: Xóa status và created_at khỏi danh sách cột và VALUES
         String sql = """
             INSERT INTO profile_change_requests (
-                user_id, request_type, status, created_at,
+                user_id, request_type,
                 current_username, current_phone_number, current_email, current_full_name,
                 current_relationship, current_date_of_birth, current_id_card_number,
                 new_username, new_phone_number, new_email, new_full_name,
                 new_relationship, new_date_of_birth, new_id_card_number
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             """;
 
         try (Connection conn = DatabaseConnection.getConnection();
@@ -28,26 +30,27 @@ public class ProfileChangeRequestDAO {
 
             pstmt.setInt(1, request.getUserId());
             pstmt.setString(2, request.getRequestType());
-            pstmt.setString(3, request.getStatus());
-            pstmt.setTimestamp(4, request.getCreatedAt());
-            
-            // Current values
-            pstmt.setString(5, request.getCurrentUsername());
-            pstmt.setString(6, request.getCurrentPhoneNumber());
-            pstmt.setString(7, request.getCurrentEmail());
-            pstmt.setString(8, request.getCurrentFullName());
-            pstmt.setString(9, request.getCurrentRelationship());
-            pstmt.setDate(10, request.getCurrentDateOfBirth());
-            pstmt.setString(11, request.getCurrentIdCardNumber());
-            
+
+            // BỎ: pstmt.setString(3, request.getStatus());
+            // BỎ: pstmt.setTimestamp(4, request.getCreatedAt());
+
+            // Current values (Bắt đầu từ tham số thứ 3)
+            pstmt.setString(3, request.getCurrentUsername());
+            pstmt.setString(4, request.getCurrentPhoneNumber());
+            pstmt.setString(5, request.getCurrentEmail());
+            pstmt.setString(6, request.getCurrentFullName());
+            pstmt.setString(7, request.getCurrentRelationship());
+            pstmt.setDate(8, request.getCurrentDateOfBirth());
+            pstmt.setString(9, request.getCurrentIdCardNumber());
+
             // New values
-            pstmt.setString(12, request.getNewUsername());
-            pstmt.setString(13, request.getNewPhoneNumber());
-            pstmt.setString(14, request.getNewEmail());
-            pstmt.setString(15, request.getNewFullName());
-            pstmt.setString(16, request.getNewRelationship());
-            pstmt.setDate(17, request.getNewDateOfBirth());
-            pstmt.setString(18, request.getNewIdCardNumber());
+            pstmt.setString(10, request.getNewUsername());
+            pstmt.setString(11, request.getNewPhoneNumber());
+            pstmt.setString(12, request.getNewEmail());
+            pstmt.setString(13, request.getNewFullName());
+            pstmt.setString(14, request.getNewRelationship());
+            pstmt.setDate(15, request.getNewDateOfBirth());
+            pstmt.setString(16, request.getNewIdCardNumber());
 
             int rows = pstmt.executeUpdate();
             return rows > 0;
@@ -164,7 +167,9 @@ public class ProfileChangeRequestDAO {
 
             // First, get the request details
             ProfileChangeRequest request = getRequestById(requestId);
-            if (request == null || !"PENDING".equals(request.getStatus())) {
+            // Check null và trim() status để tránh lỗi so sánh chuỗi
+            if (request == null || request.getStatus() == null || !"PENDING".equalsIgnoreCase(request.getStatus().trim())) {
+                System.out.println("Cannot approve: Request not found or not PENDING. Status: " + (request != null ? request.getStatus() : "null"));
                 conn.rollback();
                 return false;
             }
@@ -245,10 +250,11 @@ public class ProfileChangeRequestDAO {
      * Reject a profile change request
      */
     public boolean rejectRequest(int requestId, int adminUserId, String adminComment) {
+        // Dùng trim() và upper() trong SQL để an toàn hơn khi so sánh status
         String sql = """
             UPDATE profile_change_requests 
             SET status = 'REJECTED', processed_at = ?, processed_by = ?, admin_comment = ?
-            WHERE request_id = ? AND status = 'PENDING'
+            WHERE request_id = ? AND UPPER(TRIM(status)) = 'PENDING'
             """;
 
         try (Connection conn = DatabaseConnection.getConnection();
@@ -304,21 +310,20 @@ public class ProfileChangeRequestDAO {
      */
     private ProfileChangeRequest mapResultSetToRequest(ResultSet rs) throws SQLException {
         ProfileChangeRequest request = new ProfileChangeRequest();
-        
+
         request.setRequestId(rs.getInt("request_id"));
         request.setUserId(rs.getInt("user_id"));
         request.setRequestType(rs.getString("request_type"));
-        
-        // Debug the status field
+
         String status = rs.getString("status");
-        System.out.println("DEBUG: Mapping request ID " + rs.getInt("request_id") + " with status: " + status);
-        request.setStatus(status);
-        
+        // Xử lý null cho status khi đọc từ DB (phòng trường hợp dữ liệu cũ vẫn lỗi)
+        request.setStatus(status != null ? status : "PENDING");
+
         request.setCreatedAt(rs.getTimestamp("created_at"));
         request.setProcessedAt(rs.getTimestamp("processed_at"));
         request.setProcessedBy(rs.getInt("processed_by"));
         request.setAdminComment(rs.getString("admin_comment"));
-        
+
         // Current values
         request.setCurrentUsername(rs.getString("current_username"));
         request.setCurrentPhoneNumber(rs.getString("current_phone_number"));
@@ -327,7 +332,7 @@ public class ProfileChangeRequestDAO {
         request.setCurrentRelationship(rs.getString("current_relationship"));
         request.setCurrentDateOfBirth(rs.getDate("current_date_of_birth"));
         request.setCurrentIdCardNumber(rs.getString("current_id_card_number"));
-        
+
         // New values
         request.setNewUsername(rs.getString("new_username"));
         request.setNewPhoneNumber(rs.getString("new_phone_number"));
@@ -336,7 +341,7 @@ public class ProfileChangeRequestDAO {
         request.setNewRelationship(rs.getString("new_relationship"));
         request.setNewDateOfBirth(rs.getDate("new_date_of_birth"));
         request.setNewIdCardNumber(rs.getString("new_id_card_number"));
-        
+
         return request;
     }
 
@@ -345,20 +350,20 @@ public class ProfileChangeRequestDAO {
      */
     public boolean hasPendingRequest(int userId) {
         String sql = "SELECT COUNT(*) FROM profile_change_requests WHERE user_id = ? AND status = 'PENDING'";
-        
+
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            
+
             pstmt.setInt(1, userId);
             ResultSet rs = pstmt.executeQuery();
-            
+
             if (rs.next()) {
                 return rs.getInt(1) > 0;
             }
         } catch (SQLException e) {
             e.printStackTrace();
         }
-        
+
         return false;
     }
 }
