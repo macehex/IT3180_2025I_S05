@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
+
+<HBox fx:controller="com.example.quanlytoanha.controller.AnnouncementItemController"
+      fx:id="itemBox"
+      alignment="CENTER_LEFT"
+      spacing="10.0"
+      style="-fx-background-color: #f4f4f4; -fx-background-radius: 5; -fx-border-color: #ddd; -fx-border-radius: 5;"
+      xmlns="http://javafx.com/javafx/17"
+      xmlns:fx="http://javafx.com/fxml/1">
+
+    <padding>
+        <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+    </padding>
+
+    <children>
+        <Label fx:id="lblTime" text="[12:30 01/12]" textFill="#666666" minWidth="110.0">
+            <font>
+                <Font name="System Italic" size="12.0" />
+            </font>
+        </Label>
+
+        <VBox HBox.hgrow="ALWAYS">
+            <children>
+                <HBox spacing="5">
+                    <Label fx:id="lblUrgent" text="[QUAN TRỌNG]" textFill="RED" visible="false" managed="false">
+                        <font><Font name="System Bold" size="12.0" /></font>
+                    </Label>
+                    <Label fx:id="lblTitle" text="Tiêu đề thông báo">
+                        <font>
+                            <Font name="System Bold" size="14.0" />
+                        </font>
+                    </Label>
+                </HBox>
+                <Label fx:id="lblContent" text="Nội dung tóm tắt của thông báo..." wrapText="true" textFill="#333333" />
+            </children>
+        </VBox>
+    </children>
+</HBox>

@@ -3,6 +3,7 @@ package com.example.quanlytoanha.controller;
 import com.example.quanlytoanha.model.User;
 import com.example.quanlytoanha.model.ServiceConsumptionData;
 import com.example.quanlytoanha.model.MonthlyConsumptionData;
+import com.example.quanlytoanha.service.NotificationService; // [MỚI] Import Service thông báo
 import com.example.quanlytoanha.service.ServiceConsumptionService;
 import com.example.quanlytoanha.session.SessionManager;
 import io.github.palexdev.materialfx.controls.*;
@@ -36,7 +37,7 @@ public class ResidentDashboardController implements Initializable {
     @FXML private Label pageTitle;
     @FXML private Label debtAmountLabel;
     @FXML private Label paidAmountLabel;
-    @FXML private Label notificationCountLabel;
+    @FXML private Label notificationCountLabel; // Đây là Label hiển thị số lượng
     @FXML private VBox contentContainer;
     @FXML private VBox dashboardContent;
 
@@ -60,10 +61,7 @@ public class ResidentDashboardController implements Initializable {
     @FXML private MFXButton loginHistoryButton;
     @FXML private MFXButton notificationButton;
     @FXML private MFXButton viewMyRequestsButton;
-
-    // MỚI: Thêm khai báo cho nút Tạo Phản Ánh (Lỗi cũ do thiếu dòng này)
     @FXML private MFXButton createRequestButton;
-
     @FXML private MFXButton btnLogout;
 
     // Biến theo dõi nút đang được chọn
@@ -71,6 +69,7 @@ public class ResidentDashboardController implements Initializable {
 
     // Service instances
     private ServiceConsumptionService consumptionService;
+    private NotificationService notificationService; // [MỚI] Khai báo Service
     private NumberFormat currencyFormatter;
     private int currentApartmentId = -1;
 
@@ -83,6 +82,7 @@ public class ResidentDashboardController implements Initializable {
 
         // Initialize services
         consumptionService = ServiceConsumptionService.getInstance();
+        notificationService = new NotificationService(); // [MỚI] Khởi tạo Service
         currencyFormatter = NumberFormat.getInstance(new Locale("vi", "VN"));
 
         // Get apartment ID for current user
@@ -99,20 +99,14 @@ public class ResidentDashboardController implements Initializable {
         loadServiceConsumptionChart();
     }
 
-    /**
-     * CẬP NHẬT: Hàm này giờ gọn hơn, gọi hàm chung cho từng nút
-     */
     private void setupButtonHoverEffects() {
         setupSingleButtonHover(homeButton);
         setupSingleButtonHover(invoiceHistoryButton);
         setupSingleButtonHover(loginHistoryButton);
         setupSingleButtonHover(notificationButton);
         setupSingleButtonHover(viewMyRequestsButton);
-
-        // MỚI: Đăng ký hiệu ứng cho nút Tạo Phản Ánh
         setupSingleButtonHover(createRequestButton);
 
-        // Nút Đăng xuất (Logout) có màu riêng nên xử lý riêng
         if (btnLogout != null) {
             btnLogout.setOnMouseEntered(e ->
                     btnLogout.setStyle("-fx-background-color: rgba(244,67,54,1.0); -fx-background-radius: 12; -fx-text-fill: white; -fx-font-size: 17px; -fx-font-weight: 600; -fx-cursor: hand; -fx-font-family: 'DejaVu Sans'; -fx-alignment: CENTER;")
@@ -123,21 +117,15 @@ public class ResidentDashboardController implements Initializable {
         }
     }
 
-    /**
-     * MỚI: Hàm dùng chung để xử lý hiệu ứng Hover cho các nút menu
-     * Giúp code không bị lặp lại và dễ sửa đổi style
-     */
     private void setupSingleButtonHover(MFXButton button) {
-        if (button == null) return; // Tránh lỗi NullPointerException
+        if (button == null) return;
 
-        // Khi chuột đi vào: Sáng hơn + Căn giữa (CENTER)
         button.setOnMouseEntered(e -> {
             if (currentActiveButton != button) {
                 button.setStyle("-fx-background-color: rgba(255,255,255,0.25); -fx-background-radius: 12; -fx-text-fill: white; -fx-font-size: 17px; -fx-font-weight: 500; -fx-font-family: 'DejaVu Sans'; -fx-alignment: CENTER;");
             }
         });
 
-        // Khi chuột đi ra: Tối hơn + Căn trái (CENTER_LEFT)
         button.setOnMouseExited(e -> {
             if (currentActiveButton != button) {
                 button.setStyle("-fx-background-color: rgba(255,255,255,0.15); -fx-background-radius: 12; -fx-text-fill: white; -fx-font-size: 17px; -fx-font-weight: 500; -fx-font-family: 'DejaVu Sans'; -fx-alignment: CENTER_LEFT;");
@@ -145,10 +133,19 @@ public class ResidentDashboardController implements Initializable {
         });
     }
 
+    // Hàm load dữ liệu dashboard đã được cập nhật logic lấy số thông báo
     private void loadDashboardData() {
         debtAmountLabel.setText("0 VND");
         paidAmountLabel.setText("0 VND");
-        notificationCountLabel.setText("0");
+
+        // --- CẬP NHẬT SỐ THÔNG BÁO TỪ DB ---
+        try {
+            int unreadCount = notificationService.getUnreadCount();
+            notificationCountLabel.setText(String.valueOf(unreadCount));
+        } catch (Exception e) {
+            e.printStackTrace();
+            notificationCountLabel.setText("0"); // Fallback nếu lỗi
+        }
     }
 
     private void showDashboardContent() {
@@ -174,16 +171,11 @@ public class ResidentDashboardController implements Initializable {
         }
     }
 
-    /**
-     * CẬP NHẬT: Đảm bảo nút Active cũng được căn giữa và có viền
-     */
     private void setActiveButton(MFXButton activeButton) {
-        // Reset nút cũ (trả về lề trái)
         if (currentActiveButton != null) {
             currentActiveButton.setStyle("-fx-background-color: rgba(255,255,255,0.15); -fx-background-radius: 12; -fx-text-fill: white; -fx-font-size: 17px; -fx-font-weight: 500; -fx-font-family: 'DejaVu Sans'; -fx-alignment: CENTER_LEFT;");
         }
 
-        // Set nút mới (Căn giữa + Viền sáng)
         currentActiveButton = activeButton;
         if (currentActiveButton != null) {
             currentActiveButton.setStyle("-fx-background-color: rgba(255,255,255,0.35); -fx-background-radius: 12; -fx-text-fill: white; -fx-font-size: 17px; -fx-font-weight: 600; -fx-font-family: 'DejaVu Sans'; -fx-border-color: rgba(255,255,255,0.5); -fx-border-width: 2; -fx-border-radius: 12; -fx-alignment: CENTER;");
@@ -192,6 +184,8 @@ public class ResidentDashboardController implements Initializable {
 
     @FXML
     private void handleHomeButton() {
+        // [MỚI] Load lại dữ liệu khi quay về Home để cập nhật số thông báo mới nhất
+        loadDashboardData();
         showDashboardContent();
     }
 
@@ -265,13 +259,11 @@ public class ResidentDashboardController implements Initializable {
         }
     }
 
-    /**
-     * Setup chart button hover effects
-     */
+    // Chart logic methods... (Giữ nguyên không thay đổi)
     private void setupChartButtonEffects() {
         if (currentMonthBtn != null) {
-            currentMonthBtn.setOnMouseEntered(e -> 
-                currentMonthBtn.setStyle("-fx-background-color: #5a67d8; -fx-background-radius: 8; -fx-text-fill: white; -fx-font-size: 13px; -fx-font-weight: 500; -fx-font-family: 'DejaVu Sans'; -fx-cursor: hand;"));
+            currentMonthBtn.setOnMouseEntered(e ->
+                    currentMonthBtn.setStyle("-fx-background-color: #5a67d8; -fx-background-radius: 8; -fx-text-fill: white; -fx-font-size: 13px; -fx-font-weight: 500; -fx-font-family: 'DejaVu Sans'; -fx-cursor: hand;"));
             currentMonthBtn.setOnMouseExited(e -> {
                 if (currentMonthBtn.getStyle().contains("#667eea")) {
                     currentMonthBtn.setStyle("-fx-background-color: #667eea; -fx-background-radius: 8; -fx-text-fill: white; -fx-font-size: 13px; -fx-font-weight: 500; -fx-font-family: 'DejaVu Sans';");
@@ -282,8 +274,8 @@ public class ResidentDashboardController implements Initializable {
         }
 
         if (trendBtn != null) {
-            trendBtn.setOnMouseEntered(e -> 
-                trendBtn.setStyle("-fx-background-color: #5a67d8; -fx-background-radius: 8; -fx-text-fill: white; -fx-font-size: 13px; -fx-font-weight: 500; -fx-font-family: 'DejaVu Sans'; -fx-cursor: hand;"));
+            trendBtn.setOnMouseEntered(e ->
+                    trendBtn.setStyle("-fx-background-color: #5a67d8; -fx-background-radius: 8; -fx-text-fill: white; -fx-font-size: 13px; -fx-font-weight: 500; -fx-font-family: 'DejaVu Sans'; -fx-cursor: hand;"));
             trendBtn.setOnMouseExited(e -> {
                 if (trendBtn.getStyle().contains("#667eea")) {
                     trendBtn.setStyle("-fx-background-color: #667eea; -fx-background-radius: 8; -fx-text-fill: white; -fx-font-size: 13px; -fx-font-weight: 500; -fx-font-family: 'DejaVu Sans';");
@@ -294,168 +286,115 @@ public class ResidentDashboardController implements Initializable {
         }
     }
 
-    /**
-     * Load service consumption chart (default: current month pie chart)
-     */
     private void loadServiceConsumptionChart() {
         if (currentApartmentId == -1) {
             showNoDataMessage();
             return;
         }
-
         showCurrentMonthChart();
     }
 
-    /**
-     * Show current month pie chart
-     */
     @FXML
     private void showCurrentMonthChart() {
         if (currentApartmentId == -1) {
             showNoDataMessage();
             return;
         }
-
-        // Update button styles
         setActiveChartButton(currentMonthBtn);
         chartPeriodLabel.setText("Tháng hiện tại");
 
-        // Get current month data
         List<ServiceConsumptionData> consumptionData = consumptionService.getCurrentMonthConsumption(currentApartmentId);
-
         if (consumptionData.isEmpty()) {
             showNoDataMessage();
             return;
         }
 
-        // Show pie chart container
         pieChartContainer.setVisible(true);
         lineChartContainer.setVisible(false);
         noDataContainer.setVisible(false);
 
-        // Clear previous data
         serviceConsumptionChart.getData().clear();
-
-        // Add data to pie chart
         ObservableList<PieChart.Data> pieChartData = FXCollections.observableArrayList();
         BigDecimal total = BigDecimal.ZERO;
 
         for (ServiceConsumptionData data : consumptionData) {
             pieChartData.add(new PieChart.Data(
-                String.format("%s (%.1f%%)", data.getServiceName(), data.getPercentage()),
-                data.getAmount().doubleValue()
+                    String.format("%s (%.1f%%)", data.getServiceName(), data.getPercentage()),
+                    data.getAmount().doubleValue()
             ));
             total = total.add(data.getAmount());
         }
 
         serviceConsumptionChart.setData(pieChartData);
-
-        // Update total amount label
         totalAmountLabel.setText("Tổng chi phí: " + currencyFormatter.format(total.doubleValue()) + " VND");
-
-        // Apply custom colors to pie chart
         applyPieChartColors();
     }
 
-    /**
-     * Show 6-month trend line chart
-     */
     @FXML
     private void showTrendChart() {
         if (currentApartmentId == -1) {
             showNoDataMessage();
             return;
         }
-
-        // Update button styles
         setActiveChartButton(trendBtn);
         chartPeriodLabel.setText("6 tháng gần đây");
 
-        // Get 6-month trend data
         List<MonthlyConsumptionData> trendData = consumptionService.getSixMonthConsumptionTrend(currentApartmentId);
-
         if (trendData.isEmpty()) {
             showNoDataMessage();
             return;
         }
 
-        // Show line chart container
         pieChartContainer.setVisible(false);
         lineChartContainer.setVisible(true);
         noDataContainer.setVisible(false);
-
-        // Clear previous data
         consumptionTrendChart.getData().clear();
 
-        // Prepare data for line chart
         Map<String, XYChart.Series<String, Number>> seriesMap = new HashMap<>();
-
         for (MonthlyConsumptionData monthData : trendData) {
             String monthLabel = monthData.getMonthYearLabel();
-
             for (Map.Entry<String, BigDecimal> serviceEntry : monthData.getServiceBreakdown().entrySet()) {
                 String serviceName = serviceEntry.getKey();
                 BigDecimal amount = serviceEntry.getValue();
-
-                // Get or create series for this service
-                XYChart.Series<String, Number> series = seriesMap.computeIfAbsent(serviceName, 
-                    k -> {
-                        XYChart.Series<String, Number> newSeries = new XYChart.Series<>();
-                        newSeries.setName(k);
-                        return newSeries;
-                    });
-
-                // Add data point
+                XYChart.Series<String, Number> series = seriesMap.computeIfAbsent(serviceName,
+                        k -> {
+                            XYChart.Series<String, Number> newSeries = new XYChart.Series<>();
+                            newSeries.setName(k);
+                            return newSeries;
+                        });
                 series.getData().add(new XYChart.Data<>(monthLabel, amount.doubleValue()));
             }
         }
 
-        // Add all series to chart
         for (XYChart.Series<String, Number> series : seriesMap.values()) {
             consumptionTrendChart.getData().add(series);
         }
-
-        // Configure axes
         amountAxis.setLabel("Số tiền (VND)");
         monthAxis.setLabel("Tháng");
     }
 
-    /**
-     * Show no data message
-     */
     private void showNoDataMessage() {
         pieChartContainer.setVisible(false);
         lineChartContainer.setVisible(false);
         noDataContainer.setVisible(true);
     }
 
-    /**
-     * Set active chart button
-     */
     private void setActiveChartButton(MFXButton activeButton) {
-        // Reset both buttons to inactive state
         currentMonthBtn.setStyle("-fx-background-color: rgba(102,126,234,0.3); -fx-background-radius: 8; -fx-text-fill: #667eea; -fx-font-size: 13px; -fx-font-weight: 500; -fx-font-family: 'DejaVu Sans';");
         trendBtn.setStyle("-fx-background-color: rgba(102,126,234,0.3); -fx-background-radius: 8; -fx-text-fill: #667eea; -fx-font-size: 13px; -fx-font-weight: 500; -fx-font-family: 'DejaVu Sans';");
 
-        // Set active button
         if (activeButton != null) {
             activeButton.setStyle("-fx-background-color: #667eea; -fx-background-radius: 8; -fx-text-fill: white; -fx-font-size: 13px; -fx-font-weight: 500; -fx-font-family: 'DejaVu Sans';");
         }
     }
 
-    /**
-     * Apply custom colors to pie chart slices
-     */
     private void applyPieChartColors() {
         String[] colors = {
-            "#667eea", "#f093fb", "#4facfe", "#43e97b", "#fa709a", 
-            "#fee140", "#a8edea", "#d299c2", "#89f7fe", "#66a6ff"
+                "#667eea", "#f093fb", "#4facfe", "#43e97b", "#fa709a",
+                "#fee140", "#a8edea", "#d299c2", "#89f7fe", "#66a6ff"
         };
-
-        // Apply colors after the chart is rendered
         serviceConsumptionChart.applyCss();
         serviceConsumptionChart.layout();
-
         ObservableList<PieChart.Data> data = serviceConsumptionChart.getData();
         for (int i = 0; i < data.size() && i < colors.length; i++) {
             data.get(i).getNode().setStyle("-fx-pie-color: " + colors[i] + ";");

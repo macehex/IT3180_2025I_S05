@@ -1,132 +1,222 @@
-// Vị trí: src/main/java/com/example/quanlytoanha/controller/NotificationViewController.java
 package com.example.quanlytoanha.controller;
 
+import com.example.quanlytoanha.dao.AnnouncementDAO;
+import com.example.quanlytoanha.model.Announcement;
 import com.example.quanlytoanha.model.Notification;
-import com.example.quanlytoanha.service.NotificationService; // Import service tương ứng
+import com.example.quanlytoanha.model.Role;
+import com.example.quanlytoanha.model.User;
+import com.example.quanlytoanha.service.NotificationService;
+import com.example.quanlytoanha.session.SessionManager;
+import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
-import javafx.fxml.Initializable; // Implement Initializable để dùng hàm initialize()
-import javafx.scene.control.Alert;
-import javafx.scene.control.ListCell;
-import javafx.scene.control.ListView;
-import javafx.scene.control.Tooltip; // Import Tooltip để hiển thị đầy đủ message
-import javafx.util.Callback; // Import Callback
+import javafx.fxml.FXMLLoader;
+import javafx.fxml.Initializable;
+import javafx.scene.control.*;
+import javafx.scene.layout.HBox;
 
-import java.net.URL; // Import URL
+import java.io.IOException;
+import java.net.URL;
 import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.util.List;
-import java.util.ResourceBundle; // Import ResourceBundle
+import java.util.ResourceBundle;
 
-public class NotificationViewController implements Initializable { // Implement Initializable
+public class NotificationViewController implements Initializable {
 
-    @FXML
-    private ListView<Notification> notificationListView; // ListView từ FXML
+    // --- CÁC BIẾN FXML (Cần khớp fx:id trong file view) ---
+    @FXML private TabPane tabPane;
+    @FXML private Tab tabNews;          // Tab 1: Tin tức chung
+    @FXML private Tab tabPersonal;      // Tab 2: Cá nhân & Thanh toán
+    @FXML private Tab tabSentHistory;   // Tab 3: Đã gửi (Admin)
 
-    private NotificationService notificationService; // Service để lấy dữ liệu
-    private final SimpleDateFormat dateTimeFormat = new SimpleDateFormat("HH:mm dd/MM/yyyy"); // Định dạng ngày giờ
+    @FXML private ListView<Announcement> announcementListView; // List tin tức chung
+    @FXML private ListView<Notification> notificationListView; // List thông báo cá nhân
+    @FXML private ListView<Announcement> sentListView;         // List lịch sử gửi
 
-    /**
-     * Phương thức này được gọi tự động sau khi FXML được tải.
-     */
+    // --- SERVICES & DAO ---
+    private AnnouncementDAO announcementDAO;
+    private NotificationService notificationService;
+
+    private final SimpleDateFormat personalDateFormat = new SimpleDateFormat("HH:mm dd/MM/yyyy");
+
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        this.notificationService = new NotificationService(); // Khởi tạo service
+        this.announcementDAO = new AnnouncementDAO();
+        this.notificationService = new NotificationService();
 
-        // Cấu hình cách hiển thị từng mục trong ListView
+        User currentUser = SessionManager.getInstance().getCurrentUser();
+        if (currentUser == null) return;
+
+        // --- PHÂN QUYỀN HIỂN THỊ TAB ---
+        if (currentUser.getRole() == Role.ADMIN) {
+            setupForAdmin(currentUser.getUserId());
+        } else {
+            setupForResident();
+        }
+    }
+
+    // --- CHẾ ĐỘ 1: CƯ DÂN (Chỉ xem Tin tức & Cá nhân) ---
+    private void setupForResident() {
+        // Xóa tab của Admin đi để cư dân không thấy
+        if (tabPane != null && tabSentHistory != null) {
+            tabPane.getTabs().remove(tabSentHistory);
+        }
+
+        // Load dữ liệu cho 2 tab còn lại
+        setupAnnouncementTab();
+        setupPersonalNotificationTab();
+    }
+
+    // --- CHẾ ĐỘ 2: ADMIN (Chỉ xem Lịch sử gửi) ---
+    private void setupForAdmin(int adminId) {
+        // Xóa 2 tab của cư dân đi (Theo yêu cầu: "Chỉ có 1 mục")
+        if (tabPane != null) {
+            if (tabNews != null) tabPane.getTabs().remove(tabNews);
+            if (tabPersonal != null) tabPane.getTabs().remove(tabPersonal);
+        }
+
+        // Load dữ liệu cho tab Đã gửi
+        setupSentHistoryTab(adminId);
+    }
+
+    // --- LOGIC LOAD DỮ LIỆU ---
+
+    // 1. Tab Lịch sử gửi (Admin)
+    private void setupSentHistoryTab(int adminId) {
+        List<Announcement> mySentList = announcementDAO.getAnnouncementsByAuthor(adminId);
+
+        if (sentListView != null) {
+            sentListView.setItems(FXCollections.observableArrayList(mySentList));
+
+            sentListView.setCellFactory(param -> new ListCell<Announcement>() {
+                @Override
+                protected void updateItem(Announcement item, boolean empty) {
+                    super.updateItem(item, empty);
+                    if (empty || item == null) {
+                        setGraphic(null);
+                        setText(null);
+                    } else {
+                        try {
+                            FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/example/quanlytoanha/view/announcement_item.fxml"));
+                            HBox graphic = loader.load();
+                            AnnouncementItemController controller = loader.getController();
+
+                            // [SỬA LỖI LẶP CHỮ]: Không sửa trực tiếp item, chỉ sửa hiển thị
+                            controller.setData(item); // Set dữ liệu gốc trước
+
+                            // Tìm Label tiêu đề và thêm chữ "[Đã gửi]" vào hiển thị (không lưu vào object)
+                            Label titleLabel = (Label) graphic.lookup("#lblTitle");
+                            if (titleLabel != null) {
+                                titleLabel.setText("[Đã gửi] " + item.getAnnTitle());
+                            }
+
+                            setGraphic(graphic);
+                            setText(null);
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }
+            });
+        }
+    }
+
+    // 2. Tab Tin tức chung (Cư dân)
+    private void setupAnnouncementTab() {
+        List<Announcement> list = announcementDAO.getAllAnnouncements();
+        if (announcementListView != null) {
+            announcementListView.setItems(FXCollections.observableArrayList(list));
+
+            announcementListView.setCellFactory(param -> new ListCell<Announcement>() {
+                @Override
+                protected void updateItem(Announcement item, boolean empty) {
+                    super.updateItem(item, empty);
+                    if (empty || item == null) {
+                        setGraphic(null); setText(null);
+                    } else {
+                        try {
+                            FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/example/quanlytoanha/view/announcement_item.fxml"));
+                            HBox graphic = loader.load();
+                            AnnouncementItemController controller = loader.getController();
+                            controller.setData(item);
+                            setGraphic(graphic); setText(null);
+                            setPrefWidth(0); // Fix lỗi layout
+                        } catch (IOException e) { e.printStackTrace(); }
+                    }
+                }
+            });
+        }
+    }
+
+    // 3. Tab Thông báo cá nhân (Cư dân)
+    private void setupPersonalNotificationTab() {
+        if (notificationListView == null) return;
+
+        try {
+            notificationListView.setItems(FXCollections.observableArrayList(
+                    notificationService.getAllMyNotifications()
+            ));
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
         notificationListView.setCellFactory(param -> new ListCell<Notification>() {
-            private Tooltip tooltip = new Tooltip(); // Tạo tooltip để xem message dài
+            private Tooltip tooltip = new Tooltip();
 
             @Override
             protected void updateItem(Notification item, boolean empty) {
                 super.updateItem(item, empty);
                 if (empty || item == null) {
+                    setGraphic(null);
                     setText(null);
-                    setGraphic(null); // Xóa graphic nếu ô rỗng
-                    setStyle(""); // Xóa style cũ
                     setTooltip(null);
+                    setStyle("");
                 } else {
-                    // Tạo nội dung hiển thị: Ngày giờ + Tiêu đề
                     String displayText = String.format("[%s] %s",
-                            dateTimeFormat.format(item.getCreatedAt()), // Dùng timestamp từ DB
+                            personalDateFormat.format(item.getCreatedAt()),
                             item.getTitle());
                     setText(displayText);
 
-                    // Đặt nội dung đầy đủ vào tooltip
                     tooltip.setText(item.getMessage());
                     setTooltip(tooltip);
 
-                    // Đặt style cho thông báo chưa đọc
                     if (!item.isRead()) {
-                        // In đậm và có thể thêm màu nền nhẹ nhàng
-                        setStyle("-fx-font-weight: bold; -fx-background-color: #e8f4ff;");
+                        setStyle("-fx-font-weight: bold; -fx-background-color: #e3f2fd; -fx-text-fill: #000;");
                     } else {
-                        // Xóa style nếu đã đọc
-                        setStyle("");
+                        setStyle("-fx-font-weight: normal; -fx-background-color: transparent; -fx-text-fill: #555;");
                     }
                 }
             }
         });
 
-        // Thêm sự kiện click chuột vào ListView
         notificationListView.setOnMouseClicked(event -> {
-            Notification selectedNotification = notificationListView.getSelectionModel().getSelectedItem();
-            // Nếu có mục được chọn và nó chưa đọc
-            if (selectedNotification != null && !selectedNotification.isRead()) {
-                markNotificationAsRead(selectedNotification); // Gọi hàm đánh dấu đã đọc
+            Notification selected = notificationListView.getSelectionModel().getSelectedItem();
+            if (selected != null && !selected.isRead()) {
+                markAsRead(selected);
             }
         });
-
-        // Tải danh sách thông báo lần đầu
-        loadNotifications();
     }
 
-    /**
-     * Tải danh sách thông báo (chưa đọc) từ service và hiển thị lên ListView.
-     */
-    private void loadNotifications() {
-        try {
-            // Gọi service để lấy thông báo chưa đọc của người dùng hiện tại
-            List<Notification> notifications = notificationService.getMyUnreadNotifications();
-            // Cập nhật dữ liệu cho ListView
-            notificationListView.getItems().setAll(notifications);
-        } catch (SQLException e) {
-            showAlert(Alert.AlertType.ERROR, "Lỗi Database", "Không thể tải danh sách thông báo.");
-            e.printStackTrace(); // In lỗi ra console để debug
-        } catch (Exception e) { // Bắt các lỗi khác (ví dụ: SecurityException nếu cần)
-            showAlert(Alert.AlertType.ERROR, "Lỗi Hệ Thống", "Đã xảy ra lỗi không mong muốn: " + e.getMessage());
-            e.printStackTrace();
-        }
-    }
-
-    /**
-     * Gọi service để đánh dấu thông báo là đã đọc và cập nhật lại giao diện.
-     * @param notification Thông báo được click.
-     */
-    private void markNotificationAsRead(Notification notification) {
+    private void markAsRead(Notification notification) {
         try {
             boolean success = notificationService.markNotificationAsRead(notification.getNotificationId());
             if (success) {
-                // Đánh dấu là đã đọc trong đối tượng model
                 notification.setRead(true);
-                // Làm mới ListView để cập nhật lại style (xóa in đậm)
                 notificationListView.refresh();
-            } else {
-                System.err.println("Không thể đánh dấu đã đọc cho thông báo ID: " + notification.getNotificationId());
             }
         } catch (SQLException e) {
-            showAlert(Alert.AlertType.ERROR, "Lỗi Database", "Không thể cập nhật trạng thái thông báo.");
             e.printStackTrace();
         }
     }
 
-    /**
-     * Hàm tiện ích để hiển thị thông báo Alert.
-     */
-    private void showAlert(Alert.AlertType alertType, String title, String message) {
-        Alert alert = new Alert(alertType);
-        alert.setTitle(title);
-        alert.setHeaderText(null); // Không có tiêu đề phụ
-        alert.setContentText(message);
-        alert.showAndWait();
+    public void switchToSentTab() {
+        // Hàm này dành cho Admin khi bấm từ Dashboard
+        if (tabPane != null && tabSentHistory != null) {
+            // Đảm bảo tab Đã gửi đang hiện hữu trước khi select
+            if (!tabPane.getTabs().contains(tabSentHistory)) {
+                tabPane.getTabs().add(tabSentHistory);
+            }
+            tabPane.getSelectionModel().select(tabSentHistory);
+        }
     }
 }

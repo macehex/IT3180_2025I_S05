@@ -16,6 +16,8 @@ import javafx.scene.control.ProgressBar;
 import javafx.scene.layout.VBox;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
+import javafx.scene.Node;
+import javafx.scene.control.ScrollPane;
 
 import java.io.IOException;
 import java.math.BigDecimal;
@@ -27,13 +29,18 @@ public class AdminDashboardController {
     @FXML private Label lblWelcome;
     @FXML private Button btnQuanLyTaiKhoan;
     @FXML private Button btnQuanLyHoaDon;
-    @FXML private Button btnTaoThongBao;
+    @FXML private VBox notificationMenuContainer;
+    @FXML private VBox notificationSubMenu;
+    @FXML private Button btnNotificationMain; // Nút chính
+    @FXML private Button btnCompose;          // Nút soạn mới
+    @FXML private Button btnViewHistory;      // Nút xem lịch sử
     @FXML private Button btnXemYeuCauDichVu;
     @FXML private Button btnXemDanhSachCuDan;
     @FXML private Button btnLogout;
     @FXML private Button btnMenuToggle;
     @FXML private VBox sidebar;
     @FXML private Label lblUserName;
+    @FXML private ScrollPane contentScrollPane;
 
     @FXML private Label lblTotalResidents;
     @FXML private Label lblTotalApartments;
@@ -97,8 +104,6 @@ public class AdminDashboardController {
                 btnQuanLyTaiKhoan.setOnAction(event -> handleQuanLyTaiKhoan());
             if (btnQuanLyHoaDon != null)
                 btnQuanLyHoaDon.setOnAction(event -> handleQuanLyHoaDon());
-            if (btnTaoThongBao != null)
-                btnTaoThongBao.setOnAction(event -> handleTaoThongBao());
             if (btnXemYeuCauDichVu != null)
                 btnXemYeuCauDichVu.setOnAction(event -> handleXemYeuCauDichVu());
             if (btnXemDanhSachCuDan != null)
@@ -128,6 +133,8 @@ public class AdminDashboardController {
             if (btnKiemSoatRaVao != null) {
                 btnKiemSoatRaVao.setOnAction(event -> handleOpenAccessControl());
             }
+
+            setupNotificationMenu();
         }
     }
 
@@ -384,8 +391,59 @@ public class AdminDashboardController {
         showAlert(Alert.AlertType.INFORMATION, "Thông báo", "Chức năng Quản lý hóa đơn chưa được triển khai.");
     }
 
+    // --- [MỚI] LOGIC MENU THÔNG BÁO ---
+    private void setupNotificationMenu() {
+        if (notificationMenuContainer == null) return;
+
+        // 1. Hiệu ứng Hover: Di chuột vào container -> Hiện menu con
+        notificationMenuContainer.setOnMouseEntered(event -> {
+            notificationSubMenu.setVisible(true);
+            notificationSubMenu.setManaged(true);
+        });
+
+        // 2. Hiệu ứng Hover: Di chuột ra ngoài container -> Ẩn menu con
+        notificationMenuContainer.setOnMouseExited(event -> {
+            notificationSubMenu.setVisible(false);
+            notificationSubMenu.setManaged(false);
+        });
+
+        // 3. Sự kiện bấm nút "Soạn thông báo mới"
+        if (btnCompose != null) {
+            btnCompose.setOnAction(event -> handleTaoThongBao());
+        }
+
+        // 4. Sự kiện bấm nút "Xem thông báo đã gửi"
+        if (btnViewHistory != null) {
+            btnViewHistory.setOnAction(event -> handleXemLichSuGui());
+        }
+
+        // 5. (Tùy chọn) Bấm nút chính cũng mở menu soạn thảo cho tiện
+        if (btnNotificationMain != null) {
+            btnNotificationMain.setOnAction(event -> {
+                // Có thể để trống hoặc toggle menu con
+                boolean isVisible = notificationSubMenu.isVisible();
+                notificationSubMenu.setVisible(!isVisible);
+                notificationSubMenu.setManaged(!isVisible);
+            });
+        }
+    }
+
     private void handleTaoThongBao() {
-        showAlert(Alert.AlertType.INFORMATION, "Thông báo", "Chức năng Tạo thông báo chưa được triển khai.");
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/example/quanlytoanha/view/create_announcement.fxml"));
+            Parent root = loader.load();
+
+            Stage stage = new Stage();
+            stage.setTitle("Soạn Thông Báo Chung");
+            stage.setScene(new Scene(root));
+
+            // Chặn không cho bấm vào cửa sổ cha khi cửa sổ này đang mở (Modal)
+            stage.initModality(Modality.APPLICATION_MODAL);
+            stage.showAndWait();
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     @FXML
@@ -408,6 +466,34 @@ public class AdminDashboardController {
         } catch (IOException e) {
             e.printStackTrace();
             showAlert(Alert.AlertType.ERROR, "Lỗi", "Không thể tải màn hình Quản lý Yêu cầu: " + e.getMessage());
+        }
+    }
+
+    private void handleXemLichSuGui() {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/example/quanlytoanha/view/notification_view_embedded.fxml")); // Hoặc notification_view.fxml
+            Parent root = loader.load();
+
+            // Nếu bạn muốn hiển thị nó thay thế nội dung chính (Center) của BorderPane:
+            // Bạn cần thêm fx:id="contentScrollPane" cho ScrollPane trong file FXML AdminDashboard
+            // và khai báo @FXML ScrollPane contentScrollPane; ở trên.
+
+            /* Cách 1: Mở cửa sổ mới (Dễ nhất, ít lỗi layout) */
+            Stage stage = new Stage();
+            stage.setTitle("Quản lý Thông báo đã gửi");
+            stage.setScene(new Scene(root, 800, 600));
+            stage.initModality(Modality.WINDOW_MODAL);
+            stage.show();
+
+            /* Cách 2: Nhúng vào màn hình chính (Chuyên nghiệp hơn)
+            if (contentScrollPane != null) {
+                contentScrollPane.setContent(root);
+            }
+            */
+
+        } catch (IOException e) {
+            e.printStackTrace();
+            showAlert(Alert.AlertType.ERROR, "Lỗi", "Không thể tải màn hình lịch sử thông báo.");
         }
     }
 

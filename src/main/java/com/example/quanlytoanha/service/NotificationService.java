@@ -127,33 +127,22 @@ public class NotificationService {
     }
 
     /**
-     * Lấy danh sách thông báo CHƯA ĐỌC cho người dùng hiện tại đang đăng nhập.
+     * Lấy TẤT CẢ thông báo cho người dùng hiện tại.
      * Dùng cho Cư dân xem thông báo của mình.
-     * @return Danh sách các Notification chưa đọc.
-     * @throws SQLException Nếu có lỗi database.
      */
-    public List<Notification> getMyUnreadNotifications() throws SQLException {
+    public List<Notification> getAllMyNotifications() throws SQLException {
         User currentUser = SessionManager.getInstance().getCurrentUser();
-        // Nếu chưa đăng nhập, trả về danh sách rỗng
         if (currentUser == null) {
             return new ArrayList<>();
         }
-        // Gọi DAO để lấy thông báo của user hiện tại
-        return notificationDAO.getUnreadNotificationsForUser(currentUser.getUserId());
+        // Gọi hàm DAO mới để lấy tất cả (không lọc is_read)
+        return notificationDAO.getAllNotificationsForUser(currentUser.getUserId());
     }
 
-    /**
-     * Đánh dấu một thông báo là đã đọc.
-     * @param notificationId ID của thông báo cần đánh dấu.
-     * @return true nếu đánh dấu thành công, false nếu không.
-     * @throws SQLException Nếu có lỗi database.
-     */
     public boolean markNotificationAsRead(int notificationId) throws SQLException {
-        // (Có thể thêm kiểm tra xem user hiện tại có phải là người nhận thông báo này không)
         return notificationDAO.markAsRead(notificationId);
     }
 
-    // --- HÀM MỚI ĐÃ THÊM VÀO ---
     /**
      * Gửi một thông báo nhắc nợ riêng lẻ.
      * @param userId ID của người nhận (chủ căn hộ).
@@ -235,6 +224,21 @@ public class NotificationService {
                     LocalDateTime.now().format(logTimestampFormat), newInvoice.getInvoiceId(), userId, e.getMessage());
             e.printStackTrace();
             return false;
+        }
+    }
+
+    /**
+     * Lấy số lượng thông báo chưa đọc cho Dashboard.
+     */
+    public int getUnreadCount() {
+        try {
+            User currentUser = SessionManager.getInstance().getCurrentUser();
+            if (currentUser == null) return 0;
+
+            return notificationDAO.countUnread(currentUser.getUserId());
+        } catch (Exception e) {
+            e.printStackTrace();
+            return 0;
         }
     }
 }

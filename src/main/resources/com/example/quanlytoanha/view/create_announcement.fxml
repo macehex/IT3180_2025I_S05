@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.CheckBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TextArea?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
+
+<VBox prefHeight="450.0" prefWidth="500.0" spacing="15.0" style="-fx-background-color: white;" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.quanlytoanha.controller.CreateAnnouncementController">
+    <padding>
+        <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
+    </padding>
+    <children>
+        <Label text="Soạn Thông Báo Mới" textFill="#2c3e50">
+            <font>
+                <Font name="System Bold" size="20.0" />
+            </font>
+        </Label>
+
+        <VBox spacing="5.0">
+            <children>
+                <Label text="Tiêu đề thông báo:" />
+                <TextField fx:id="txtTitle" promptText="Ví dụ: Thông báo cắt nước ngày 15/12..." prefHeight="35.0" />
+            </children>
+        </VBox>
+
+        <VBox spacing="5.0" VBox.vgrow="ALWAYS">
+            <children>
+                <Label text="Nội dung chi tiết:" />
+                <TextArea fx:id="txtContent" promptText="Nhập nội dung thông báo tại đây..." wrapText="true" VBox.vgrow="ALWAYS" />
+            </children>
+        </VBox>
+
+        <CheckBox fx:id="chkUrgent" text="Đánh dấu là QUAN TRỌNG / KHẨN CẤP" textFill="#e74c3c">
+            <font>
+                <Font name="System Bold" size="12.0" />
+            </font>
+        </CheckBox>
+
+        <HBox alignment="CENTER_RIGHT" spacing="10.0">
+            <children>
+                <Button cancelButton="true" mnemonicParsing="false" onAction="#handleCancel" prefWidth="80.0" style="-fx-background-color: #95a5a6;" text="Hủy" textFill="WHITE" />
+                <Button defaultButton="true" mnemonicParsing="false" onAction="#handleSend" prefWidth="100.0" style="-fx-background-color: #3498db;" text="Gửi ngay" textFill="WHITE">
+                    <font>
+                        <Font name="System Bold" size="12.0" />
+                    </font>
+                </Button>
+            </children>
+        </HBox>
+    </children>
+</VBox>

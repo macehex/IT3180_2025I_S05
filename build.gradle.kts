@@ -28,22 +28,23 @@ application {
 }
 
 javafx {
+    // Giữ nguyên bản 21 vì JavaFX thường đi theo bản LTS, nó vẫn chạy tốt trên JDK 25
     version = "21.0.6"
     modules = listOf("javafx.controls", "javafx.fxml", "javafx.web", "javafx.graphics", "javafx.base")
 }
 
 tasks.withType<JavaCompile> {
     options.encoding = "UTF-8"
-    options.compilerArgs.add("--enable-preview")
+    // [ĐÃ XÓA] dòng options.compilerArgs.add("--enable-preview") để tắt chế độ dùng thử, tránh lỗi version
 }
 
 tasks.withType<Test> {
     useJUnitPlatform()
-    jvmArgs("--enable-preview")
+    // [ĐÃ XÓA] dòng jvmArgs("--enable-preview")
 }
 
 tasks.withType<JavaExec> {
-    jvmArgs("--enable-preview")
+    // [ĐÃ XÓA] dòng jvmArgs("--enable-preview")
 }
 
 dependencies {
@@ -54,7 +55,7 @@ dependencies {
     implementation("org.kordamp.ikonli:ikonli-materialdesign2-pack:12.3.1")
     implementation("com.google.code.gson:gson:2.10.1")
     implementation("org.apache.pdfbox:pdfbox:3.0.2")
-    
+
     // Use Spring Security with excluded transitive dependencies that cause module issues
     implementation("org.springframework.security:spring-security-core:6.5.5") {
         exclude(group = "io.micrometer", module = "micrometer-observation")
@@ -66,19 +67,19 @@ dependencies {
     testImplementation("org.junit.jupiter:junit-jupiter-api:${junitVersion}")
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:${junitVersion}")
     testImplementation("org.junit.platform:junit-platform-suite:1.12.1")
-    testImplementation("org.mockito:mockito-core:5.5.0")         // Mockito core
-    testImplementation("org.mockito:mockito-junit-jupiter:5.5.0") // Tích hợp Mockito với JUnit 5
+    testImplementation("org.mockito:mockito-core:5.5.0")
+    testImplementation("org.mockito:mockito-junit-jupiter:5.5.0")
 }
 
-// Alternative 1: Fat JAR approach (simpler, avoids module issues)
+// Alternative 1: Fat JAR approach
 tasks.register<Jar>("fatJar") {
     archiveClassifier.set("fat")
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
-    
+
     manifest {
         attributes["Main-Class"] = "com.example.quanlytoanha.Launcher"
     }
-    
+
     from(configurations.runtimeClasspath.get().map { if (it.isDirectory) it else zipTree(it) })
     with(tasks.jar.get())
 }
@@ -91,7 +92,7 @@ tasks.register<JavaCompile>("compileJavaForFatJar") {
     destinationDirectory.set(layout.buildDirectory.dir("classes/java/fatjar"))
     classpath = configurations.compileClasspath.get()
     options.encoding = "UTF-8"
-    options.compilerArgs.add("--enable-preview")
+    // [ĐÃ XÓA] dòng enable-preview ở đây luôn
 }
 
 // Modified fat JAR task that uses non-modular compilation
@@ -99,25 +100,24 @@ tasks.register<Jar>("fatJarNoModule") {
     dependsOn("compileJavaForFatJar", "processResources")
     archiveClassifier.set("fat-nomodule")
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
-    
+
     manifest {
         attributes["Main-Class"] = "com.example.quanlytoanha.Launcher"
     }
-    
+
     from(tasks.getByName("compileJavaForFatJar").outputs)
     from(tasks.processResources.get().outputs)
     from(configurations.runtimeClasspath.get().map { if (it.isDirectory) it else zipTree(it) })
 }
 
-// Alternative 2: Simplified jlink (try this if fat JAR doesn't work)
+// Alternative 2: Simplified jlink
 jlink {
     imageZip.set(layout.buildDirectory.file("/distributions/app-${javafx.platform.classifier}.zip"))
     options.set(listOf("--strip-debug", "--compress", "2", "--no-header-files", "--no-man-pages", "--ignore-signing-information"))
     launcher {
         name = "app"
     }
-    // Force all non-modular JARs onto classpath instead of module path
     forceMerge("log4j")
-    forceMerge("slf4j") 
+    forceMerge("slf4j")
     forceMerge("spring")
 }

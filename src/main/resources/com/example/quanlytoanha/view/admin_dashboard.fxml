@@ -39,7 +39,26 @@
                 <Separator />
 
                 <Button fx:id="btnQuanLyHoaDon" text="💰 Hóa Đơn &amp; Công Nợ" styleClass="sidebar-menu-item" />
-                <Button fx:id="btnTaoThongBao" text="📢 Thông Báo Chung" styleClass="sidebar-menu-item" />
+
+                <VBox fx:id="notificationMenuContainer" spacing="0" alignment="TOP_LEFT">
+
+                    <Button fx:id="btnNotificationMain" text="📢 Thông Báo Chung"
+                            styleClass="sidebar-menu-item" maxWidth="Infinity" alignment="CENTER_LEFT"/>
+
+                    <VBox fx:id="notificationSubMenu" visible="false" managed="false"
+                          style="-fx-background-color: rgba(0,0,0,0.15);">
+                        <children>
+                            <Button fx:id="btnCompose" text="    ➕ Soạn thông báo mới"
+                                    styleClass="sidebar-menu-item" maxWidth="Infinity" alignment="CENTER_LEFT"
+                                    style="-fx-font-size: 13px; -fx-text-fill: #ecf0f1;"/>
+
+                            <Button fx:id="btnViewHistory" text="    📤 Xem thông báo đã gửi"
+                                    styleClass="sidebar-menu-item" maxWidth="Infinity" alignment="CENTER_LEFT"
+                                    style="-fx-font-size: 13px; -fx-text-fill: #ecf0f1;"/>
+                        </children>
+                    </VBox>
+                </VBox>
+
                 <Button fx:id="btnXemYeuCauDichVu" text="🛠️ Yêu Cầu Dịch Vụ" styleClass="sidebar-menu-item" />
 
                 <Separator />

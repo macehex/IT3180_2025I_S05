@@ -3,24 +3,65 @@
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.ListView?>
+<?import javafx.scene.control.Tab?>
+<?import javafx.scene.control.TabPane?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<VBox prefHeight="400.0" prefWidth="600.0" spacing="10.0" style="-fx-font-family: 'DejaVu Sans'; -fx-font-size: 16.9px;" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.quanlytoanha.controller.NotificationViewController">
+<VBox prefHeight="400.0" prefWidth="600.0" spacing="10.0"
+      style="-fx-font-family: 'DejaVu Sans'; -fx-font-size: 16.9px;"
+      xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="com.example.quanlytoanha.controller.NotificationViewController">
+
     <padding>
         <Insets bottom="15.0" left="15.0" right="15.0" top="15.0" />
     </padding>
+
     <children>
-        <Label text="Thông Báo Của Bạn" style="-fx-font-family: 'DejaVu Sans';">
+        <Label text="Trung Tâm Thông Báo" style="-fx-font-family: 'DejaVu Sans';">
             <font>
-                <Font name="DejaVu Sans" size="23.4" />
+                <Font name="DejaVu Sans Bold" size="23.4" />
             </font>
         </Label>
-        <Label text="(Click vào thông báo để đánh dấu đã đọc)" textFill="#666666" style="-fx-font-family: 'DejaVu Sans'; -fx-font-size: 16.9px;">
-            <VBox.margin>
-                <Insets bottom="5.0" />
-            </VBox.margin>
-        </Label>
-        <ListView fx:id="notificationListView" VBox.vgrow="ALWAYS" style="-fx-font-family: 'DejaVu Sans'; -fx-font-size: 16.9px;" />
+
+        <TabPane fx:id="tabPane" tabClosingPolicy="UNAVAILABLE" VBox.vgrow="ALWAYS" style="-fx-font-family: 'DejaVu Sans'; -fx-font-size: 16.9px;">
+            <tabs>
+                <Tab fx:id="tabNews" text="Tin tức chung">
+                    <content>
+                        <VBox spacing="5.0">
+                            <padding><Insets top="10" /></padding>
+                            <children>
+                                <Label text="Thông báo từ Ban Quản Lý" textFill="#666666" style="-fx-font-family: 'DejaVu Sans'; -fx-font-size: 14px;" />
+                                <ListView fx:id="announcementListView" VBox.vgrow="ALWAYS" style="-fx-font-family: 'DejaVu Sans'; -fx-font-size: 16.9px;" />
+                            </children>
+                        </VBox>
+                    </content>
+                </Tab>
+
+                <Tab fx:id="tabPersonal" text="Cá nhân &amp; Thanh toán">
+                    <content>
+                        <VBox spacing="5.0">
+                            <padding><Insets top="10" /></padding>
+                            <children>
+                                <Label text="Click vào thông báo để đánh dấu đã đọc" textFill="#666666" style="-fx-font-family: 'DejaVu Sans'; -fx-font-size: 14px;" />
+                                <ListView fx:id="notificationListView" VBox.vgrow="ALWAYS" style="-fx-font-family: 'DejaVu Sans'; -fx-font-size: 16.9px;" />
+                            </children>
+                        </VBox>
+                    </content>
+                </Tab>
+
+                <Tab fx:id="tabSentHistory" text="📤 Đã gửi (Admin)">
+                    <content>
+                        <VBox spacing="5.0">
+                            <padding><Insets top="10" /></padding>
+                            <children>
+                                <Label text="Các thông báo bạn đã phát đi" textFill="#666666" style="-fx-font-family: 'DejaVu Sans'; -fx-font-size: 14px;" />
+                                <ListView fx:id="sentListView" VBox.vgrow="ALWAYS" style="-fx-font-family: 'DejaVu Sans'; -fx-font-size: 16.9px;" />
+                            </children>
+                        </VBox>
+                    </content>
+                </Tab>
+            </tabs>
+        </TabPane>
     </children>
 </VBox>
