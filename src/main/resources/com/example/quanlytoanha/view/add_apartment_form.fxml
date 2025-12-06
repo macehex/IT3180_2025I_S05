@@ -64,19 +64,25 @@
                                   GridPane.columnIndex="1" GridPane.rowIndex="2" />
 
                         <!-- Action Buttons -->
-                        <HBox alignment="CENTER_RIGHT" spacing="15" 
-                              GridPane.columnIndex="1" GridPane.rowIndex="3">
-                            <Button fx:id="btnSave" text="💾 Lưu Căn Hộ" 
-                                    onAction="#handleSaveButtonAction"
-                                    prefHeight="45.0" prefWidth="140.0"
-                                    style="-fx-background-color: linear-gradient(to right, #1e3c72, #2a5298); -fx-text-fill: white; -fx-font-size: 14px; -fx-font-weight: bold; -fx-background-radius: 8; -fx-cursor: hand;">
-                            </Button>
-                            <Button text="❌ Hủy Bỏ" 
-                                    onAction="#handleCancelButtonAction"
-                                    prefHeight="45.0" prefWidth="120.0"
-                                    style="-fx-background-color: #dc3545; -fx-text-fill: white; -fx-font-size: 14px; -fx-font-weight: bold; -fx-background-radius: 8; -fx-cursor: hand;">
-                            </Button>
-                        </HBox>
+                        <VBox spacing="10" GridPane.columnIndex="1" GridPane.rowIndex="3">
+                            <HBox alignment="CENTER_LEFT" spacing="10">
+                                <Button fx:id="btnSave" text="💾 Lưu" 
+                                        onAction="#handleSaveButtonAction"
+                                        prefHeight="40.0" prefWidth="110.0"
+                                        style="-fx-background-color: linear-gradient(to right, #1e3c72, #2a5298); -fx-text-fill: white; -fx-font-size: 13px; -fx-font-weight: bold; -fx-background-radius: 8; -fx-cursor: hand;">
+                                </Button>
+                                <Button fx:id="btnDelete" text="🗑️ Xóa" 
+                                        onAction="#handleDeleteButtonAction"
+                                        prefHeight="40.0" prefWidth="90.0"
+                                        style="-fx-background-color: #dc3545; -fx-text-fill: white; -fx-font-size: 13px; -fx-font-weight: bold; -fx-background-radius: 8; -fx-cursor: hand;">
+                                </Button>
+                                <Button fx:id="btnClear" text="🔄 Làm mới" 
+                                        onAction="#handleClearForm"
+                                        prefHeight="40.0" prefWidth="110.0"
+                                        style="-fx-background-color: #6c757d; -fx-text-fill: white; -fx-font-size: 13px; -fx-font-weight: bold; -fx-background-radius: 8; -fx-cursor: hand;">
+                                </Button>
+                            </HBox>
+                        </VBox>
                     </GridPane>
                 </children>
             </VBox>

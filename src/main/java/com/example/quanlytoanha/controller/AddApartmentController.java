@@ -26,6 +26,8 @@ public class AddApartmentController {
     @FXML private TextField txtApartmentId;
     @FXML private ComboBox<Resident> cbOwner;
     @FXML private Button btnSave;
+    @FXML private Button btnDelete;
+    @FXML private Button btnClear;
     @FXML private Label titleLabel;
     @FXML private TableView<Apartment> tableViewApartments;
     @FXML private TableColumn<Apartment, Integer> colApartmentId;
@@ -36,6 +38,9 @@ public class AddApartmentController {
     private final ApartmentService apartmentService = new ApartmentService();
     private final ResidentDAO residentDAO = new ResidentDAO();
     private final ApartmentDAO apartmentDAO = new ApartmentDAO();
+    
+    // Biến lưu căn hộ đang được chọn để sửa/xóa
+    private Apartment selectedApartment = null;
 
     /**
      * Phương thức khởi tạo logic cho các ComboBox (Chạy sau khi FXML load)
@@ -54,7 +59,24 @@ public class AddApartmentController {
 
             // Mặc định tiêu đề
             if (titleLabel != null) {
-                titleLabel.setText("THÊM CĂN HỘ MỚI");
+                titleLabel.setText("QUẢN LÝ CĂN HỘ");
+            }
+            
+            // Thêm listener cho TableView để chọn căn hộ
+            if (tableViewApartments != null) {
+                tableViewApartments.getSelectionModel().selectedItemProperty().addListener(
+                    (observable, oldValue, newValue) -> {
+                        if (newValue != null) {
+                            loadApartmentToForm(newValue);
+                        }
+                    }
+                );
+            }
+            
+            // Ẩn nút Delete ban đầu (chỉ hiện khi chọn căn hộ)
+            if (btnDelete != null) {
+                btnDelete.setVisible(false);
+                btnDelete.setManaged(false);
             }
         } catch (Exception e) {
             System.err.println("LỖI KHỞI TẠO FORM THÊM CĂN HỘ:");
@@ -92,8 +114,7 @@ public class AddApartmentController {
                         return "Căn hộ trống";
                     }
                     String name = resident.getFullName() != null ? resident.getFullName() : "Chưa có tên";
-                    String relationship = resident.getRelationship() != null ? " - " + resident.getRelationship() : "";
-                    return name + relationship + " (" + resident.getUsername() + ")";
+                    return name + " (" + resident.getUsername() + ")";
                 }
 
                 @Override
@@ -212,8 +233,9 @@ public class AddApartmentController {
             if (!apartmentIdText.isEmpty()) {
                 try {
                     apartmentId = Integer.parseInt(apartmentIdText);
-                    // Kiểm tra xem ID này đã tồn tại chưa
-                    if (apartmentDAO.apartmentExists(apartmentId)) {
+                    
+                    // CHỈ KIỂM TRA TRÙNG KHI ĐANG THÊM MỚI (không phải cập nhật)
+                    if (selectedApartment == null && apartmentDAO.apartmentExists(apartmentId)) {
                         showAlert(Alert.AlertType.WARNING, "ID đã tồn tại", 
                                 "Căn hộ với ID " + apartmentId + " đã tồn tại. Vui lòng chọn ID khác hoặc để trống để tự động.");
                         return;
@@ -229,27 +251,39 @@ public class AddApartmentController {
             int ownerId = (selectedOwner != null && selectedOwner.getUserId() > 0) ? selectedOwner.getUserId() : 0;
 
             // 4. Tạo đối tượng Apartment
-            Apartment newApartment = new Apartment();
-            newApartment.setApartmentId(apartmentId); // 0 = tự động, >0 = chỉ định
-            newApartment.setArea(area);
-            newApartment.setOwnerId(ownerId);
+            Apartment apartment = new Apartment();
+            apartment.setApartmentId(apartmentId); // 0 = tự động, >0 = chỉ định
+            apartment.setArea(area);
+            apartment.setOwnerId(ownerId);
 
-            // 5. Gọi Service
-            if (apartmentService.addApartment(newApartment)) {
-                String successMsg = apartmentId > 0 
-                    ? "Thêm căn hộ ID " + apartmentId + " thành công!" 
-                    : "Thêm căn hộ mới thành công!";
-                showAlert(Alert.AlertType.INFORMATION, "Thành công", successMsg);
-                
-                // Reload danh sách căn hộ và ID gợi ý
-                loadApartmentList();
-                loadSuggestedApartmentId();
-                
-                // Xóa form để thêm tiếp
-                txtArea.clear();
-                cbOwner.getSelectionModel().selectFirst();
+            // 5. Gọi Service (Thêm mới hoặc Cập nhật)
+            if (selectedApartment == null) {
+                // CHẾ ĐỘ THÊM MỚI
+                if (apartmentService.addApartment(apartment)) {
+                    String successMsg = apartmentId > 0 
+                        ? "Thêm căn hộ ID " + apartmentId + " thành công!" 
+                        : "Thêm căn hộ mới thành công!";
+                    showAlert(Alert.AlertType.INFORMATION, "Thành công", successMsg);
+                    
+                    // Reload danh sách căn hộ và reset form
+                    loadApartmentList();
+                    handleClearForm();
+                } else {
+                    showAlert(Alert.AlertType.ERROR, "Lỗi", "Không thể thêm căn hộ (Lỗi không xác định).");
+                }
             } else {
-                showAlert(Alert.AlertType.ERROR, "Lỗi", "Không thể thêm căn hộ (Lỗi không xác định).");
+                // CHẾ ĐỘ CẬP NHẬT
+                apartment.setApartmentId(selectedApartment.getApartmentId()); // Dùng ID của căn hộ đang sửa
+                if (apartmentService.updateApartment(apartment)) {
+                    showAlert(Alert.AlertType.INFORMATION, "Thành công", 
+                            "Cập nhật thông tin căn hộ ID " + apartment.getApartmentId() + " thành công!");
+                    
+                    // Reload danh sách và reset form
+                    loadApartmentList();
+                    handleClearForm();
+                } else {
+                    showAlert(Alert.AlertType.ERROR, "Lỗi", "Không thể cập nhật căn hộ (Lỗi không xác định).");
+                }
             }
         } catch (ValidationException e) {
             showAlert(Alert.AlertType.WARNING, "Dữ liệu không hợp lệ", e.getMessage());
@@ -259,6 +293,132 @@ public class AddApartmentController {
         } catch (Exception e) {
             showAlert(Alert.AlertType.ERROR, "Lỗi", "Đã xảy ra lỗi: " + e.getMessage());
             e.printStackTrace();
+        }
+    }
+
+    /**
+     * Load thông tin căn hộ vào form để sửa
+     */
+    private void loadApartmentToForm(Apartment apartment) {
+        selectedApartment = apartment;
+        
+        // Điền thông tin vào form
+        if (txtApartmentId != null) {
+            txtApartmentId.setText(String.valueOf(apartment.getApartmentId()));
+            txtApartmentId.setEditable(false); // Không cho sửa ID
+            txtApartmentId.setStyle("-fx-background-color: #e9ecef;");
+        }
+        
+        if (txtArea != null) {
+            txtArea.setText(apartment.getArea().toString());
+        }
+        
+        // Chọn chủ hộ tương ứng
+        if (cbOwner != null) {
+            if (apartment.getOwnerId() > 0) {
+                // Tìm resident có userId = apartment.ownerId
+                for (Resident resident : cbOwner.getItems()) {
+                    if (resident != null && resident.getUserId() == apartment.getOwnerId()) {
+                        cbOwner.getSelectionModel().select(resident);
+                        break;
+                    }
+                }
+            } else {
+                // Chọn "Căn hộ trống"
+                cbOwner.getSelectionModel().selectFirst();
+            }
+        }
+        
+        // Đổi text nút và hiện nút Delete
+        if (btnSave != null) {
+            btnSave.setText("💾 Cập Nhật");
+        }
+        if (btnDelete != null) {
+            btnDelete.setVisible(true);
+            btnDelete.setManaged(true);
+        }
+        if (titleLabel != null) {
+            titleLabel.setText("SỬA THÔNG TIN CĂN HỘ");
+        }
+    }
+
+    /**
+     * Xử lý sự kiện khi nhấn nút XÓA
+     */
+    @FXML
+    private void handleDeleteButtonAction() {
+        if (selectedApartment == null) {
+            showAlert(Alert.AlertType.WARNING, "Cảnh báo", "Vui lòng chọn căn hộ cần xóa.");
+            return;
+        }
+        
+        // Xác nhận xóa
+        Alert confirmAlert = new Alert(Alert.AlertType.CONFIRMATION);
+        confirmAlert.setTitle("Xác nhận xóa");
+        confirmAlert.setHeaderText("Bạn có chắc chắn muốn xóa căn hộ này?");
+        confirmAlert.setContentText("Căn hộ ID: " + selectedApartment.getApartmentId() + 
+                                    "\nDiện tích: " + selectedApartment.getArea() + " m²");
+        
+        confirmAlert.showAndWait().ifPresent(response -> {
+            if (response == ButtonType.OK) {
+                try {
+                    if (apartmentService.deleteApartment(selectedApartment.getApartmentId())) {
+                        showAlert(Alert.AlertType.INFORMATION, "Thành công", 
+                                "Đã xóa căn hộ ID " + selectedApartment.getApartmentId());
+                        
+                        // Reload danh sách và reset form
+                        loadApartmentList();
+                        handleClearForm();
+                    } else {
+                        showAlert(Alert.AlertType.ERROR, "Lỗi", "Không thể xóa căn hộ.");
+                    }
+                } catch (SQLException e) {
+                    showAlert(Alert.AlertType.ERROR, "Lỗi Database", 
+                            "Lỗi: " + e.getMessage() + 
+                            "\n\nLưu ý: Không thể xóa căn hộ có cư dân hoặc hóa đơn liên quan.");
+                    e.printStackTrace();
+                }
+            }
+        });
+    }
+
+    /**
+     * Xử lý sự kiện khi nhấn nút LÀM MỚI FORM
+     */
+    @FXML
+    private void handleClearForm() {
+        selectedApartment = null;
+        
+        // Reset form
+        if (txtArea != null) {
+            txtArea.clear();
+        }
+        if (cbOwner != null) {
+            cbOwner.getSelectionModel().selectFirst();
+        }
+        
+        // Reset ID và cho phép tự động
+        loadSuggestedApartmentId();
+        if (txtApartmentId != null) {
+            txtApartmentId.setEditable(true);
+            txtApartmentId.setStyle("");
+        }
+        
+        // Đổi text nút về Thêm mới
+        if (btnSave != null) {
+            btnSave.setText("💾 Lưu Căn Hộ");
+        }
+        if (btnDelete != null) {
+            btnDelete.setVisible(false);
+            btnDelete.setManaged(false);
+        }
+        if (titleLabel != null) {
+            titleLabel.setText("QUẢN LÝ CĂN HỘ");
+        }
+        
+        // Bỏ chọn trong TableView
+        if (tableViewApartments != null) {
+            tableViewApartments.getSelectionModel().clearSelection();
         }
     }
 

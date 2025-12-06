@@ -171,4 +171,53 @@ public class ApartmentDAO {
         }
         return 1; // Mặc định là 1 nếu không có căn hộ nào
     }
+
+    /**
+     * Cập nhật thông tin căn hộ (diện tích và chủ hộ)
+     * @param apartment Đối tượng Apartment chứa thông tin mới
+     * @return true nếu cập nhật thành công
+     */
+    public boolean updateApartment(Apartment apartment) throws SQLException {
+        String sql = "UPDATE apartments SET area = ?, owner_id = ? WHERE apartment_id = ?";
+        
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            
+            // Set area
+            if (apartment.getArea() != null) {
+                stmt.setBigDecimal(1, apartment.getArea());
+            } else {
+                stmt.setNull(1, java.sql.Types.DECIMAL);
+            }
+            
+            // Set owner_id (có thể NULL)
+            if (apartment.getOwnerId() > 0) {
+                stmt.setInt(2, apartment.getOwnerId());
+            } else {
+                stmt.setNull(2, java.sql.Types.INTEGER);
+            }
+            
+            stmt.setInt(3, apartment.getApartmentId());
+            
+            int rowsAffected = stmt.executeUpdate();
+            return rowsAffected > 0;
+        }
+    }
+
+    /**
+     * Xóa căn hộ
+     * @param apartmentId ID căn hộ cần xóa
+     * @return true nếu xóa thành công
+     */
+    public boolean deleteApartment(int apartmentId) throws SQLException {
+        String sql = "DELETE FROM apartments WHERE apartment_id = ?";
+        
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            
+            stmt.setInt(1, apartmentId);
+            int rowsAffected = stmt.executeUpdate();
+            return rowsAffected > 0;
+        }
+    }
 }
