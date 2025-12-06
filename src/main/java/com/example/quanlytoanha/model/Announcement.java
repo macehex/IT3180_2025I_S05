@@ -1,4 +1,3 @@
-// Vị trí: src/main/java/com/example/quanlytoanha/model/Announcement.java
 package com.example.quanlytoanha.model;
 
 import java.sql.Date;
@@ -13,7 +12,7 @@ public class Announcement {
     private String annTitle;
     private String content;
     private boolean isUrgent;
-    private Date createdAt;
+    private Timestamp createdAt;
 
     // Constructors
     public Announcement() {}
@@ -66,11 +65,11 @@ public class Announcement {
         isUrgent = urgent;
     }
 
-    public Date getCreatedAt() {
+    public Timestamp getCreatedAt() {
         return createdAt;
     }
 
-    public void setCreatedAt(Date createdAt) {
+    public void setCreatedAt(Timestamp createdAt) {
         this.createdAt = createdAt;
     }
 }

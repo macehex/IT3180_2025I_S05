@@ -46,7 +46,29 @@
                 <Separator />
 
                 <Button fx:id="btnQuanLyHoaDon" text="💰 Hóa Đơn &amp; Công Nợ" styleClass="sidebar-menu-item" />
-                <Button fx:id="btnTaoThongBao" text="📢 Thông Báo Chung" styleClass="sidebar-menu-item" />
+
+                <VBox spacing="0">
+                    <Button fx:id="btnMenuThongBao" text="📢 Thông Báo Chung"
+                            styleClass="sidebar-menu-item"
+                            onAction="#toggleNotificationSubMenu"
+                            maxWidth="Infinity" />
+
+                    <VBox fx:id="vboxNotificationSubMenu" visible="false" managed="false" spacing="0">
+
+                        <Button fx:id="btnTaoThongBao" text="➕ Tạo thông báo mới"
+                                styleClass="sidebar-menu-item"
+                                style="-fx-padding: 10 10 10 50; -fx-font-size: 13px; -fx-background-color: transparent;"
+                                onAction="#handleOpenAnnouncementForm"
+                                maxWidth="Infinity" alignment="BASELINE_LEFT"/>
+
+                        <Button fx:id="btnXemThongBaoDaGui" text="📋 Xem DS đã gửi"
+                                styleClass="sidebar-menu-item"
+                                style="-fx-padding: 10 10 10 50; -fx-font-size: 13px; -fx-background-color: transparent;"
+                                onAction="#handleOpenSentAnnouncements"
+                                maxWidth="Infinity" alignment="BASELINE_LEFT"/>
+                    </VBox>
+                </VBox>
+
                 <Button fx:id="btnXemYeuCauDichVu" text="🛠️ Yêu Cầu Dịch Vụ" styleClass="sidebar-menu-item" />
 
                 <Separator />

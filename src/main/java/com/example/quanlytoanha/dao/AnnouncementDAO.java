@@ -15,7 +15,7 @@ public class AnnouncementDAO {
      */
     public int createAnnouncement(Announcement announcement) throws SQLException {
         String sql = "INSERT INTO announcements (author_id, ann_title, content, is_urgent, created_at) " +
-                     "VALUES (?, ?, ?, ?, CURRENT_DATE) RETURNING ann_id";
+                "VALUES (?, ?, ?, ?, CURRENT_TIMESTAMP) RETURNING ann_id";
         
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
@@ -161,7 +161,7 @@ public class AnnouncementDAO {
         announcement.setAnnTitle(rs.getString("ann_title"));
         announcement.setContent(rs.getString("content"));
         announcement.setUrgent(rs.getBoolean("is_urgent"));
-        announcement.setCreatedAt(rs.getDate("created_at"));
+        announcement.setCreatedAt(rs.getTimestamp("created_at"));
         return announcement;
     }
 }

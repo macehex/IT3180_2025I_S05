@@ -1,0 +1,86 @@
+/* 1. Tổng thể bảng: Bỏ viền thừa, thêm bo góc */
+.table-view {
+    -fx-background-color: white;
+    -fx-background-radius: 8px;
+    -fx-border-radius: 8px;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.1), 10, 0, 0, 5); /* Đổ bóng nhẹ */
+    -fx-padding: 0;
+}
+
+/* 2. Tiêu đề cột (Header) */
+.table-view .column-header-background {
+    -fx-background-color: #f8f9fa; /* Màu xám rất nhạt */
+    -fx-background-radius: 8px 8px 0 0;
+}
+
+.table-view .column-header {
+    -fx-background-color: transparent;
+    -fx-size: 45px; /* Chiều cao header */
+    -fx-border-color: transparent transparent #e2e8f0 transparent; /* Chỉ kẻ đường dưới */
+}
+
+.table-view .column-header .label {
+    -fx-text-fill: #64748b; /* Màu chữ xám xanh hiện đại */
+    -fx-font-weight: bold;
+    -fx-font-family: 'Segoe UI', sans-serif;
+    -fx-font-size: 13px;
+    -fx-alignment: center-left;
+}
+
+/* 3. Dòng dữ liệu (Rows) */
+.table-row-cell {
+    -fx-background-color: white;
+    -fx-border-color: transparent transparent #f1f5f9 transparent; /* Kẻ mờ giữa các dòng */
+    -fx-cell-size: 40px; /* Chiều cao dòng */
+}
+
+.table-row-cell:odd {
+    -fx-background-color: #fafafa; /* Dòng chẵn lẻ khác màu nhẹ */
+}
+
+.table-row-cell:hover {
+    -fx-background-color: #f1f5f9; /* Hiệu ứng khi di chuột vào */
+}
+
+.table-row-cell:selected {
+    -fx-background-color: #e0f2fe; /* Màu xanh nhạt khi chọn */
+}
+
+/* 4. Ô dữ liệu (Cells) */
+.table-cell {
+    -fx-alignment: CENTER_LEFT;
+    -fx-text-fill: #334155;
+    -fx-font-size: 13px;
+    -fx-padding: 0 10 0 10;
+}
+
+/* 5. Style cho thanh cuộn (Scrollbar) cho đẹp hơn */
+.table-view .scroll-bar:vertical,
+.table-view .scroll-bar:horizontal {
+    -fx-background-color: transparent;
+}
+.table-view .scroll-bar:vertical .thumb,
+.table-view .scroll-bar:horizontal .thumb {
+    -fx-background-color: #cbd5e1;
+    -fx-background-radius: 5em;
+}
+
+/* --- BADGES (Nhãn trạng thái) --- */
+/* Style cho Label bên trong ô Khẩn cấp */
+.badge-urgent {
+    -fx-background-color: #fecaca; /* Nền đỏ nhạt */
+    -fx-text-fill: #ef4444;       /* Chữ đỏ đậm */
+    -fx-background-radius: 12px;
+    -fx-padding: 4 12 4 12;
+    -fx-font-size: 11px;
+    -fx-font-weight: bold;
+}
+
+.badge-normal {
+    -fx-background-color: #d1fae5; /* Nền xanh lá nhạt */
+    -fx-text-fill: #10b981;       /* Chữ xanh lá đậm */
+    -fx-background-radius: 12px;
+    -fx-padding: 4 12 4 12;
+    -fx-font-size: 11px;
+    -fx-font-weight: bold;
+}
