@@ -237,5 +237,17 @@ public class NotificationService {
             return false;
         }
     }
+
+    /**
+     * Lấy lịch sử thông báo đầy đủ cho người dùng hiện tại.
+     */
+    public List<Notification> getAllMyNotifications() throws SQLException {
+        User currentUser = SessionManager.getInstance().getCurrentUser();
+        if (currentUser == null) {
+            return new ArrayList<>();
+        }
+        // Gọi hàm mới vừa viết bên DAO
+        return notificationDAO.getAllNotificationsForUser(currentUser.getUserId());
+    }
 }
 

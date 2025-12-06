@@ -4,13 +4,19 @@ package com.example.quanlytoanha.controller;
 import com.example.quanlytoanha.model.Notification;
 import com.example.quanlytoanha.service.NotificationService; // Import service tương ứng
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable; // Implement Initializable để dùng hàm initialize()
+import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
 import javafx.scene.control.Tooltip; // Import Tooltip để hiển thị đầy đủ message
+import javafx.stage.Modality;
+import javafx.stage.Stage;
 import javafx.util.Callback; // Import Callback
 
+import java.io.IOException;
 import java.net.URL; // Import URL
 import java.sql.SQLException;
 import java.text.SimpleDateFormat;
@@ -57,11 +63,11 @@ public class NotificationViewController implements Initializable { // Implement 
 
                     // Đặt style cho thông báo chưa đọc
                     if (!item.isRead()) {
-                        // In đậm và có thể thêm màu nền nhẹ nhàng
-                        setStyle("-fx-font-weight: bold; -fx-background-color: #e8f4ff;");
+                        // Chưa đọc: Chữ đậm, nền xanh nhạt, màu chữ đen rõ ràng
+                        setStyle("-fx-font-weight: bold; -fx-background-color: #e8f4ff; -fx-text-fill: #000000;");
                     } else {
-                        // Xóa style nếu đã đọc
-                        setStyle("");
+                        // Đã đọc: Chữ thường, nền trong suốt (hoặc trắng), màu chữ ghi (xám)
+                        setStyle("-fx-font-weight: normal; -fx-background-color: transparent; -fx-text-fill: #718096;");
                     }
                 }
             }
@@ -70,9 +76,17 @@ public class NotificationViewController implements Initializable { // Implement 
         // Thêm sự kiện click chuột vào ListView
         notificationListView.setOnMouseClicked(event -> {
             Notification selectedNotification = notificationListView.getSelectionModel().getSelectedItem();
-            // Nếu có mục được chọn và nó chưa đọc
-            if (selectedNotification != null && !selectedNotification.isRead()) {
-                markNotificationAsRead(selectedNotification); // Gọi hàm đánh dấu đã đọc
+
+            if (selectedNotification != null) {
+                // 1. Click chuột (bất kỳ): Đánh dấu đã đọc
+                if (!selectedNotification.isRead()) {
+                    markNotificationAsRead(selectedNotification);
+                }
+
+                // 2. Double Click (Nhấn đúp): Mở popup xem chi tiết
+                if (event.getClickCount() == 2) {
+                    showNotificationDetailPopup(selectedNotification);
+                }
             }
         });
 
@@ -86,7 +100,7 @@ public class NotificationViewController implements Initializable { // Implement 
     private void loadNotifications() {
         try {
             // Gọi service để lấy thông báo chưa đọc của người dùng hiện tại
-            List<Notification> notifications = notificationService.getMyUnreadNotifications();
+            List<Notification> notifications = notificationService.getAllMyNotifications();
             // Cập nhật dữ liệu cho ListView
             notificationListView.getItems().setAll(notifications);
         } catch (SQLException e) {
@@ -128,5 +142,29 @@ public class NotificationViewController implements Initializable { // Implement 
         alert.setHeaderText(null); // Không có tiêu đề phụ
         alert.setContentText(message);
         alert.showAndWait();
+    }
+
+    // --- HÀM MỚI ĐỂ MỞ POPUP ---
+    private void showNotificationDetailPopup(Notification notification) {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/example/quanlytoanha/view/notification_detail.fxml"));
+            Parent root = loader.load();
+
+            // Lấy controller của popup và truyền dữ liệu
+            NotificationDetailController controller = loader.getController();
+            controller.setNotification(notification);
+
+            Stage stage = new Stage();
+            stage.setTitle("Chi tiết thông báo");
+            stage.initModality(Modality.WINDOW_MODAL); // Chặn tương tác cửa sổ cha
+            stage.initOwner(notificationListView.getScene().getWindow());
+            stage.setScene(new Scene(root));
+            stage.setResizable(false); // Popup nhỏ gọn không cần resize
+            stage.showAndWait();
+
+        } catch (IOException e) {
+            e.printStackTrace();
+            showAlert(Alert.AlertType.ERROR, "Lỗi", "Không thể mở chi tiết thông báo: " + e.getMessage());
+        }
     }
 }

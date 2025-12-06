@@ -80,4 +80,25 @@ public class NotificationDAO {
         }
         return n;
     }
+
+    /**
+     * Lấy danh sách TẤT CẢ thông báo (cả đã đọc và chưa đọc) của user.
+     */
+    public List<Notification> getAllNotificationsForUser(int userId) throws SQLException {
+        List<Notification> notifications = new ArrayList<>();
+        // SQL không có điều kiện "is_read = FALSE" để lấy hết
+        String sql = "SELECT * FROM notifications WHERE user_id = ? ORDER BY created_at DESC";
+
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setInt(1, userId);
+            ResultSet rs = stmt.executeQuery();
+            while (rs.next()) {
+                // Sử dụng lại hàm map có sẵn trong file của bạn
+                notifications.add(mapResultSetToNotification(rs));
+            }
+        }
+        return notifications;
+    }
 }

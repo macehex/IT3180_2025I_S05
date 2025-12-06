@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
+
+<VBox prefHeight="600.0" prefWidth="800.0" spacing="10.0" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.quanlytoanha.controller.SentAnnouncementsController">
+    <padding>
+        <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
+    </padding>
+    <children>
+        <Label text="Danh Sách Thông Báo Đã Gửi" textFill="#21468b">
+            <font>
+                <Font name="System Bold" size="24.0" />
+            </font>
+        </Label>
+        <Label text="(Click đúp vào dòng để xem chi tiết nội dung)" textFill="#666666" />
+
+        <TableView fx:id="tableAnnouncements" VBox.vgrow="ALWAYS">
+            <columns>
+                <TableColumn fx:id="colId" prefWidth="50.0" text="ID" />
+                <TableColumn fx:id="colTitle" prefWidth="300.0" text="Tiêu đề" />
+                <TableColumn fx:id="colDate" prefWidth="150.0" text="Ngày gửi" />
+                <TableColumn fx:id="colUrgent" prefWidth="100.0" text="Khẩn cấp" />
+                <TableColumn fx:id="colContent" prefWidth="200.0" text="Nội dung (tóm tắt)" />
+            </columns>
+            <columnResizePolicy>
+                <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
+            </columnResizePolicy>
+        </TableView>
+    </children>
+</VBox>

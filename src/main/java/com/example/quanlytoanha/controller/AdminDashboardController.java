@@ -16,6 +16,7 @@ import javafx.scene.control.ProgressBar;
 import javafx.scene.layout.VBox;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
+import java.net.URL;
 
 import java.io.IOException;
 import java.math.BigDecimal;
@@ -23,19 +24,36 @@ import java.util.Map;
 
 public class AdminDashboardController {
 
-    @FXML private Button btnThemCuDan;
-    @FXML private Button btnThemCanHo;
-    @FXML private Label lblWelcome;
-    @FXML private Button btnQuanLyTaiKhoan;
-    @FXML private Button btnQuanLyHoaDon;
-    @FXML private Button btnTaoThongBao;
-    @FXML private Button btnXemYeuCauDichVu;
-    @FXML private Button btnXemDanhSachCuDan;
-    @FXML private Button btnLogout;
-    @FXML private Button btnLogoutHeader;
-    @FXML private Button btnMenuToggle;
-    @FXML private VBox sidebar;
-    @FXML private Label lblUserName;
+    @FXML
+    private Button btnThemCuDan;
+    @FXML
+    private Button btnThemCanHo;
+    @FXML
+    private Label lblWelcome;
+    @FXML
+    private Button btnQuanLyTaiKhoan;
+    @FXML
+    private Button btnQuanLyHoaDon;
+    @FXML
+    private Button btnTaoThongBao;
+    @FXML
+    private Button btnMenuThongBao;       // Nút cha
+    @FXML
+    private VBox vboxNotificationSubMenu; // Container menu con
+    @FXML
+    private Button btnXemThongBaoDaGui;   // Nút xem lịch sử
+    @FXML
+    private Button btnXemYeuCauDichVu;
+    @FXML
+    private Button btnXemDanhSachCuDan;
+    @FXML
+    private Button btnLogout;
+    @FXML
+    private Button btnMenuToggle;
+    @FXML
+    private VBox sidebar;
+    @FXML
+    private Label lblUserName;
 
     @FXML private Label lblTotalResidents;
     @FXML private Label lblTotalApartments;
@@ -109,6 +127,14 @@ public class AdminDashboardController {
                 btnQuanLyHoaDon.setOnAction(event -> handleQuanLyHoaDon());
             if (btnTaoThongBao != null)
                 btnTaoThongBao.setOnAction(event -> handleOpenAnnouncementForm());
+            // Cấu hình cho nút "Xem thông báo đã gửi"
+            if (btnXemThongBaoDaGui != null) {
+                btnXemThongBaoDaGui.setOnAction(event -> handleOpenSentAnnouncements());
+            }
+            // Cấu hình cho nút menu cha
+            if (btnMenuThongBao != null) {
+                btnMenuThongBao.setOnAction(event -> toggleNotificationSubMenu());
+            }
             if (btnXemYeuCauDichVu != null)
                 btnXemYeuCauDichVu.setOnAction(event -> handleXemYeuCauDichVu());
             if (btnXemDanhSachCuDan != null)
@@ -456,6 +482,7 @@ public class AdminDashboardController {
         showAlert(Alert.AlertType.INFORMATION, "Thông báo", "Chức năng Quản lý hóa đơn chưa được triển khai.");
     }
 
+    @FXML
     private void handleOpenAnnouncementForm() {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/example/quanlytoanha/view/announcement_form.fxml"));
@@ -568,5 +595,62 @@ public class AdminDashboardController {
         alert.setHeaderText(null);
         alert.setContentText(message);
         alert.showAndWait();
+    }
+
+    /**
+     * Hàm bật/tắt menu con của phần Thông Báo
+     */
+    @FXML
+    private void toggleNotificationSubMenu() {
+        if (vboxNotificationSubMenu != null) {
+            boolean isVisible = vboxNotificationSubMenu.isVisible();
+            // Đảo ngược trạng thái hiện tại
+            vboxNotificationSubMenu.setVisible(!isVisible);
+            vboxNotificationSubMenu.setManaged(!isVisible); // managed đi kèm visible để không chiếm chỗ trống khi ẩn
+
+            // (Tuỳ chọn) Đổi icon hoặc màu nút cha để biết đang mở
+            if (!isVisible) {
+                btnMenuThongBao.setStyle("-fx-background-color: rgba(255,255,255,0.1);"); // Sáng lên khi mở
+            } else {
+                btnMenuThongBao.setStyle(""); // Trở về mặc định khi đóng
+            }
+        }
+    }
+
+    /**
+     * Hàm mở màn hình danh sách thông báo đã gửi
+     * (US: Xem thông báo đã gửi)
+     */
+    @FXML
+    private void handleOpenSentAnnouncements() {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/example/quanlytoanha/view/sent_announcements.fxml"));
+            Parent root = loader.load();
+
+            // --- BẮT ĐẦU SỬA ĐỔI ---
+            Scene scene = new Scene(root, 1000, 650); // Tăng kích thước chút cho thoáng
+
+            // Nạp CSS vào Scene
+            // Đảm bảo đường dẫn file CSS chính xác với cấu trúc dự án của bạn
+            URL cssUrl = getClass().getResource("/com/example/quanlytoanha/view/styles/table_styles.css");
+            if (cssUrl != null) {
+                scene.getStylesheets().add(cssUrl.toExternalForm());
+            } else {
+                System.err.println("Không tìm thấy file table_styles.css!");
+            }
+            // --- KẾT THÚC SỬA ĐỔI ---
+
+            Stage stage = new Stage();
+            stage.setTitle("Danh Sách Thông Báo Đã Gửi");
+            stage.initModality(Modality.WINDOW_MODAL);
+            stage.initOwner(btnXemThongBaoDaGui.getScene().getWindow());
+            stage.setScene(scene);
+            stage.setResizable(true);
+            stage.showAndWait();
+
+        } catch (IOException e) {
+            e.printStackTrace();
+            showAlert(Alert.AlertType.ERROR, "Lỗi", "Không thể tải màn hình Lịch sử thông báo: " + e.getMessage());
+        }
     }
 }

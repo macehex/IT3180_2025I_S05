@@ -1,0 +1,91 @@
+/* 1. Container chính */
+.detail-container {
+    -fx-background-color: white;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.2), 10, 0, 0, 0);
+    -fx-padding: 0;
+}
+
+/* 2. Header màu xanh */
+.detail-header {
+    -fx-background-color: #21468B; /* Màu chủ đạo của app */
+    -fx-padding: 15px;
+    -fx-alignment: CENTER_LEFT;
+}
+
+.header-text {
+    -fx-text-fill: white;
+    -fx-font-size: 16px;
+    -fx-font-weight: bold;
+    -fx-font-family: 'Segoe UI', sans-serif;
+}
+
+/* 3. Phần thông tin meta (Ngày gửi, Trạng thái) */
+.meta-container {
+    -fx-padding: 15px 20px 5px 20px;
+    -fx-alignment: CENTER_LEFT;
+}
+
+.meta-date {
+    -fx-text-fill: #64748b; /* Màu xám */
+    -fx-font-style: italic;
+    -fx-font-size: 13px;
+}
+
+/* Badge trạng thái (Reuse style cũ hoặc định nghĩa mới) */
+.badge-urgent {
+    -fx-background-color: #fee2e2;
+    -fx-text-fill: #ef4444;
+    -fx-background-radius: 4px;
+    -fx-padding: 2 8 2 8;
+    -fx-font-size: 12px;
+    -fx-font-weight: bold;
+}
+
+.badge-normal {
+    -fx-background-color: #dbeafe;
+    -fx-text-fill: #2563eb;
+    -fx-background-radius: 4px;
+    -fx-padding: 2 8 2 8;
+    -fx-font-size: 12px;
+    -fx-font-weight: bold;
+}
+
+/* 4. Tiêu đề thông báo */
+.content-title {
+    -fx-font-size: 18px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #1e293b;
+    -fx-padding: 5px 20px 10px 20px;
+}
+
+/* 5. Nội dung thông báo */
+.content-area {
+    -fx-background-color: transparent;
+    -fx-background-insets: 0;
+    -fx-padding: 10px 20px 20px 20px;
+    -fx-font-size: 14px;
+    -fx-text-fill: #334155;
+    -fx-font-family: 'Segoe UI', sans-serif;
+}
+/* Ẩn viền TextArea mặc định */
+.content-area .content {
+    -fx-background-color: #f8fafc;
+    -fx-background-radius: 8px;
+    -fx-padding: 10px;
+}
+.content-area:focused {
+    -fx-background-color: transparent;
+}
+
+/* 6. Nút Đóng */
+.action-btn {
+    -fx-background-color: #e2e8f0;
+    -fx-text-fill: #475569;
+    -fx-font-weight: bold;
+    -fx-background-radius: 6px;
+    -fx-cursor: hand;
+    -fx-padding: 8 20 8 20;
+}
+.action-btn:hover {
+    -fx-background-color: #cbd5e1;
+}

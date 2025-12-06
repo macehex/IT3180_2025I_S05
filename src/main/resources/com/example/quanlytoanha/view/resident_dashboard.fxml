@@ -20,10 +20,12 @@
 
         <!-- App Title -->
         <VBox alignment="CENTER" spacing="10.0" style="-fx-padding: 0 0 36 0;">
-            <Label text="PLACEHOLDER"
+            <Label text="Chung cư BlueMoon"
                    style="-fx-font-size: 23px; -fx-font-weight: bold; -fx-text-fill: white; -fx-font-family: 'DejaVu Sans';"/>
-            <Label text="PLACEHOLDER"
-                   style="-fx-font-size: 14px; -fx-text-fill: rgba(255,255,255,0.7); -fx-font-family: 'DejaVu Sans';"/>
+
+            <Label text="Trang cư dân"
+                   style="-fx-font-size: 14px;
+                   -fx-text-fill: rgba(255,255,255,0.7); -fx-font-family: 'DejaVu Sans';"/>
         </VBox>
 
         <!-- Navigation Section -->
