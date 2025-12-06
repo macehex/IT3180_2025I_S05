@@ -3,14 +3,17 @@ package com.example.quanlytoanha.controller;
 
 import com.example.quanlytoanha.service.ResidentService.ValidationException;
 import com.example.quanlytoanha.model.Resident;
+import com.example.quanlytoanha.model.Apartment;
 import com.example.quanlytoanha.service.ResidentService;
 import com.example.quanlytoanha.session.SessionManager; // <-- BỔ SUNG: Import SessionManager
 import com.example.quanlytoanha.model.User;             // <-- BỔ SUNG: Import User
+import com.example.quanlytoanha.dao.ApartmentDAO;
 
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.stage.Stage;
+import javafx.util.StringConverter;
 
 import java.sql.SQLException;
 import java.time.ZoneId;
@@ -32,6 +35,7 @@ public class AddResidentController {
     // --- KHAI BÁO SERVICE VÀ ĐỐI TƯỢNG SỬA ---
     // (Giữ nguyên)
     private final ResidentService residentService = new ResidentService();
+    private final ApartmentDAO apartmentDAO = new ApartmentDAO();
     private Resident residentToEdit;
 
     /**
@@ -41,12 +45,8 @@ public class AddResidentController {
     public void initialize() {
         // ⚠️ Bọc toàn bộ logic trong try-catch để bắt lỗi (nếu có)
         try {
-            // 1. Khởi tạo ComboBox Căn hộ (Sử dụng setItems an toàn)
-            if (cbApartmentId != null) {
-                cbApartmentId.setItems(FXCollections.observableArrayList(
-                        101, 102, 201, 202, 301, 302
-                ));
-            }
+            // 1. Khởi tạo ComboBox Căn hộ - Load từ database
+            loadApartmentList();
 
             // 2. Khởi tạo ComboBox Mối quan hệ (Sử dụng setItems an toàn)
             if (cbRelationship != null) {
@@ -61,6 +61,52 @@ public class AddResidentController {
             }
         } catch (Exception e) {
             System.err.println("LỖI KHỞI TẠO COMBOBOX TRONG ADD_RESIDENT_CONTROLLER:");
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * Load danh sách căn hộ từ database vào ComboBox
+     */
+    private void loadApartmentList() {
+        try {
+            if (cbApartmentId != null) {
+                java.util.List<Apartment> apartments = apartmentDAO.getAllApartments();
+                
+                // Tạo ObservableList chỉ chứa apartment_id
+                javafx.collections.ObservableList<Integer> apartmentIds = FXCollections.observableArrayList();
+                for (Apartment apt : apartments) {
+                    apartmentIds.add(apt.getApartmentId());
+                }
+                
+                cbApartmentId.setItems(apartmentIds);
+                
+                // Cấu hình hiển thị: ID - Diện tích - Chủ hộ
+                cbApartmentId.setConverter(new StringConverter<Integer>() {
+                    @Override
+                    public String toString(Integer aptId) {
+                        if (aptId == null) return "";
+                        
+                        // Tìm apartment tương ứng để hiển thị thông tin
+                        for (Apartment apt : apartments) {
+                            if (apt.getApartmentId() == aptId) {
+                                String ownerInfo = (apt.getOwnerName() != null && !apt.getOwnerName().isEmpty()) 
+                                    ? " - " + apt.getOwnerName() 
+                                    : " - Căn hộ trống";
+                                return String.format("CH %d (%.2f m²)%s", aptId, apt.getArea(), ownerInfo);
+                            }
+                        }
+                        return String.valueOf(aptId);
+                    }
+
+                    @Override
+                    public Integer fromString(String string) {
+                        return null;
+                    }
+                });
+            }
+        } catch (Exception e) {
+            System.err.println("Lỗi khi load danh sách căn hộ: " + e.getMessage());
             e.printStackTrace();
         }
     }

@@ -9,7 +9,6 @@ import com.google.gson.Gson; // <-- BỔ SUNG: Import Gson
 import com.google.gson.GsonBuilder; // <-- BỔ SUNG: Import GsonBuilder (cho định dạng đẹp)
 
 import java.sql.SQLException;
-import java.util.UUID;
 
 public class ResidentService {
 

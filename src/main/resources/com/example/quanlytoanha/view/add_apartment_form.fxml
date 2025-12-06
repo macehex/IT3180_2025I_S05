@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.text.Font?>
+<?import javafx.scene.control.ScrollPane?>
+
+<BorderPane xmlns="http://javafx.com/javafx/17" 
+            xmlns:fx="http://javafx.com/fxml/1" 
+            fx:controller="com.example.quanlytoanha.controller.AddApartmentController"
+            style="-fx-background-color: #f8f9fa;">
+    
+    <top>
+        <!-- Header với gradient xanh đậm -->
+        <HBox alignment="CENTER_LEFT" style="-fx-background-color: linear-gradient(to right, #1e3c72 0%, #2a5298 100%); -fx-padding: 25;">
+            <children>
+                <Label fx:id="titleLabel" text="THÊM CĂN HỘ MỚI" 
+                       style="-fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: white;">
+                    <HBox.margin>
+                        <Insets left="20.0" />
+                    </HBox.margin>
+                </Label>
+            </children>
+        </HBox>
+    </top>
+    
+    <center>
+        <HBox spacing="20" style="-fx-padding: 20;">
+            <!-- Form thêm căn hộ bên trái -->
+            <VBox alignment="TOP_LEFT" prefWidth="400" style="-fx-padding: 20;">
+                <children>
+                    <Label text="THÔNG TIN CĂN HỘ MỚI" 
+                           style="-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #1e3c72; -fx-padding: 0 0 15 0;"/>
+                    
+                    <GridPane hgap="15" vgap="20" alignment="TOP_LEFT">
+                        <Label text="ID căn hộ (tự động):" GridPane.columnIndex="0" GridPane.rowIndex="0" 
+                               style="-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #1e3c72;"/>
+                        <TextField fx:id="txtApartmentId" promptText="Tự động" 
+                                   prefWidth="250.0" prefHeight="40.0"
+                                   style="-fx-background-radius: 8; -fx-padding: 10; -fx-font-size: 14px;"
+                                   GridPane.columnIndex="1" GridPane.rowIndex="0" />
+
+                        <Label text="Diện tích (m²) (*):" GridPane.columnIndex="0" GridPane.rowIndex="1" 
+                               style="-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #1e3c72;"/>
+                        <TextField fx:id="txtArea" promptText="Ví dụ: 75.5" 
+                                   prefWidth="250.0" prefHeight="40.0"
+                                   style="-fx-background-radius: 8; -fx-padding: 10; -fx-font-size: 14px;"
+                                   GridPane.columnIndex="1" GridPane.rowIndex="1" />
+
+                        <Label text="Chủ hộ:" GridPane.columnIndex="0" GridPane.rowIndex="2"
+                               style="-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #1e3c72;"/>
+                        <ComboBox fx:id="cbOwner" promptText="Chọn cư dân làm chủ hộ (hoặc để trống)" 
+                                  prefWidth="250.0" prefHeight="40.0"
+                                  style="-fx-background-radius: 8; -fx-padding: 5; -fx-font-size: 14px;"
+                                  GridPane.columnIndex="1" GridPane.rowIndex="2" />
+
+                        <!-- Action Buttons -->
+                        <HBox alignment="CENTER_RIGHT" spacing="15" 
+                              GridPane.columnIndex="1" GridPane.rowIndex="3">
+                            <Button fx:id="btnSave" text="💾 Lưu Căn Hộ" 
+                                    onAction="#handleSaveButtonAction"
+                                    prefHeight="45.0" prefWidth="140.0"
+                                    style="-fx-background-color: linear-gradient(to right, #1e3c72, #2a5298); -fx-text-fill: white; -fx-font-size: 14px; -fx-font-weight: bold; -fx-background-radius: 8; -fx-cursor: hand;">
+                            </Button>
+                            <Button text="❌ Hủy Bỏ" 
+                                    onAction="#handleCancelButtonAction"
+                                    prefHeight="45.0" prefWidth="120.0"
+                                    style="-fx-background-color: #dc3545; -fx-text-fill: white; -fx-font-size: 14px; -fx-font-weight: bold; -fx-background-radius: 8; -fx-cursor: hand;">
+                            </Button>
+                        </HBox>
+                    </GridPane>
+                </children>
+            </VBox>
+            
+            <!-- Danh sách căn hộ hiện có bên phải -->
+            <VBox alignment="TOP_LEFT" prefWidth="500" style="-fx-padding: 20;">
+                <children>
+                    <Label text="DANH SÁCH CĂN HỘ HIỆN CÓ" 
+                           style="-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #1e3c72; -fx-padding: 0 0 15 0;"/>
+                    
+                    <TableView fx:id="tableViewApartments" prefHeight="400.0" prefWidth="500.0"
+                               style="-fx-background-radius: 8;">
+                        <columns>
+                            <TableColumn fx:id="colApartmentId" text="ID" prefWidth="80"/>
+                            <TableColumn fx:id="colArea" text="Diện tích" prefWidth="120"/>
+                            <TableColumn fx:id="colOwnerName" text="Chủ hộ" prefWidth="300"/>
+                        </columns>
+                    </TableView>
+                </children>
+            </VBox>
+        </HBox>
+    </center>
+    
+</BorderPane>
+

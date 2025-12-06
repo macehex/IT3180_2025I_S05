@@ -7,6 +7,7 @@ import com.example.quanlytoanha.utils.DatabaseConnection;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -14,7 +15,11 @@ public class ApartmentDAO {
 
     public List<Apartment> getAllApartments() {
         List<Apartment> apartments = new ArrayList<>();
-        String sql = "SELECT * FROM apartments"; // (Giả sử tên bảng là 'apartments')
+        // JOIN với users để lấy tên chủ hộ
+        String sql = "SELECT a.apartment_id, a.area, a.owner_id, u.full_name AS owner_name " +
+                     "FROM apartments a " +
+                     "LEFT JOIN users u ON a.owner_id = u.user_id " +
+                     "ORDER BY a.apartment_id";
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql);
              ResultSet rs = stmt.executeQuery()) {
@@ -23,7 +28,19 @@ public class ApartmentDAO {
                 Apartment apartment = new Apartment();
                 apartment.setApartmentId(rs.getInt("apartment_id"));
                 apartment.setArea(rs.getBigDecimal("area")); // Đọc diện tích
-                apartment.setOwnerId(rs.getInt("owner_id"));
+                
+                // Xử lý owner_id có thể NULL
+                int ownerId = rs.getInt("owner_id");
+                if (rs.wasNull()) {
+                    apartment.setOwnerId(0); // 0 để đại diện cho NULL
+                } else {
+                    apartment.setOwnerId(ownerId);
+                }
+                
+                // Xử lý owner_name có thể NULL (căn hộ trống)
+                String ownerName = rs.getString("owner_name");
+                apartment.setOwnerName(ownerName != null ? ownerName : "");
+                
                 apartments.add(apartment);
             }
         } catch (Exception e) {
@@ -44,12 +61,114 @@ public class ApartmentDAO {
                     apartment = new Apartment();
                     apartment.setApartmentId(rs.getInt("apartment_id"));
                     apartment.setArea(rs.getBigDecimal("area")); // Đọc diện tích
-                    apartment.setOwnerId(rs.getInt("owner_id"));
+                    // Xử lý owner_id có thể NULL
+                    int ownerId = rs.getInt("owner_id");
+                    if (rs.wasNull()) {
+                        apartment.setOwnerId(0); // 0 để đại diện cho NULL
+                    } else {
+                        apartment.setOwnerId(ownerId);
+                    }
                 }
             }
         } catch (Exception e) {
             e.printStackTrace();
         }
         return apartment; // Sẽ là null nếu không tìm thấy
+    }
+
+    /**
+     * Thêm căn hộ mới vào database
+     * @param apartment Đối tượng Apartment chứa thông tin căn hộ
+     * @return true nếu thêm thành công, false nếu có lỗi
+     */
+    public boolean addApartment(Apartment apartment) throws SQLException {
+        String sql;
+        
+        // Nếu có apartment_id thì chỉ định, không thì để tự động
+        if (apartment.getApartmentId() > 0) {
+            sql = "INSERT INTO apartments (apartment_id, area, owner_id) VALUES (?, ?, ?)";
+        } else {
+            sql = "INSERT INTO apartments (area, owner_id) VALUES (?, ?)";
+        }
+        
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            
+            if (apartment.getApartmentId() > 0) {
+                // Có chỉ định apartment_id
+                stmt.setInt(1, apartment.getApartmentId());
+                
+                // Set area
+                if (apartment.getArea() != null) {
+                    stmt.setBigDecimal(2, apartment.getArea());
+                } else {
+                    stmt.setNull(2, java.sql.Types.DECIMAL);
+                }
+                
+                // Set owner_id (có thể NULL)
+                if (apartment.getOwnerId() > 0) {
+                    stmt.setInt(3, apartment.getOwnerId());
+                } else {
+                    stmt.setNull(3, java.sql.Types.INTEGER);
+                }
+            } else {
+                // Tự động tạo apartment_id
+                // Set area
+                if (apartment.getArea() != null) {
+                    stmt.setBigDecimal(1, apartment.getArea());
+                } else {
+                    stmt.setNull(1, java.sql.Types.DECIMAL);
+                }
+                
+                // Set owner_id (có thể NULL)
+                if (apartment.getOwnerId() > 0) {
+                    stmt.setInt(2, apartment.getOwnerId());
+                } else {
+                    stmt.setNull(2, java.sql.Types.INTEGER);
+                }
+            }
+            
+            int rowsAffected = stmt.executeUpdate();
+            return rowsAffected > 0;
+        }
+    }
+
+    /**
+     * Kiểm tra căn hộ có tồn tại không
+     * @param apartmentId ID căn hộ cần kiểm tra
+     * @return true nếu tồn tại, false nếu không
+     */
+    public boolean apartmentExists(int apartmentId) throws SQLException {
+        String sql = "SELECT COUNT(*) FROM apartments WHERE apartment_id = ?";
+        
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            
+            stmt.setInt(1, apartmentId);
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt(1) > 0;
+                }
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Lấy ID tiếp theo gợi ý cho căn hộ mới (MAX + 1)
+     * @return ID gợi ý tiếp theo
+     */
+    public int getNextSuggestedApartmentId() throws SQLException {
+        String sql = "SELECT COALESCE(MAX(apartment_id), 0) + 1 FROM apartments";
+        
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql);
+             ResultSet rs = stmt.executeQuery()) {
+            
+            if (rs.next()) {
+                return rs.getInt(1);
+            }
+        }
+        return 1; // Mặc định là 1 nếu không có căn hộ nào
     }
 }

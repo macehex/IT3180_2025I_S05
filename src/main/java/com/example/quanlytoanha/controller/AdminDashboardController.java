@@ -24,6 +24,7 @@ import java.util.Map;
 public class AdminDashboardController {
 
     @FXML private Button btnThemCuDan;
+    @FXML private Button btnThemCanHo;
     @FXML private Label lblWelcome;
     @FXML private Button btnQuanLyTaiKhoan;
     @FXML private Button btnQuanLyHoaDon;
@@ -31,6 +32,7 @@ public class AdminDashboardController {
     @FXML private Button btnXemYeuCauDichVu;
     @FXML private Button btnXemDanhSachCuDan;
     @FXML private Button btnLogout;
+    @FXML private Button btnLogoutHeader;
     @FXML private Button btnMenuToggle;
     @FXML private VBox sidebar;
     @FXML private Label lblUserName;
@@ -94,6 +96,11 @@ public class AdminDashboardController {
                 if (hasPermission) {
                     btnThemCuDan.setOnAction(event -> handleOpenAddResidentForm());
                 }
+            }
+
+            // Cấu hình sự kiện cho nút Thêm Căn Hộ
+            if (btnThemCanHo != null) {
+                btnThemCanHo.setOnAction(event -> handleOpenAddApartmentForm());
             }
 
             if (btnQuanLyTaiKhoan != null)
@@ -390,6 +397,34 @@ public class AdminDashboardController {
         } catch (IOException e) {
             e.printStackTrace();
             showAlert(Alert.AlertType.ERROR, "Lỗi", "Không thể tải form thêm cư dân.");
+        }
+    }
+
+    /**
+     * Mở form thêm căn hộ mới
+     */
+    @FXML
+    private void handleOpenAddApartmentForm() {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/example/quanlytoanha/view/add_apartment_form.fxml"));
+            Parent root = loader.load();
+
+            Stage stage = new Stage();
+            stage.setTitle("Thêm Căn Hộ Mới");
+            stage.initModality(Modality.WINDOW_MODAL);
+            stage.initOwner(btnThemCanHo.getScene().getWindow());
+            stage.setScene(new Scene(root, 1000, 600));
+            stage.setResizable(true);
+            stage.setMinWidth(900);
+            stage.setMinHeight(500);
+            stage.showAndWait();
+
+            // Reload dashboard stats sau khi thêm căn hộ thành công
+            loadDashboardStats();
+
+        } catch (IOException e) {
+            e.printStackTrace();
+            showAlert(Alert.AlertType.ERROR, "Lỗi", "Không thể tải form thêm căn hộ.");
         }
     }
 

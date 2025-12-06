@@ -14,6 +14,12 @@
                 <Button fx:id="btnMenuToggle" text="☰" styleClass="hamburger-button" onAction="#toggleSidebar" />
                 <Label fx:id="lblWelcome" text="Chào mừng, Ban Quản Trị" styleClass="header-title" />
                 <Region HBox.hgrow="ALWAYS" />
+                <Button fx:id="btnLogoutHeader" text="🚪 Đăng xuất" onAction="#handleLogout"
+                        style="-fx-background-color: #dc3545; -fx-text-fill: white; -fx-font-size: 14px; -fx-font-weight: bold; -fx-background-radius: 8; -fx-cursor: hand; -fx-padding: 10 20;">
+                    <HBox.margin>
+                        <Insets right="20.0" />
+                    </HBox.margin>
+                </Button>
             </children>
         </HBox>
     </top>
@@ -33,6 +39,7 @@
                 <Separator />
 
                 <Button fx:id="btnThemCuDan" text="➕ Thêm Hồ Sơ Cư Dân" styleClass="sidebar-menu-item" />
+                <Button fx:id="btnThemCanHo" text="🏘️ Thêm Căn Hộ" styleClass="sidebar-menu-item" onAction="#handleOpenAddApartmentForm" />
                 <Button fx:id="btnQuanLyTaiKhoan" text="👤 Quản Lý Tài Khoản" styleClass="sidebar-menu-item" />
                 <Button fx:id="btnXemDanhSachCuDan" text="📋 Danh Sách Cư Dân" styleClass="sidebar-menu-item" onAction="#handleOpenResidentList" />
 
