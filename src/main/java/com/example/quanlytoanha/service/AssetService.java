@@ -172,4 +172,16 @@ public class AssetService {
     public java.math.BigDecimal getTotalMaintenanceCost() throws SQLException {
         return assetDAO.getTotalMaintenanceCost();
     }
+
+    // Trong file AssetService.java
+
+    public List<Asset> searchAssets(String keyword, String status) {
+        return assetDAO.searchAssets(keyword, status);
+    }
+
+    // Trong file AssetService.java
+
+    public boolean deleteAsset(int assetId) throws SQLException {
+        return assetDAO.deleteAsset(assetId);
+    }
 }

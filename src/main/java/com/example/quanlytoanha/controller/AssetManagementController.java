@@ -14,6 +14,7 @@ import javafx.stage.Modality;
 import javafx.stage.Stage;
 
 import java.io.IOException;
+import java.sql.SQLException;
 import java.util.ArrayList; // <-- BẮT BUỘC IMPORT
 import java.util.Arrays;    // <-- BẮT BUỘC IMPORT
 import java.util.List;      // <-- BẮT BUỘC IMPORT
@@ -60,8 +61,20 @@ public class AssetManagementController {
 
     @FXML
     private void handleFilterAction() {
-        // TODO: Triển khai logic lọc ở AssetService
-        loadAssetsData();
+        // 1. Lấy giá trị từ giao diện
+        String keyword = txtSearch.getText();
+        String status = cmbStatusFilter.getValue();
+
+        // 2. Gọi Service để tìm kiếm
+        try {
+            List<Asset> filteredList = assetService.searchAssets(keyword, status);
+
+            // 3. Cập nhật lại bảng
+            assetTable.setItems(FXCollections.observableArrayList(filteredList));
+
+        } catch (Exception e) {
+            new Alert(Alert.AlertType.ERROR, "Lỗi khi lọc dữ liệu: " + e.getMessage()).showAndWait();
+        }
     }
 
     @FXML
@@ -102,6 +115,44 @@ public class AssetManagementController {
             e.printStackTrace();
             // BÂY GIỜ BẠN SẼ THẤY LỖI THẬT
             new Alert(Alert.AlertType.ERROR, "Không thể mở Form: " + e.getMessage()).showAndWait();
+        }
+    }
+
+    @FXML
+    private void handleDeleteAsset() {
+        // 1. Lấy tài sản đang chọn
+        Asset selectedAsset = assetTable.getSelectionModel().getSelectedItem();
+
+        if (selectedAsset == null) {
+            new Alert(Alert.AlertType.WARNING, "Vui lòng chọn một tài sản để xóa.").showAndWait();
+            return;
+        }
+
+        // 2. Hiện hộp thoại xác nhận
+        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+        alert.setTitle("Xác nhận xóa");
+        alert.setHeaderText("Bạn có chắc chắn muốn xóa tài sản này?");
+        alert.setContentText("Tài sản: " + selectedAsset.getAssetType() + "\nTại: " + selectedAsset.getLocation());
+
+        // Chờ người dùng bấm nút
+        if (alert.showAndWait().get() == ButtonType.OK) {
+            try {
+                // 3. Gọi Service xóa
+                boolean deleted = assetService.deleteAsset(selectedAsset.getAssetId());
+
+                if (deleted) {
+                    new Alert(Alert.AlertType.INFORMATION, "Đã xóa tài sản thành công.").showAndWait();
+                    // 4. Tải lại bảng dữ liệu
+                    loadAssetsData();
+                } else {
+                    new Alert(Alert.AlertType.ERROR, "Không thể xóa tài sản (Lỗi không xác định).").showAndWait();
+                }
+
+            } catch (SQLException e) {
+                e.printStackTrace();
+                // Hiển thị thông báo lỗi chi tiết (bao gồm cả lỗi khóa ngoại đã bắt ở DAO)
+                new Alert(Alert.AlertType.ERROR, "Lỗi xóa dữ liệu:\n" + e.getMessage()).showAndWait();
+            }
         }
     }
 }

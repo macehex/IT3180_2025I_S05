@@ -392,4 +392,73 @@ public class AssetDAO {
         }
         return java.math.BigDecimal.ZERO;
     }
+
+    public List<Asset> searchAssets(String keyword, String status) {
+        List<Asset> assets = new ArrayList<>();
+
+        // Câu lệnh SQL cơ bản
+        StringBuilder sql = new StringBuilder("SELECT * FROM assets WHERE 1=1");
+        List<Object> params = new ArrayList<>();
+
+        // 1. Nếu có từ khóa tìm kiếm (tìm theo Tên hoặc Vị trí)
+        if (keyword != null && !keyword.trim().isEmpty()) {
+            // Dùng ILIKE trong PostgreSQL để không phân biệt hoa thường
+            sql.append(" AND (asset_type ILIKE ? OR location ILIKE ?)");
+            String searchPattern = "%" + keyword.trim() + "%";
+            params.add(searchPattern);
+            params.add(searchPattern);
+        }
+
+        // 2. Nếu có lọc theo trạng thái (và không phải là "Tất cả")
+        if (status != null && !status.isEmpty() && !status.equals("Tất cả")) {
+            sql.append(" AND status = ?");
+            params.add(status);
+        }
+
+        sql.append(" ORDER BY asset_id DESC");
+
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql.toString())) {
+
+            // Gán các tham số vào dấu ?
+            for (int i = 0; i < params.size(); i++) {
+                pstmt.setObject(i + 1, params.get(i));
+            }
+
+            try (ResultSet rs = pstmt.executeQuery()) {
+                while (rs.next()) {
+                    assets.add(mapResultSetToAsset(rs));
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return assets;
+    }
+
+    /**
+     * XÓA: Xóa tài sản khỏi CSDL.
+     * Lưu ý: Sẽ thất bại nếu tài sản đã có dữ liệu liên quan (Lịch sử bảo trì, v.v.)
+     * @param assetId ID tài sản cần xóa
+     * @return true nếu xóa thành công
+     */
+    public boolean deleteAsset(int assetId) throws SQLException {
+        String sql = "DELETE FROM assets WHERE asset_id = ?";
+
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+            pstmt.setInt(1, assetId);
+            int rowsAffected = pstmt.executeUpdate();
+            return rowsAffected > 0;
+
+        } catch (SQLException e) {
+            // Kiểm tra lỗi ràng buộc khóa ngoại (Foreign Key Violation)
+            // Mã lỗi 23503 trong PostgreSQL là foreign_key_violation
+            if ("23503".equals(e.getSQLState())) {
+                throw new SQLException("Không thể xóa tài sản này vì đang có dữ liệu liên quan (Lịch sử bảo trì, Yêu cầu...). Hãy thử chuyển trạng thái sang 'DISPOSED' thay vì xóa.");
+            }
+            throw e; // Ném các lỗi khác ra ngoài
+        }
+    }
 }
