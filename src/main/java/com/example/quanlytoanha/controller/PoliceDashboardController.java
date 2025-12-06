@@ -4,7 +4,7 @@ import com.example.quanlytoanha.model.User;
 import com.example.quanlytoanha.session.SessionManager;
 import com.example.quanlytoanha.service.ReportExportService; // Service xuất PDF
 import com.example.quanlytoanha.service.FinancialService; // Service lấy dữ liệu công nợ
-import com.example.quanlytoanha.service.SecurityDataService; // Service lấy dữ liệu an ninh (Cần tạo)
+import com.example.quanlytoanha.service.SecurityDataService; // Service lấy dữ liệu an ninh
 import com.example.quanlytoanha.model.ApartmentDebt; // Model dữ liệu
 import com.example.quanlytoanha.model.VehicleAccessLog; // Model dữ liệu
 import com.example.quanlytoanha.model.VisitorLog; // Model dữ liệu
@@ -95,45 +95,56 @@ public class PoliceDashboardController {
             // Xóa cache cũ
             cachedReportData = null;
             previewTable.getColumns().clear(); // Xóa các cột cũ
-            previewTable.getItems().clear(); // Xóa dữ liệu cũ
-
-            previewTable.setItems(FXCollections.observableArrayList()); // Set list rỗng mới
+// KHÔNG dùng getItems().clear() để tránh lỗi với Immutable List
+// Thay vào đó, gán luôn một list mới rỗng
+            previewTable.setItems(FXCollections.observableArrayList());
+            boolean isTableView = true;
 
             // Lấy dữ liệu mới
             switch (reportType) {
                 case "Báo cáo Công nợ Chi tiết":
-                    List<ApartmentDebt> debtData = financialService.getDetailedDebtList(); // (Cần lọc theo ngày nếu muốn)
+                    List<ApartmentDebt> debtData = financialService.getDetailedDebtList();
                     cachedReportData = debtData;
-                    setupDebtPreviewTable(); // Cấu hình bảng
-                    ((TableView<ApartmentDebt>) previewTable).setItems(FXCollections.observableList(debtData));                    break;
+                    setupDebtPreviewTable();
+                    // SỬA: Dùng observableArrayList
+                    ((TableView<ApartmentDebt>) previewTable).setItems(FXCollections.observableArrayList(debtData));
+                    break;
 
                 case "Báo cáo Biến động Dân cư":
-                    // Báo cáo này là Map, không phải List, nên xử lý riêng (hiển thị đơn giản)
                     Map<String, Integer> stats = securityDataService.getPopulationStats(startDate, endDate);
                     cachedReportData = stats;
                     setupPopulationPreviewTable(stats);
-                    btnExportPdf.setDisable(false); // Kích hoạt nút xuất
+                    isTableView = false; // Đánh dấu đây KHÔNG phải là bảng
+                    btnExportPdf.setDisable(false);
                     break;
 
                 case "Lịch sử Xe Ra/Vào":
                     List<VehicleAccessLog> vehicleData = securityDataService.getVehicleLogs(startDate, endDate);
                     cachedReportData = vehicleData;
-                    setupVehiclePreviewTable(); // Cấu hình bảng
-                    ((TableView<VehicleAccessLog>) previewTable).setItems(FXCollections.observableList(vehicleData));
+                    setupVehiclePreviewTable();
+                    ((TableView<VehicleAccessLog>) previewTable).setItems(FXCollections.observableArrayList(vehicleData));
                     break;
 
                 case "Lịch sử Khách Ra/Vào":
                     List<VisitorLog> visitorData = securityDataService.getVisitorLogs(startDate, endDate);
                     cachedReportData = visitorData;
-                    setupVisitorPreviewTable(); // Cấu hình bảng
-                    ((TableView<VisitorLog>) previewTable).setItems(FXCollections.observableList(visitorData));
+                    setupVisitorPreviewTable();
+                    // SỬA: Dùng observableArrayList
+                    ((TableView<VisitorLog>) previewTable).setItems(FXCollections.observableArrayList(visitorData));
                     break;
             }
 
             cachedReportType = reportType; // Lưu lại loại báo cáo đã chọn
 
             // Hiển thị vùng xem trước và kích hoạt nút xuất (trừ BĐ Dân cư đã làm)
-            if (!reportType.equals("Báo cáo Biến động Dân cư")) {
+            if (isTableView) {
+                // 1. Đảm bảo TableView hiển thị
+                previewTable.setVisible(true);
+
+                // 2. QUAN TRỌNG: Gắn lại TableView vào TitledPane
+                // (Vì nếu trước đó xem báo cáo Dân cư, chỗ này đang là TextArea)
+                previewPane.setContent(previewTable);
+
                 previewPane.setVisible(true);
                 previewPane.setManaged(true);
                 btnExportPdf.setDisable(false);
@@ -284,22 +295,5 @@ public class PoliceDashboardController {
         alert.setHeaderText(null);
         alert.setContentText(message);
         alert.showAndWait();
-    }
-
-    // --- Cần tạo Service này ---
-    // Ví dụ về lớp SecurityDataService
-    private class SecurityDataService {
-        public Map<String, Integer> getPopulationStats(LocalDate start, LocalDate end) {
-            // TODO: Viết DAO để đếm residents có move_in_date/move_out_date trong khoảng
-            return Map.of("moveIns", 0, "moveOuts", 0);
-        }
-        public List<VehicleAccessLog> getVehicleLogs(LocalDate start, LocalDate end) {
-            // TODO: Viết DAO để SELECT từ bảng vehicle_access_logs
-            return List.of();
-        }
-        public List<VisitorLog> getVisitorLogs(LocalDate start, LocalDate end) {
-            // TODO: Viết DAO để SELECT từ bảng visitor_logs
-            return List.of();
-        }
     }
 }
