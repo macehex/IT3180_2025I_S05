@@ -45,8 +45,6 @@
 
                 <Separator />
 
-                <Button fx:id="btnQuanLyHoaDon" text="💰 Hóa Đơn &amp; Công Nợ" styleClass="sidebar-menu-item" />
-
                 <VBox spacing="0">
                     <Button fx:id="btnMenuThongBao" text="📢 Thông Báo Chung"
                             styleClass="sidebar-menu-item"
