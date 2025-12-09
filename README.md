@@ -88,7 +88,7 @@ The application follows a layered MVC (Model-View-Controller) architecture:
 ## Installation & Setup
 
 ### Fast Install
-- Download the .jar at [Releases](https://github.com/macehex/quan-ly-toa-nha-nhom-05/releases/tag/v1.0.snapshot)
+- Download the .jar at [Releases](https://github.com/macehex/IT3180_2025I_S05/releases)
 
 ### Prerequisites
 - Java 21 or higher
