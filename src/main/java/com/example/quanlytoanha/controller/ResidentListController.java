@@ -1,6 +1,8 @@
 package com.example.quanlytoanha.controller;
 
 import com.example.quanlytoanha.dao.ResidentDAO;
+import com.example.quanlytoanha.service.UserAccountService;
+import com.example.quanlytoanha.dao.ApartmentDAO;
 import com.example.quanlytoanha.model.Resident;
 import javafx.beans.property.SimpleStringProperty; // Cần import
 import javafx.collections.FXCollections;
@@ -56,11 +58,15 @@ public class ResidentListController implements Initializable {
     // Data
     private ObservableList<Resident> residentList;
     private ResidentDAO residentDAO;
+    private UserAccountService userAccountService;
+    private ApartmentDAO apartmentDAO;
     private SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy");
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         residentDAO = new ResidentDAO();
+        userAccountService = new UserAccountService();
+        apartmentDAO = new ApartmentDAO();
         residentList = FXCollections.observableArrayList();
 
         setupTableColumns();
@@ -70,6 +76,21 @@ public class ResidentListController implements Initializable {
         setupButtonListeners();
 
         loadAllResidents();
+
+        // Tự động refresh khi cửa sổ quay lại focus (đồng bộ với thay đổi căn hộ)
+        tableView.sceneProperty().addListener((obsScene, oldScene, newScene) -> {
+            if (newScene != null) {
+                newScene.windowProperty().addListener((obsWindow, oldWindow, newWindow) -> {
+                    if (newWindow != null) {
+                        newWindow.focusedProperty().addListener((obsFocus, wasFocused, isNowFocused) -> {
+                            if (isNowFocused) {
+                                loadAllResidents();
+                            }
+                        });
+                    }
+                });
+            }
+        });
     }
 
     private void setupTableColumns() {
@@ -254,8 +275,49 @@ public class ResidentListController implements Initializable {
 
     @FXML
     private void handleDeleteResident() {
-        // TODO: Triển khai logic xóa cư dân
-        showAlert(Alert.AlertType.INFORMATION, "Thông báo", "Chức năng xóa chưa được triển khai.");
+        Resident selectedResident = tableView.getSelectionModel().getSelectedItem();
+        if (selectedResident == null) {
+            showAlert(Alert.AlertType.WARNING, "Cảnh báo", "Vui lòng chọn một cư dân để xóa.");
+            return;
+        }
+
+        Alert confirm = new Alert(Alert.AlertType.CONFIRMATION);
+        confirm.setTitle("Xác nhận xóa");
+        confirm.setHeaderText("Xóa cư dân \"" + selectedResident.getFullName() + "\"?");
+        confirm.setContentText("Thao tác này sẽ xóa hồ sơ cư dân và các phương tiện gắn với cư dân này.");
+
+        if (confirm.showAndWait().orElse(ButtonType.CANCEL) != ButtonType.OK) {
+            return;
+        }
+
+        try {
+            boolean removedResident = residentDAO.removeResident(selectedResident.getResidentId());
+
+            // Nếu có user_id, xóa luôn tài khoản (force)
+            boolean removedUser = true;
+            if (removedResident && selectedResident.getUserId() > 0) {
+                try {
+                    apartmentDAO.clearOwnerByUserId(selectedResident.getUserId());
+                    removedUser = userAccountService.deleteUserForce(selectedResident.getUserId());
+                } catch (Exception e) {
+                    removedUser = false;
+                    e.printStackTrace();
+                }
+            }
+
+            if (removedResident && removedUser) {
+                showAlert(Alert.AlertType.INFORMATION, "Thành công", "Đã xóa cư dân và tài khoản liên quan.");
+                loadAllResidents();
+            } else if (removedResident) {
+                showAlert(Alert.AlertType.WARNING, "Đã xóa cư dân", "Đã xóa cư dân nhưng không thể xóa tài khoản. Vui lòng kiểm tra tài khoản thủ công.");
+                loadAllResidents();
+            } else {
+                showAlert(Alert.AlertType.ERROR, "Lỗi", "Không thể xóa cư dân (cư dân không tồn tại hoặc lỗi dữ liệu).");
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            showAlert(Alert.AlertType.ERROR, "Lỗi", "Không thể xóa cư dân: " + e.getMessage());
+        }
     }
 
     @FXML

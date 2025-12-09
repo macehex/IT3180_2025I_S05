@@ -518,6 +518,19 @@ public class UserDAO {
     }
 
     /**
+     * Xóa tài khoản bất kể role (dùng sau khi đã xóa hồ sơ cư dân).
+     */
+    public boolean deleteUserForce(int userId) throws SQLException {
+        String sql = "DELETE FROM users WHERE user_id = ?";
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setInt(1, userId);
+            int rowsAffected = pstmt.executeUpdate();
+            return rowsAffected > 0;
+        }
+    }
+
+    /**
      * Kiểm tra username đã tồn tại chưa.
      */
     public boolean isUsernameExists(String username) throws SQLException {

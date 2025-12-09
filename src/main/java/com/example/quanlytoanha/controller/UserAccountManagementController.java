@@ -2,6 +2,8 @@ package com.example.quanlytoanha.controller;
 
 import com.example.quanlytoanha.model.Role;
 import com.example.quanlytoanha.model.User;
+import com.example.quanlytoanha.dao.ResidentDAO;
+import com.example.quanlytoanha.dao.ApartmentDAO;
 import com.example.quanlytoanha.service.UserAccountService;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -43,12 +45,16 @@ public class UserAccountManagementController {
     @FXML private Button btnRefresh;
 
     private UserAccountService userAccountService;
+    private ResidentDAO residentDAO;
+    private ApartmentDAO apartmentDAO;
     private ObservableList<User> userList;
     private User selectedUser;
 
     @FXML
     public void initialize() {
         this.userAccountService = new UserAccountService();
+        this.residentDAO = new ResidentDAO();
+        this.apartmentDAO = new ApartmentDAO();
         this.userList = FXCollections.observableArrayList();
 
         // Cấu hình bảng User
@@ -133,7 +139,7 @@ public class UserAccountManagementController {
 
         btnAddUser.setDisable(true);
         btnUpdateUser.setDisable(false);
-        btnDeleteUser.setDisable(user.getRole() == Role.RESIDENT); // Không cho xóa Resident
+        btnDeleteUser.setDisable(false); // Cho phép xóa mọi user (Resident sẽ xóa kèm hồ sơ)
         btnResetPassword.setDisable(false);
     }
 
@@ -238,11 +244,28 @@ public class UserAccountManagementController {
         confirmAlert.showAndWait().ifPresent(response -> {
             if (response == ButtonType.OK) {
                 try {
-                    boolean success = userAccountService.deleteUser(selectedUser.getUserId());
+                    boolean success;
+
+                    // Nếu là cư dân: xóa hồ sơ cư dân (nếu có) rồi luôn xóa tài khoản (force)
+                    if (selectedUser.getRole() == Role.RESIDENT) {
+                        try {
+                            // Gỡ chủ hộ khỏi các căn hộ mà user này đang là owner để tránh FK
+                            apartmentDAO.clearOwnerByUserId(selectedUser.getUserId());
+                            residentDAO.removeResidentByUserId(selectedUser.getUserId());
+                        } catch (SQLException ignore) {
+                            // Không tìm thấy cư dân thì bỏ qua, vẫn xóa user
+                        }
+                        success = userAccountService.deleteUserForce(selectedUser.getUserId());
+                    } else {
+                        success = userAccountService.deleteUser(selectedUser.getUserId());
+                    }
+
                     if (success) {
                         showAlert(Alert.AlertType.INFORMATION, "Thành công", "Đã xóa tài khoản thành công!");
                         clearUserForm();
                         loadUserData();
+                    } else {
+                        showAlert(Alert.AlertType.ERROR, "Lỗi", "Không thể xóa tài khoản. Kiểm tra ràng buộc dữ liệu hoặc thử lại.");
                     }
                 } catch (SecurityException e) {
                     showAlert(Alert.AlertType.ERROR, "Lỗi Phân quyền", e.getMessage());

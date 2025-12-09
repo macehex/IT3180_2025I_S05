@@ -220,4 +220,19 @@ public class ApartmentDAO {
             return rowsAffected > 0;
         }
     }
+
+    /**
+     * Bỏ gán chủ hộ cho tất cả căn hộ có owner_id = userId.
+     * Dùng trước khi xóa tài khoản cư dân để tránh lỗi ràng buộc FK.
+     * @param userId id người dùng (cư dân) cần gỡ khỏi các căn hộ
+     * @return số bản ghi được cập nhật
+     */
+    public int clearOwnerByUserId(int userId) throws SQLException {
+        String sql = "UPDATE apartments SET owner_id = NULL WHERE owner_id = ?";
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setInt(1, userId);
+            return pstmt.executeUpdate();
+        }
+    }
 }

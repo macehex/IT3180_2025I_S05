@@ -129,6 +129,21 @@ public class UserAccountService {
     }
 
     /**
+     * Xóa tài khoản cư dân sau khi đã xóa hồ sơ cư dân.
+     */
+    public boolean deleteUserForce(int userId) throws SQLException, SecurityException {
+        checkPermission();
+
+        // Không cho phép xóa chính mình
+        User currentUser = SessionManager.getInstance().getCurrentUser();
+        if (currentUser != null && currentUser.getUserId() == userId) {
+            throw new SecurityException("Bạn không thể xóa chính tài khoản của mình.");
+        }
+
+        return userDAO.deleteUserForce(userId);
+    }
+
+    /**
      * Lấy tất cả quyền trong hệ thống.
      */
     public List<Permission> getAllPermissions() throws SQLException, SecurityException {
