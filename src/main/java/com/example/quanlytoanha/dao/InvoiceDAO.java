@@ -155,12 +155,12 @@ public class InvoiceDAO {
     public List<Invoice> getUnpaidInvoices(int residentId) {
         Map<Integer, Invoice> invoices = new HashMap<>();
 
-        // SỬA LỖI 1: Lấy 'id.fee_id' thay vì 'id.invoice_detail_id'
+        // FIXED: Join directly through apartments.owner_id instead of residents table
         String sql = "SELECT i.*, id.fee_id, id.name, id.amount as detail_amount " +
                 "FROM invoices i " +
                 "LEFT JOIN invoicedetails id ON i.invoice_id = id.invoice_id " +
-                "JOIN residents r ON i.apartment_id = r.apartment_id " +
-                "WHERE r.user_id = ? AND i.status = 'UNPAID' " +
+                "JOIN apartments a ON i.apartment_id = a.apartment_id " +
+                "WHERE a.owner_id = ? AND i.status = 'UNPAID' " +
                 "ORDER BY i.due_date";
 
         try (Connection conn = DatabaseConnection.getConnection();

@@ -117,9 +117,9 @@ public class InvoiceHistoryController implements Initializable {
     }
 
     private void setupPaymentControls() {
-        // Đặt ngày mặc định (Giữ nguyên)
-        fromDate.setValue(LocalDate.now().minusMonths(1));
-        toDate.setValue(LocalDate.now());
+        // FIXED: Set wider default date range to catch any existing transactions
+        fromDate.setValue(LocalDate.now().minusYears(2)); // Look back 2 years
+        toDate.setValue(LocalDate.now().plusMonths(1));   // Include future dates
 
         // Load hóa đơn chưa trả vào ComboBox
         List<Invoice> invoices = invoiceService.getUnpaidInvoices(residentId);
