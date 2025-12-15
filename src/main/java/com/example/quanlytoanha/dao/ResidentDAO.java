@@ -53,42 +53,39 @@ public class ResidentDAO {
      * @return true nếu thêm thành công.
      */
     public boolean addResident(Resident resident) throws SQLException {
-        // SỬA SQL: Loại bỏ status và move_in_date để khớp với Resident.java
-        String SQL = "INSERT INTO residents (apartment_id, user_id, full_name, date_of_birth, id_card_number, relationship) " +
-                "VALUES (?, ?, ?, ?, ?, ?)"; // CHỈ CÒN 6 THAM SỐ
+        // Đã cập nhật để bao gồm move_in_date
+        String SQL = "INSERT INTO residents (apartment_id, user_id, full_name, date_of_birth, id_card_number, relationship, move_in_date) " +
+                "VALUES (?, ?, ?, ?, ?, ?, ?)";
 
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(SQL)) {
 
-            // 1. apartmentId
             pstmt.setInt(1, resident.getApartmentId());
 
-            // 2. userId (Có thể NULL)
             if (resident.getUserId() > 0) {
                 pstmt.setInt(2, resident.getUserId());
             } else {
                 pstmt.setNull(2, java.sql.Types.INTEGER);
             }
 
-            // 3. fullName
             pstmt.setString(3, resident.getFullName());
 
-            // 4. dateOfBirth (Có thể NULL)
             if (resident.getDateOfBirth() != null) {
                 pstmt.setDate(4, new java.sql.Date(resident.getDateOfBirth().getTime()));
             } else {
                 pstmt.setNull(4, java.sql.Types.DATE);
             }
 
-            // 5. idCardNumber
             pstmt.setString(5, resident.getIdCardNumber());
-
-            // 6. relationship
             pstmt.setString(6, resident.getRelationship());
 
-            int affectedRows = pstmt.executeUpdate();
-            return affectedRows > 0;
+            if (resident.getMoveInDate() != null) {
+                pstmt.setDate(7, new java.sql.Date(resident.getMoveInDate().getTime()));
+            } else {
+                pstmt.setDate(7, new java.sql.Date(System.currentTimeMillis()));
+            }
 
+            return pstmt.executeUpdate() > 0;
         }
     }
 
@@ -101,7 +98,7 @@ public class ResidentDAO {
 
         // Sử dụng LEFT JOIN để lấy cả cư dân có và không có tài khoản user
         String SQL = "SELECT u.user_id, u.username, u.email, u.full_name, u.role_id, u.created_at, u.last_login, u.phone_number, " +
-                "r.resident_id, r.apartment_id, r.date_of_birth, r.id_card_number, r.relationship, r.status, r.move_in_date " +
+                "r.resident_id, r.apartment_id, r.date_of_birth, r.id_card_number, r.relationship, r.status, r.move_in_date, r.move_out_date " + // <--- Đã thêm r.move_out_date
                 "FROM residents r LEFT JOIN users u ON r.user_id = u.user_id";
 
         try (Connection conn = DatabaseConnection.getConnection();
@@ -125,7 +122,7 @@ public class ResidentDAO {
 
         StringBuilder sql = new StringBuilder();
         sql.append("SELECT u.user_id, u.username, u.email, u.full_name, u.role_id, u.created_at, u.last_login, u.phone_number, ");
-        sql.append("r.resident_id, r.apartment_id, r.date_of_birth, r.id_card_number, r.relationship, r.status, r.move_in_date ");
+        sql.append("r.resident_id, r.apartment_id, r.date_of_birth, r.id_card_number, r.relationship, r.status, r.move_in_date, r.move_out_date "); // <--- Đã thêm r.move_out_date
         sql.append("FROM residents r LEFT JOIN users u ON r.user_id = u.user_id WHERE 1=1");
 
         java.util.List<Object> parameters = new java.util.ArrayList<>();

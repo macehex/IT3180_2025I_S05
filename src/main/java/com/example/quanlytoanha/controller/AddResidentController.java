@@ -31,6 +31,7 @@ public class AddResidentController {
     @FXML private TextField txtPhoneNumber;
     @FXML private Button btnSave;
     @FXML private Label titleLabel; // (Giữ nguyên)
+    @FXML private DatePicker dpMoveInDate;
 
     // --- KHAI BÁO SERVICE VÀ ĐỐI TƯỢNG SỬA ---
     // (Giữ nguyên)
@@ -58,6 +59,10 @@ public class AddResidentController {
             // Mặc định tiêu đề là Thêm Mới (chỉ hoạt động nếu titleLabel được tiêm đúng)
             if (titleLabel != null) {
                 titleLabel.setText("THÊM HỒ SƠ CƯ DÂN MỚI");
+            }
+
+            if (dpMoveInDate != null) {
+                dpMoveInDate.setValue(LocalDate.now());
             }
         } catch (Exception e) {
             System.err.println("LỖI KHỞI TẠO COMBOBOX TRONG ADD_RESIDENT_CONTROLLER:");
@@ -230,6 +235,10 @@ public class AddResidentController {
             String relationship = cbRelationship.getSelectionModel().getSelectedItem();
             String phoneNumber = txtPhoneNumber.getText().trim();
 
+            Date moveInDate = (dpMoveInDate.getValue() != null)
+                    ? Date.from(dpMoveInDate.getValue().atStartOfDay(ZoneId.systemDefault()).toInstant())
+                    : new Date();
+
             // 2. Tạo đối tượng Resident
             Resident newResident = new Resident();
             newResident.setFullName(fullName);
@@ -238,6 +247,7 @@ public class AddResidentController {
             newResident.setDateOfBirth(dateOfBirth);
             newResident.setRelationship(relationship);
             newResident.setPhoneNumber(phoneNumber);
+            newResident.setMoveInDate(moveInDate);
 
             // 3. Gọi Service
             if (residentService.createNewResident(newResident)) {
@@ -269,6 +279,9 @@ public class AddResidentController {
                     : null;
             String phoneNumber = txtPhoneNumber.getText().trim();
 
+            Date moveInDate = (dpMoveInDate.getValue() != null)
+                    ? Date.from(dpMoveInDate.getValue().atStartOfDay(ZoneId.systemDefault()).toInstant())
+                    : null;
             // Gán giá trị mới vào đối tượng đang chỉnh sửa
             residentToEdit.setFullName(fullName);
             residentToEdit.setApartmentId(apartmentId);
@@ -276,6 +289,7 @@ public class AddResidentController {
             residentToEdit.setDateOfBirth(dateOfBirth);
             residentToEdit.setRelationship(relationship);
             residentToEdit.setPhoneNumber(phoneNumber);
+            residentToEdit.setMoveInDate(moveInDate);
 
             // 2. Lấy ID người dùng (Ban Quản trị) đang thực hiện thay đổi
             User currentUser = SessionManager.getInstance().getCurrentUser();

@@ -12,16 +12,15 @@
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.text.Font?>
 
-<BorderPane xmlns="http://javafx.com/javafx/17" 
-            xmlns:fx="http://javafx.com/fxml/1" 
+<BorderPane xmlns="http://javafx.com/javafx/17"
+            xmlns:fx="http://javafx.com/fxml/1"
             fx:controller="com.example.quanlytoanha.controller.AddResidentController"
             style="-fx-background-color: #f8f9fa;">
-    
+
     <top>
-        <!-- Header với gradient xanh đậm -->
         <HBox alignment="CENTER_LEFT" style="-fx-background-color: linear-gradient(to right, #1e3c72 0%, #2a5298 100%); -fx-padding: 25;">
             <children>
-                <Label fx:id="titleLabel" text="THÊM HỒ SƠ CƯ DÂN MỚI" 
+                <Label fx:id="titleLabel" text="THÊM HỒ SƠ CƯ DÂN MỚI"
                        style="-fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: white;">
                     <HBox.margin>
                         <Insets left="20.0" />
@@ -30,62 +29,68 @@
             </children>
         </HBox>
     </top>
-    
+
     <center>
         <VBox alignment="TOP_LEFT" style="-fx-padding: 30;">
             <children>
                 <GridPane hgap="15" vgap="20" alignment="CENTER">
-                    <Label text="1. Họ tên (*):" GridPane.columnIndex="0" GridPane.rowIndex="1" 
+                    <Label text="1. Họ tên (*):" GridPane.columnIndex="0" GridPane.rowIndex="1"
                            style="-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #1e3c72;"/>
-                    <TextField fx:id="txtFullName" promptText="Nguyễn Văn A" 
+                    <TextField fx:id="txtFullName" promptText="Nguyễn Văn A"
                                prefWidth="300.0" prefHeight="40.0"
                                style="-fx-background-radius: 8; -fx-padding: 10; -fx-font-size: 14px;"
                                GridPane.columnIndex="1" GridPane.rowIndex="1" />
 
                     <Label text="2. Căn hộ (*):" GridPane.columnIndex="0" GridPane.rowIndex="2"
                            style="-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #1e3c72;"/>
-                    <ComboBox fx:id="cbApartmentId" promptText="Chọn Căn hộ" 
+                    <ComboBox fx:id="cbApartmentId" promptText="Chọn Căn hộ"
                               prefWidth="300.0" prefHeight="40.0"
                               style="-fx-background-radius: 8; -fx-padding: 5; -fx-font-size: 14px;"
                               GridPane.columnIndex="1" GridPane.rowIndex="2" />
 
                     <Label text="3. Số CCCD/CMND:" GridPane.columnIndex="0" GridPane.rowIndex="3"
                            style="-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #1e3c72;"/>
-                    <TextField fx:id="txtIdCard" promptText="Ví dụ: 001200000000" 
+                    <TextField fx:id="txtIdCard" promptText="Ví dụ: 001200000000"
                                prefWidth="300.0" prefHeight="40.0"
                                style="-fx-background-radius: 8; -fx-padding: 10; -fx-font-size: 14px;"
                                GridPane.columnIndex="1" GridPane.rowIndex="3" />
 
                     <Label text="4. Ngày sinh:" GridPane.columnIndex="0" GridPane.rowIndex="4"
                            style="-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #1e3c72;"/>
-                    <DatePicker fx:id="dpDateOfBirth" promptText="Chọn ngày" 
+                    <DatePicker fx:id="dpDateOfBirth" promptText="Chọn ngày"
                                 prefWidth="300.0" prefHeight="40.0"
                                 style="-fx-background-radius: 8; -fx-padding: 5; -fx-font-size: 14px;"
                                 GridPane.columnIndex="1" GridPane.rowIndex="4" />
 
                     <Label text="5. Số điện thoại" GridPane.columnIndex="0" GridPane.rowIndex="5"
                            style="-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #1e3c72;"/>
-                    <TextField fx:id="txtPhoneNumber" promptText="VD: 0901234567" 
-                                prefWidth="300.0" prefHeight="40.0"
-                                style="-fx-background-radius: 8; -fx-padding: 10; -fx-font-size: 14px;"
-                                GridPane.columnIndex="1" GridPane.rowIndex="5"/>
+                    <TextField fx:id="txtPhoneNumber" promptText="VD: 0901234567"
+                               prefWidth="300.0" prefHeight="40.0"
+                               style="-fx-background-radius: 8; -fx-padding: 10; -fx-font-size: 14px;"
+                               GridPane.columnIndex="1" GridPane.rowIndex="5"/>
 
-                    <Label text="6. Mối quan hệ:" GridPane.columnIndex="0" GridPane.rowIndex="6"
+                    <Label text="6. Ngày chuyển vào:" GridPane.columnIndex="0" GridPane.rowIndex="6"
                            style="-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #1e3c72;"/>
-                    <ComboBox fx:id="cbRelationship" promptText="Chọn mối quan hệ" 
+                    <DatePicker fx:id="dpMoveInDate" promptText="Chọn ngày vào ở"
+                                prefWidth="300.0" prefHeight="40.0"
+                                style="-fx-background-radius: 8; -fx-padding: 5; -fx-font-size: 14px;"
+                                GridPane.columnIndex="1" GridPane.rowIndex="6" />
+
+                    <Label text="7. Mối quan hệ:" GridPane.columnIndex="0" GridPane.rowIndex="7"
+                           style="-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #1e3c72;"/>
+                    <ComboBox fx:id="cbRelationship" promptText="Chọn mối quan hệ"
                               prefWidth="300.0" prefHeight="40.0"
                               style="-fx-background-radius: 8; -fx-padding: 5; -fx-font-size: 14px;"
-                              GridPane.columnIndex="1" GridPane.rowIndex="6" />
+                              GridPane.columnIndex="1" GridPane.rowIndex="7" />
 
-                    <!-- Action Buttons -->
-                    <HBox alignment="CENTER_RIGHT" spacing="15" 
-                          GridPane.columnIndex="1" GridPane.rowIndex="7">
-                        <Button fx:id="btnSave" text="💾 Lưu Hồ Sơ" 
+                    <HBox alignment="CENTER_RIGHT" spacing="15"
+                          GridPane.columnIndex="1" GridPane.rowIndex="8">
+                        <Button fx:id="btnSave" text="💾 Lưu Hồ Sơ"
                                 onAction="#handleSaveButtonAction"
                                 prefHeight="45.0" prefWidth="140.0"
                                 style="-fx-background-color: linear-gradient(to right, #1e3c72, #2a5298); -fx-text-fill: white; -fx-font-size: 14px; -fx-font-weight: bold; -fx-background-radius: 8; -fx-cursor: hand;">
                         </Button>
-                        <Button text="❌ Hủy Bỏ" 
+                        <Button text="❌ Hủy Bỏ"
                                 onAction="#handleCancelButtonAction"
                                 prefHeight="45.0" prefWidth="120.0"
                                 style="-fx-background-color: #dc3545; -fx-text-fill: white; -fx-font-size: 14px; -fx-font-weight: bold; -fx-background-radius: 8; -fx-cursor: hand;">
@@ -95,5 +100,5 @@
             </children>
         </VBox>
     </center>
-    
+
 </BorderPane>
