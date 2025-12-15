@@ -18,6 +18,8 @@ public class Resident extends User {
     private String relationship; // (Quan hệ với chủ hộ)
     private String status; // Trạng thái cư dân (RESIDING, MOVED_OUT, TEMPORARY)
     private Date moveInDate; // Ngày chuyển vào
+    private Date moveOutDate;
+
     // private List<Vehicle> vehicles; // Có thể thêm sau
 
     public Resident() {
@@ -119,4 +121,8 @@ public class Resident extends User {
     public void setMoveInDate(Date moveInDate) {
         this.moveInDate = moveInDate;
     }
+
+    public Date getMoveOutDate() { return moveOutDate; }
+
+    public void setMoveOutDate(Date moveOutDate) { this.moveOutDate = moveOutDate; }
 }

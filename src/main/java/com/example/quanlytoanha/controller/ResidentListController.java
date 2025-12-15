@@ -137,7 +137,7 @@ public class ResidentListController implements Initializable {
 
     private void setupStatusComboBox() {
         ObservableList<String> statusOptions = FXCollections.observableArrayList(
-                "Tất cả", "RESIDING", "MOVED_OUT", "TEMPORARY"
+                "Tất cả", "RESIDING", "MOVED_OUT"
         );
         cmbStatus.setItems(statusOptions);
         cmbStatus.setValue("Tất cả");
