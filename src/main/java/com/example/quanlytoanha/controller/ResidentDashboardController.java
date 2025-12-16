@@ -1,5 +1,8 @@
 package com.example.quanlytoanha.controller;
-
+import com.example.quanlytoanha.dao.NotificationDAO; // Import mới
+import com.example.quanlytoanha.dao.TransactionDAO;  // Import mới
+import com.example.quanlytoanha.model.Notification;  // Import mới
+import com.example.quanlytoanha.model.Transaction;
 import com.example.quanlytoanha.model.User;
 import com.example.quanlytoanha.model.ServiceConsumptionData;
 import com.example.quanlytoanha.model.MonthlyConsumptionData;
@@ -19,7 +22,9 @@ import javafx.scene.control.Label;
 import javafx.scene.layout.VBox;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
-
+import java.time.LocalDate;
+import java.time.temporal.TemporalAdjusters;
+import java.sql.SQLException;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.net.URL;
@@ -76,6 +81,9 @@ public class ResidentDashboardController implements Initializable {
     private ServiceConsumptionService consumptionService;
     private NumberFormat currencyFormatter;
     private int currentApartmentId = -1;
+
+    private final NotificationDAO notificationDAO = new NotificationDAO();
+    private final TransactionDAO transactionDAO = TransactionDAO.getInstance();
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
@@ -150,9 +158,46 @@ public class ResidentDashboardController implements Initializable {
     }
 
     private void loadDashboardData() {
-        debtAmountLabel.setText("0 VND");
-        paidAmountLabel.setText("0 VND");
-        notificationCountLabel.setText("0");
+        User currentUser = SessionManager.getInstance().getCurrentUser();
+        if (currentUser == null) return;
+
+        // 1. XỬ LÝ SỐ TIỀN TRẢ THÁNG NÀY
+        try {
+            LocalDate now = LocalDate.now();
+            LocalDate startOfMonth = now.with(TemporalAdjusters.firstDayOfMonth());
+            LocalDate endOfMonth = now.with(TemporalAdjusters.lastDayOfMonth());
+
+            // Lấy danh sách giao dịch trong tháng này
+            List<Transaction> transactions = transactionDAO.getTransactions(
+                    currentUser.getUserId(),
+                    startOfMonth,
+                    endOfMonth
+            );
+
+            // Tính tổng tiền
+            BigDecimal totalPaidThisMonth = BigDecimal.ZERO;
+            for (Transaction t : transactions) {
+                if (t.getAmount() != null) {
+                    totalPaidThisMonth = totalPaidThisMonth.add(t.getAmount());
+                }
+            }
+
+            paidAmountLabel.setText(currencyFormatter.format(totalPaidThisMonth) + " VND");
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            paidAmountLabel.setText("Lỗi");
+        }
+
+        // 2. XỬ LÝ SỐ THÔNG BÁO CHƯA ĐỌC
+        try {
+            List<Notification> unreadNotifications = notificationDAO.getUnreadNotificationsForUser(currentUser.getUserId());
+            int count = unreadNotifications.size();
+            notificationCountLabel.setText(String.valueOf(count));
+        } catch (SQLException e) {
+            e.printStackTrace();
+            notificationCountLabel.setText("0");
+        }
     }
 
     private void showDashboardContent() {
