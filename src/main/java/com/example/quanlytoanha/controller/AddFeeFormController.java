@@ -85,6 +85,10 @@ public class AddFeeFormController {
             }
 
             BigDecimal unitPrice = new BigDecimal(priceStr);
+            if (unitPrice.compareTo(BigDecimal.ZERO) < 0) {
+                showAlert(Alert.AlertType.ERROR, "Lỗi", "Đơn giá không được là số âm.");
+                return;
+            }
             boolean isDefault = chkIsDefault.isSelected(); // <-- Đọc giá trị mới
 
             // 2. Gọi Service
@@ -116,7 +120,7 @@ public class AddFeeFormController {
             dialogStage.close();
 
         } catch (NumberFormatException e) {
-            showAlert(Alert.AlertType.ERROR, "Lỗi", "Đơn giá phải là một con số.");
+            showAlert(Alert.AlertType.ERROR, "Lỗi", "Đơn giá phải là một con số hợp lệ.");
         } catch (SecurityException e) {
             showAlert(Alert.AlertType.ERROR, "Lỗi Phân Quyền", e.getMessage());
         } catch (Exception e) {

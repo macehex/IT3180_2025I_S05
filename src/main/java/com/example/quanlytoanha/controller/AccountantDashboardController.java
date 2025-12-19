@@ -85,6 +85,10 @@ public class AccountantDashboardController {
         this.notificationService = new NotificationService();
         // ---------------------------
 
+        setupNumericTextField(txtDaysBefore);
+        setupNumericTextField(txtBillingMonth);
+        setupNumericTextField(txtBillingYear);
+
         loadDashboardData();
         configureDebtTableColumns();
         configureFeeTableColumns();
@@ -112,6 +116,22 @@ public class AccountantDashboardController {
                 }
             }
         });
+    }
+
+
+    private void setupNumericTextField(TextField textField) {
+        // Sử dụng UnaryOperator để lọc thay đổi
+        java.util.function.UnaryOperator<TextFormatter.Change> filter = change -> {
+            String newText = change.getControlNewText();
+            // Cho phép chuỗi rỗng (khi xóa hết) hoặc chuỗi chỉ chứa số
+            if (newText.matches("\\d*")) {
+                return change;
+            }
+            return null; // Từ chối thay đổi nếu không phải số
+        };
+
+        TextFormatter<String> formatter = new TextFormatter<>(filter);
+        textField.setTextFormatter(formatter);
     }
 
     // ... (Các hàm loadDashboardData, handleLogout, handleViewDetails, showAlert,
