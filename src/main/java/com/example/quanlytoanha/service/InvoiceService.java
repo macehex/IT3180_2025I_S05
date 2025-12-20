@@ -13,10 +13,12 @@ public class InvoiceService {
     private static InvoiceService instance;
     private final InvoiceDAO invoiceDAO;
     private final TransactionDAO transactionDAO;
+    private final NotificationService notificationService;
 
     private InvoiceService() {
         invoiceDAO = InvoiceDAO.getInstance();
         transactionDAO = TransactionDAO.getInstance();
+        notificationService = new NotificationService();
     }
 
     public static InvoiceService getInstance() {
@@ -47,6 +49,9 @@ public class InvoiceService {
         if (transaction != null) {
             // Update the invoice status to PAID
             invoiceDAO.updateInvoiceStatus(invoice.getInvoiceId(), "PAID");
+            
+            // Send payment success notification to the user
+            notificationService.sendPaymentSuccessNotification(residentId, invoice, amount);
         }
 
         return transaction;

@@ -36,11 +36,14 @@ public class TransactionDAO {
             ResultSet rs = pstmt.executeQuery();
 
             while (rs.next()) {
+                // FIX: transaction_date is DATE type, not TIMESTAMP
+                // Convert DATE to LocalDateTime at start of day
+                LocalDate transactionDate = rs.getDate("transaction_date").toLocalDate();
                 Transaction transaction = new Transaction(
                     rs.getInt("transaction_id"),
                     rs.getBigDecimal("amount"),
                     "Payment for invoice #" + rs.getInt("invoice_id"),
-                    rs.getTimestamp("transaction_date").toLocalDateTime(),
+                    transactionDate.atStartOfDay(),
                     "COMPLETED",
                     "Standard Payment",
                     rs.getInt("invoice_id")
