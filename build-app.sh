@@ -1,4 +1,4 @@
-#!/bin/bash
+./#!/bin/bash
 # Build script for JavaFX app with multiple options
 # This script temporarily works around Spring Security module issues
 

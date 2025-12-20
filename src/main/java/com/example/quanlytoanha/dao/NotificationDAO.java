@@ -101,4 +101,25 @@ public class NotificationDAO {
         }
         return notifications;
     }
+
+    /**
+     * Đếm số lượng thông báo chưa đọc của một người dùng
+     * @param userId ID của người dùng
+     * @return Số lượng thông báo chưa đọc
+     */
+    public int countUnreadNotifications(int userId) throws SQLException {
+        String sql = "SELECT COUNT(*) as unread_count FROM notifications WHERE user_id = ? AND is_read = FALSE";
+        
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            
+            stmt.setInt(1, userId);
+            ResultSet rs = stmt.executeQuery();
+            
+            if (rs.next()) {
+                return rs.getInt("unread_count");
+            }
+        }
+        return 0;
+    }
 }
