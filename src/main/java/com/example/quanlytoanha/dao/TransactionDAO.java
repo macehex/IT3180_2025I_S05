@@ -36,11 +36,14 @@ public class TransactionDAO {
             ResultSet rs = pstmt.executeQuery();
 
             while (rs.next()) {
+                // FIX: transaction_date is DATE type, not TIMESTAMP
+                // Convert DATE to LocalDateTime at start of day
+                LocalDate transactionDate = rs.getDate("transaction_date").toLocalDate();
                 Transaction transaction = new Transaction(
                     rs.getInt("transaction_id"),
                     rs.getBigDecimal("amount"),
                     "Payment for invoice #" + rs.getInt("invoice_id"),
-                    rs.getTimestamp("transaction_date").toLocalDateTime(),
+                    transactionDate.atStartOfDay(),
                     "COMPLETED",
                     "Standard Payment",
                     rs.getInt("invoice_id")
@@ -127,5 +130,31 @@ public class TransactionDAO {
             e.printStackTrace();
         }
         return "0 VND";
+    }
+
+    /**
+     * Lấy tổng số tiền đã thanh toán trong tháng hiện tại của một người dùng
+     * @param userId ID của người dùng
+     * @return Tổng số tiền đã thanh toán trong tháng
+     */
+    public BigDecimal getMonthlyPaymentTotal(int userId) {
+        String sql = "SELECT COALESCE(SUM(amount), 0) as total_amount FROM transactions " +
+                    "WHERE payer_user_id = ? " +
+                    "AND EXTRACT(YEAR FROM transaction_date) = EXTRACT(YEAR FROM CURRENT_DATE) " +
+                    "AND EXTRACT(MONTH FROM transaction_date) = EXTRACT(MONTH FROM CURRENT_DATE)";
+
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+            pstmt.setInt(1, userId);
+            ResultSet rs = pstmt.executeQuery();
+
+            if (rs.next()) {
+                return rs.getBigDecimal("total_amount");
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return BigDecimal.ZERO;
     }
 }

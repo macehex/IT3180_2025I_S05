@@ -1,8 +1,8 @@
 package com.example.quanlytoanha.controller;
-import com.example.quanlytoanha.dao.NotificationDAO; // Import mới
-import com.example.quanlytoanha.dao.TransactionDAO;  // Import mới
-import com.example.quanlytoanha.model.Notification;  // Import mới
-import com.example.quanlytoanha.model.Transaction;
+
+import com.example.quanlytoanha.dao.InvoiceDAO;
+import com.example.quanlytoanha.dao.NotificationDAO;
+import com.example.quanlytoanha.dao.TransactionDAO;
 import com.example.quanlytoanha.model.User;
 import com.example.quanlytoanha.model.ServiceConsumptionData;
 import com.example.quanlytoanha.model.MonthlyConsumptionData;
@@ -82,9 +82,6 @@ public class ResidentDashboardController implements Initializable {
     private NumberFormat currencyFormatter;
     private int currentApartmentId = -1;
 
-    private final NotificationDAO notificationDAO = new NotificationDAO();
-    private final TransactionDAO transactionDAO = TransactionDAO.getInstance();
-
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         User currentUser = SessionManager.getInstance().getCurrentUser();
@@ -159,43 +156,50 @@ public class ResidentDashboardController implements Initializable {
 
     private void loadDashboardData() {
         User currentUser = SessionManager.getInstance().getCurrentUser();
-        if (currentUser == null) return;
-
-        // 1. XỬ LÝ SỐ TIỀN TRẢ THÁNG NÀY
-        try {
-            LocalDate now = LocalDate.now();
-            LocalDate startOfMonth = now.with(TemporalAdjusters.firstDayOfMonth());
-            LocalDate endOfMonth = now.with(TemporalAdjusters.lastDayOfMonth());
-
-            // Lấy danh sách giao dịch trong tháng này
-            List<Transaction> transactions = transactionDAO.getTransactions(
-                    currentUser.getUserId(),
-                    startOfMonth,
-                    endOfMonth
-            );
-
-            // Tính tổng tiền
-            BigDecimal totalPaidThisMonth = BigDecimal.ZERO;
-            for (Transaction t : transactions) {
-                if (t.getAmount() != null) {
-                    totalPaidThisMonth = totalPaidThisMonth.add(t.getAmount());
-                }
-            }
-
-            paidAmountLabel.setText(currencyFormatter.format(totalPaidThisMonth) + " VND");
-
-        } catch (Exception e) {
-            e.printStackTrace();
-            paidAmountLabel.setText("Lỗi");
+        if (currentUser == null) {
+            System.out.println("[DEBUG] No current user found");
+            debtAmountLabel.setText("0 VND");
+            paidAmountLabel.setText("0 VND");
+            notificationCountLabel.setText("0");
+            return;
         }
 
-        // 2. XỬ LÝ SỐ THÔNG BÁO CHƯA ĐỌC
+        System.out.println("[DEBUG] Loading dashboard data for user: " + currentUser.getUserId() + " (" + currentUser.getUsername() + ")");
+        System.out.println("[DEBUG] Apartment ID: " + currentApartmentId);
+
         try {
-            List<Notification> unreadNotifications = notificationDAO.getUnreadNotificationsForUser(currentUser.getUserId());
-            int count = unreadNotifications.size();
-            notificationCountLabel.setText(String.valueOf(count));
-        } catch (SQLException e) {
+            // Load debt information
+            if (currentApartmentId != -1) {
+                InvoiceDAO invoiceDAO = InvoiceDAO.getInstance();
+                BigDecimal totalDebt = invoiceDAO.getTotalDebtForApartment(currentApartmentId);
+                System.out.println("[DEBUG] Total debt for apartment " + currentApartmentId + ": " + totalDebt);
+                String debtText = currencyFormatter.format(totalDebt.doubleValue()) + " VND";
+                debtAmountLabel.setText(debtText);
+                System.out.println("[DEBUG] Debt label set to: " + debtText);
+            } else {
+                System.out.println("[DEBUG] No apartment found for user, setting debt to 0");
+                debtAmountLabel.setText("0 VND");
+            }
+
+            // Load monthly payment information
+            TransactionDAO transactionDAO = TransactionDAO.getInstance();
+            BigDecimal monthlyPayment = transactionDAO.getMonthlyPaymentTotal(currentUser.getUserId());
+            System.out.println("[DEBUG] Monthly payment for user " + currentUser.getUserId() + ": " + monthlyPayment);
+            String paymentText = currencyFormatter.format(monthlyPayment.doubleValue()) + " VND";
+            paidAmountLabel.setText(paymentText);
+            System.out.println("[DEBUG] Payment label set to: " + paymentText);
+
+            // Load unread notification count
+            NotificationDAO notificationDAO = new NotificationDAO();
+            int unreadCount = notificationDAO.countUnreadNotifications(currentUser.getUserId());
+            System.out.println("[DEBUG] Unread notifications for user " + currentUser.getUserId() + ": " + unreadCount);
+            notificationCountLabel.setText(String.valueOf(unreadCount));
+
+        } catch (Exception e) {
+            System.err.println("[ERROR] Failed to load dashboard data: " + e.getMessage());
             e.printStackTrace();
+            debtAmountLabel.setText("0 VND");
+            paidAmountLabel.setText("0 VND");
             notificationCountLabel.setText("0");
         }
     }

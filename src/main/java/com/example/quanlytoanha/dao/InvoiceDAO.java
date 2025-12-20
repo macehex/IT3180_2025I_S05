@@ -441,4 +441,28 @@ public class InvoiceDAO {
             return false;
         }
     }
+
+    /**
+     * Lấy tổng số tiền nợ (hóa đơn chưa thanh toán) của một căn hộ
+     * @param apartmentId ID của căn hộ
+     * @return Tổng số tiền nợ
+     */
+    public BigDecimal getTotalDebtForApartment(int apartmentId) {
+        String sql = "SELECT COALESCE(SUM(total_amount), 0) as total_debt FROM invoices WHERE apartment_id = ? AND status = 'UNPAID'";
+        
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            
+            stmt.setInt(1, apartmentId);
+            ResultSet rs = stmt.executeQuery();
+            
+            if (rs.next()) {
+                return rs.getBigDecimal("total_debt");
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        
+        return BigDecimal.ZERO;
+    }
 }

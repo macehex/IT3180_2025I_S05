@@ -6,6 +6,7 @@ import com.example.quanlytoanha.dao.NotificationDAO;
 import com.example.quanlytoanha.model.*;
 import com.example.quanlytoanha.session.SessionManager; // Đảm bảo đúng đường dẫn
 
+import java.math.BigDecimal;
 import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDateTime; // Dùng LocalDateTime cho log time chính xác hơn
@@ -248,6 +249,47 @@ public class NotificationService {
         }
         // Gọi hàm mới vừa viết bên DAO
         return notificationDAO.getAllNotificationsForUser(currentUser.getUserId());
+    }
+
+    /**
+     * Gửi thông báo thanh toán thành công cho người dùng.
+     * Hàm này được gọi tự động sau khi thanh toán hóa đơn thành công.
+     * @param userId ID của người dùng nhận thông báo.
+     * @param invoice Đối tượng Invoice đã được thanh toán.
+     * @param paidAmount Số tiền đã thanh toán.
+     * @return true nếu gửi thành công, false nếu không.
+     */
+    public boolean sendPaymentSuccessNotification(int userId, Invoice invoice, BigDecimal paidAmount) {
+        // Không cần checkPermission() vì hàm này được gọi tự động từ logic hệ thống
+        
+        // Tạo tiêu đề và nội dung thông báo
+        String title = String.format("Thanh toan thanh cong hoa don #%d", invoice.getInvoiceId());
+        String message = String.format(
+            "Ban da thanh toan thanh cong hoa don #%d cua can ho %d voi so tien %,.0f VND. Cam on ban da thanh toan dung han.",
+            invoice.getInvoiceId(),
+            invoice.getApartmentId(),
+            paidAmount
+        );
+        
+        // Tạo đối tượng Notification
+        Notification notification = new Notification(userId, title, message, invoice.getInvoiceId());
+        
+        try {
+            boolean success = notificationDAO.createNotification(notification);
+            if (success) {
+                System.out.printf("[%s] Da gui thong bao thanh toan thanh cong HD #%d cho User ID %d\n",
+                        LocalDateTime.now().format(logTimestampFormat), invoice.getInvoiceId(), userId);
+            } else {
+                System.err.printf("[%s] LOI gui thong bao thanh toan thanh cong HD #%d cho User ID %d\n",
+                        LocalDateTime.now().format(logTimestampFormat), invoice.getInvoiceId(), userId);
+            }
+            return success;
+        } catch (SQLException e) {
+            System.err.printf("[%s] LOI DB khi gui thong bao thanh toan thanh cong HD #%d cho User ID %d: %s\n",
+                    LocalDateTime.now().format(logTimestampFormat), invoice.getInvoiceId(), userId, e.getMessage());
+            e.printStackTrace();
+            return false;
+        }
     }
 }
 
