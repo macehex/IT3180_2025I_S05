@@ -188,7 +188,19 @@ public class InvoiceHistoryController implements Initializable {
 
                 refreshTiles(); // Chỉ cập nhật dữ liệu Tile
 
-                filterTransactions(); // Tải lại bảng giao dịch
+                // FIX: Ensure the new transaction is visible by expanding date range to include today
+                LocalDate today = LocalDate.now();
+                LocalDate currentFrom = fromDate.getValue();
+                LocalDate currentTo = toDate.getValue();
+                
+                // Expand the date range if today is outside the current filter
+                if (currentFrom == null || currentTo == null || today.isBefore(currentFrom) || today.isAfter(currentTo)) {
+                    // Set a range that includes today
+                    fromDate.setValue(currentFrom != null && today.isAfter(currentFrom) ? currentFrom : today.minusMonths(1));
+                    toDate.setValue(currentTo != null && today.isBefore(currentTo) ? currentTo : today.plusMonths(1));
+                }
+                
+                filterTransactions(); // Tải lại bảng giao dịch với date range bao gồm hôm nay
 
                 // Cập nhật lại ComboBox
                 invoiceSelector.getItems().remove(selectedInvoice); // Xóa hóa đơn đã thanh toán
