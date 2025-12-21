@@ -235,4 +235,74 @@ public class ApartmentDAO {
             return pstmt.executeUpdate();
         }
     }
+
+    /**
+     * Kiểm tra căn hộ có cư dân đang ở không (có owner_id hoặc có residents)
+     * @param apartmentId ID căn hộ cần kiểm tra
+     * @return true nếu căn hộ có người ở, false nếu không
+     */
+    public boolean hasResidents(int apartmentId) throws SQLException {
+        // Kiểm tra có owner_id không
+        Apartment apartment = getApartmentById(apartmentId);
+        if (apartment != null && apartment.getOwnerId() > 0) {
+            return true;
+        }
+        
+        // Kiểm tra có residents trong căn hộ không
+        String sql = "SELECT COUNT(*) FROM residents WHERE apartment_id = ? AND (status = 'RESIDING' OR status IS NULL)";
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setInt(1, apartmentId);
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt(1) > 0;
+                }
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Chuyển chủ hộ: cập nhật quan hệ của chủ hộ cũ và thành viên mới
+     * @param apartmentId ID căn hộ
+     * @param oldOwnerId ID chủ hộ cũ
+     * @param newOwnerId ID chủ hộ mới
+     */
+    public void transferApartmentOwner(int apartmentId, int oldOwnerId, int newOwnerId) throws SQLException {
+        Connection conn = null;
+        try {
+            conn = DatabaseConnection.getConnection();
+            conn.setAutoCommit(false);
+
+            // 1. Cập nhật quan hệ của chủ hộ cũ từ "Chủ hộ" thành "Thành viên"
+            String updateOldOwnerSql = "UPDATE residents SET relationship = 'Thành viên' " +
+                                      "WHERE apartment_id = ? AND user_id = ? AND relationship = 'Chủ hộ'";
+            try (PreparedStatement stmt = conn.prepareStatement(updateOldOwnerSql)) {
+                stmt.setInt(1, apartmentId);
+                stmt.setInt(2, oldOwnerId);
+                stmt.executeUpdate();
+            }
+
+            // 2. Cập nhật quan hệ của thành viên mới thành "Chủ hộ"
+            String updateNewOwnerSql = "UPDATE residents SET relationship = 'Chủ hộ' " +
+                                       "WHERE apartment_id = ? AND user_id = ?";
+            try (PreparedStatement stmt = conn.prepareStatement(updateNewOwnerSql)) {
+                stmt.setInt(1, apartmentId);
+                stmt.setInt(2, newOwnerId);
+                stmt.executeUpdate();
+            }
+
+            conn.commit();
+        } catch (SQLException e) {
+            if (conn != null) {
+                conn.rollback();
+            }
+            throw e;
+        } finally {
+            if (conn != null) {
+                conn.setAutoCommit(true);
+                conn.close();
+            }
+        }
+    }
 }

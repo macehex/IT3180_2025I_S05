@@ -41,9 +41,19 @@ public class ServiceRequestService {
         // Schema database 'service_requests' của bạn không có cột 'location'.
         // User Story lại có "vị trí".
         // Giải pháp: Tạm thời chúng ta sẽ nối 'location' vào cuối 'description'.
-        String fullDescription = description;
+        // Xử lý null: nếu description là null, khởi tạo thành chuỗi rỗng
+        String fullDescription = (description != null) ? description : "";
         if (location != null && !location.isEmpty()) {
-            fullDescription += "\n\n--- Vị trí báo cáo: " + location;
+            if (fullDescription.isEmpty()) {
+                fullDescription = "--- Vị trí báo cáo: " + location;
+            } else {
+                fullDescription += "\n\n--- Vị trí báo cáo: " + location;
+            }
+        }
+        
+        // Nếu sau khi xử lý vẫn rỗng, đặt thành null để DB có thể báo lỗi NOT NULL constraint nếu cần
+        if (fullDescription.trim().isEmpty()) {
+            fullDescription = null;
         }
 
         // LƯU Ý QUAN TRỌNG (2): Xử lý Ảnh

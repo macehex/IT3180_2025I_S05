@@ -268,6 +268,7 @@ public class UserDAO {
 
             // --- BƯỚC 3: GHI LỊCH SỬ THAY ĐỔI (AUDIT LOG) ---
             // Kiểm tra: Chỉ ghi log nếu có sự khác biệt về nội dung JSON
+            // Xử lý an toàn: kiểm tra null trước khi gọi equals()
             if (oldDataJson != null && newDataJson != null && !oldDataJson.equals(newDataJson)) {
                 historyDAO.addHistory(
                         conn,
@@ -275,6 +276,24 @@ public class UserDAO {
                         changedByUserId,
                         oldDataJson,
                         newDataJson
+                );
+            } else if (oldDataJson == null && newDataJson != null) {
+                // Trường hợp: oldData là null nhưng newData có giá trị
+                historyDAO.addHistory(
+                        conn,
+                        resident.getResidentId(),
+                        changedByUserId,
+                        "null",
+                        newDataJson
+                );
+            } else if (oldDataJson != null && newDataJson == null) {
+                // Trường hợp: oldData có giá trị nhưng newData là null
+                historyDAO.addHistory(
+                        conn,
+                        resident.getResidentId(),
+                        changedByUserId,
+                        oldDataJson,
+                        "null"
                 );
             }
 

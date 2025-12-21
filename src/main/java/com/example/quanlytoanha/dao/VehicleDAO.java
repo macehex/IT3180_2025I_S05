@@ -19,11 +19,23 @@ public class VehicleDAO {
      * @return Integer (ID Cư dân) nếu tìm thấy, ngược lại trả về null.
      */
     public Integer findResidentByLicensePlate(String licensePlate) throws SQLException {
-        // Chuẩn hóa biển số (xóa dấu cách, gạch ngang, viết hoa)
-        String standardizedPlate = licensePlate.replaceAll("[^a-zA-Z0-9]", "").toUpperCase();
+        // Kiểm tra null hoặc rỗng
+        if (licensePlate == null || licensePlate.trim().isEmpty()) {
+            return null;
+        }
+        
+        // Chuẩn hóa biển số: trim() trước, sau đó xóa tất cả ký tự không phải chữ/số, viết hoa
+        String standardizedPlate = licensePlate.trim().replaceAll("[^a-zA-Z0-9]", "").toUpperCase();
+        
+        // Nếu sau khi chuẩn hóa thành chuỗi rỗng, trả về null
+        if (standardizedPlate.isEmpty()) {
+            return null;
+        }
 
         // SQL cũng chuẩn hóa biển số trong CSDL khi so sánh
-        String sql = "SELECT resident_id FROM vehicles WHERE UPPER(REGEXP_REPLACE(license_plate, '[^a-zA-Z0-9]', '')) = ?";
+        // Sử dụng TRIM() và REGEXP_REPLACE để xử lý khoảng trắng và ký tự đặc biệt
+        // PostgreSQL REGEXP_REPLACE mặc định replace tất cả các occurrence
+        String sql = "SELECT resident_id FROM vehicles WHERE UPPER(REGEXP_REPLACE(TRIM(license_plate), '[^a-zA-Z0-9]', '')) = ?";
 
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {

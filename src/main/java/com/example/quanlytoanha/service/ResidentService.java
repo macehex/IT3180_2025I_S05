@@ -4,6 +4,8 @@ package com.example.quanlytoanha.service;
 import com.example.quanlytoanha.dao.ResidentDAO;
 import com.example.quanlytoanha.model.Resident;
 import com.example.quanlytoanha.dao.UserDAO;
+import com.example.quanlytoanha.dao.ApartmentDAO;
+import com.example.quanlytoanha.model.Apartment;
 import com.example.quanlytoanha.model.Role;
 import com.google.gson.Gson; // <-- BỔ SUNG: Import Gson
 import com.google.gson.GsonBuilder; // <-- BỔ SUNG: Import GsonBuilder (cho định dạng đẹp)
@@ -72,6 +74,16 @@ public class ResidentService {
             throw new ValidationException("Căn hộ ID " + resident.getApartmentId() + " không tồn tại.");
         }
 
+        // --- 3.1. KIỂM TRA CĂN HỘ ĐÃ CÓ CHỦ HỘ CHƯA (NẾU QUAN HỆ LÀ "Chủ hộ") ---
+        if (resident.getRelationship() != null && 
+            (resident.getRelationship().equals("Chủ hộ") || resident.getRelationship().equalsIgnoreCase("Chủ hộ"))) {
+            ApartmentDAO apartmentDAO = new ApartmentDAO();
+            Apartment existingApartment = apartmentDAO.getApartmentById(resident.getApartmentId());
+            if (existingApartment != null && existingApartment.getOwnerId() > 0) {
+                throw new ValidationException("Căn hộ đã có chủ hộ.");
+            }
+        }
+
         if (idCard != null && !idCard.trim().isEmpty()) {
             resident.setIdCardNumber(idCard.trim());
             if (!residentDAO.isIdCardUnique(resident.getIdCardNumber())) {
@@ -79,8 +91,31 @@ public class ResidentService {
             }
         }
 
-        // --- 4. GỌI DAO VÀ THỰC HIỆN LƯU (GIỮ NGUYÊN) ---
-        return userDAO.addResident(resident);
+        // --- 4. GỌI DAO VÀ THỰC HIỆN LƯU ---
+        boolean success = userDAO.addResident(resident);
+        
+        // --- 5. TỰ ĐỘNG CẬP NHẬT CHỦ HỘ NẾU QUAN HỆ LÀ "Chủ hộ" ---
+        if (success && resident.getRelationship() != null && 
+            (resident.getRelationship().equals("Chủ hộ") || resident.getRelationship().equalsIgnoreCase("Chủ hộ"))) {
+            try {
+                ApartmentDAO apartmentDAO = new ApartmentDAO();
+                Apartment apartment = new Apartment();
+                apartment.setApartmentId(resident.getApartmentId());
+                apartment.setOwnerId(resident.getUserId());
+                // Giữ nguyên diện tích hiện tại
+                Apartment existingApartment = apartmentDAO.getApartmentById(resident.getApartmentId());
+                if (existingApartment != null) {
+                    apartment.setArea(existingApartment.getArea());
+                }
+                apartmentDAO.updateApartment(apartment);
+            } catch (SQLException e) {
+                // Log lỗi nhưng không throw để không ảnh hưởng đến việc thêm cư dân
+                System.err.println("Cảnh báo: Không thể tự động cập nhật chủ hộ: " + e.getMessage());
+                e.printStackTrace();
+            }
+        }
+        
+        return success;
     }
 
     // ----------------------------------------------------------------------
@@ -126,7 +161,8 @@ public class ResidentService {
         // --- 3. CHUYỂN ĐỔI SANG JSON STRING ---
 
         // Chuyển dữ liệu CŨ và MỚI sang JSON String
-        String oldDataJson = gson.toJson(residentOldData);
+        // Xử lý an toàn khi residentOldData có thể là null
+        String oldDataJson = (residentOldData != null) ? gson.toJson(residentOldData) : null;
         String newDataJson = gson.toJson(residentNewData);
 
         // --- 4. GỌI DAO VÀ THỰC HIỆN CẬP NHẬT VÀ GHI LOG ---

@@ -65,6 +65,16 @@ public class ApartmentService {
             throw new ValidationException("ID căn hộ không hợp lệ.");
         }
 
+        // Xử lý chuyển chủ hộ: nếu owner_id thay đổi, cập nhật quan hệ của chủ hộ cũ và mới
+        Apartment oldApartment = apartmentDAO.getApartmentById(apartment.getApartmentId());
+        if (oldApartment != null && oldApartment.getOwnerId() > 0 && 
+            apartment.getOwnerId() > 0 && oldApartment.getOwnerId() != apartment.getOwnerId()) {
+            // Chuyển chủ hộ: cập nhật quan hệ của chủ hộ cũ và mới
+            apartmentDAO.transferApartmentOwner(apartment.getApartmentId(), 
+                                                oldApartment.getOwnerId(), 
+                                                apartment.getOwnerId());
+        }
+
         // Gọi DAO để cập nhật
         return apartmentDAO.updateApartment(apartment);
     }
@@ -73,12 +83,19 @@ public class ApartmentService {
      * Xóa căn hộ
      * @param apartmentId ID căn hộ cần xóa
      * @return true nếu xóa thành công
+     * @throws ValidationException nếu căn hộ có người ở
      * @throws SQLException nếu có lỗi database
      */
-    public boolean deleteApartment(int apartmentId) throws SQLException {
+    public boolean deleteApartment(int apartmentId) throws ValidationException, SQLException {
         if (apartmentId <= 0) {
             return false;
         }
+        
+        // Kiểm tra căn hộ có người ở không
+        if (apartmentDAO.hasResidents(apartmentId)) {
+            throw new ValidationException("Không thể xóa căn hộ đang có người ở.");
+        }
+        
         return apartmentDAO.deleteApartment(apartmentId);
     }
 }

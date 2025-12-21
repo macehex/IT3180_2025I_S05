@@ -128,9 +128,19 @@ public class ResidentDAO {
         java.util.List<Object> parameters = new java.util.ArrayList<>();
 
         if (name != null && !name.trim().isEmpty()) {
-            sql.append(" AND (u.full_name LIKE ? OR r.full_name LIKE ?)");
-            parameters.add("%" + name.trim() + "%");
-            parameters.add("%" + name.trim() + "%");
+            // Sử dụng ILIKE để không phân biệt hoa/thường
+            // Hỗ trợ tìm kiếm không dấu bằng cách sử dụng hàm translate để loại bỏ dấu tiếng Việt
+            String searchPattern = "%" + name.trim() + "%";
+            
+            // So sánh với tên gốc (có dấu) và tên không dấu
+            // Sử dụng TRANSLATE để loại bỏ dấu tiếng Việt
+            sql.append(" AND (u.full_name ILIKE ? OR r.full_name ILIKE ? OR ");
+            sql.append("TRANSLATE(LOWER(COALESCE(u.full_name, '')), 'áàảãạăắằẳẵặâấầẩẫậéèẻẽẹêếềểễệíìỉĩịóòỏõọôốồổỗộơớờởỡợúùủũụưứừửữựýỳỷỹỵđ', 'aaaaaaaaaaaaaaaaaeeeeeeeeeeiiiiioooooooooooooouuuuuuuuuuuyyyyyyd') ILIKE TRANSLATE(LOWER(?), 'áàảãạăắằẳẵặâấầẩẫậéèẻẽẹêếềểễệíìỉĩịóòỏõọôốồổỗộơớờởỡợúùủũụưứừửữựýỳỷỹỵđ', 'aaaaaaaaaaaaaaaaaeeeeeeeeeeiiiiioooooooooooooouuuuuuuuuuuyyyyyyd') OR ");
+            sql.append("TRANSLATE(LOWER(COALESCE(r.full_name, '')), 'áàảãạăắằẳẵặâấầẩẫậéèẻẽẹêếềểễệíìỉĩịóòỏõọôốồổỗộơớờởỡợúùủũụưứừửữựýỳỷỹỵđ', 'aaaaaaaaaaaaaaaaaeeeeeeeeeeiiiiioooooooooooooouuuuuuuuuuuyyyyyyd') ILIKE TRANSLATE(LOWER(?), 'áàảãạăắằẳẵặâấầẩẫậéèẻẽẹêếềểễệíìỉĩịóòỏõọôốồổỗộơớờởỡợúùủũụưứừửữựýỳỷỹỵđ', 'aaaaaaaaaaaaaaaaaeeeeeeeeeeiiiiioooooooooooooouuuuuuuuuuuyyyyyyd'))");
+            parameters.add(searchPattern);
+            parameters.add(searchPattern);
+            parameters.add(searchPattern);
+            parameters.add(searchPattern);
         }
 
         if (apartmentId != null) {
@@ -325,24 +335,25 @@ public class ResidentDAO {
         Map<String, Integer> stats = new HashMap<>();
 
         // Sử dụng Conditional Aggregation để đếm trong 1 truy vấn
+        // Sửa để đảm bảo lấy đúng dữ liệu trong khoảng thời gian (bao gồm cả ngày bắt đầu và kết thúc)
         String sql = "SELECT " +
-                "    COUNT(CASE WHEN move_in_date BETWEEN ? AND ? THEN 1 END) AS move_ins, " +
-                "    COUNT(CASE WHEN move_out_date BETWEEN ? AND ? THEN 1 END) AS move_outs " +
+                "    COUNT(CASE WHEN move_in_date >= ? AND move_in_date <= ? THEN 1 END) AS move_ins, " +
+                "    COUNT(CASE WHEN move_out_date >= ? AND move_out_date <= ? THEN 1 END) AS move_outs " +
                 "FROM residents " +
-                "WHERE move_in_date BETWEEN ? AND ? OR move_out_date BETWEEN ? AND ?";
+                "WHERE (move_in_date >= ? AND move_in_date <= ?) OR (move_out_date >= ? AND move_out_date <= ?)";
 
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
 
-            // Set tham số cho move_in_date
+            // Set tham số cho move_in_date trong COUNT
             pstmt.setDate(1, startDate);
             pstmt.setDate(2, endDate);
 
-            // Set tham số cho move_out_date
+            // Set tham số cho move_out_date trong COUNT
             pstmt.setDate(3, startDate);
             pstmt.setDate(4, endDate);
 
-            // Set tham số cho WHERE
+            // Set tham số cho WHERE clause
             pstmt.setDate(5, startDate);
             pstmt.setDate(6, endDate);
             pstmt.setDate(7, startDate);

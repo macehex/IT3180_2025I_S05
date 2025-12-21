@@ -45,7 +45,14 @@ public class ServiceRequestDAO {
             pstmt.setInt(1, request.getReqUserId());
             pstmt.setString(2, request.getReqType());
             pstmt.setString(3, request.getReqTitle());
-            pstmt.setString(4, request.getDescription());
+            
+            // Xử lý description có thể null
+            if (request.getDescription() != null) {
+                pstmt.setString(4, request.getDescription());
+            } else {
+                pstmt.setNull(4, java.sql.Types.VARCHAR);
+            }
+            
             pstmt.setString(5, request.getStatus()); // Java gửi String "PENDING", SQL sẽ ép kiểu
             pstmt.setDate(6, request.getCreatedAt());
 

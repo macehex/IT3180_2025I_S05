@@ -372,6 +372,8 @@ public class AddApartmentController {
                     } else {
                         showAlert(Alert.AlertType.ERROR, "Lỗi", "Không thể xóa căn hộ.");
                     }
+                } catch (ApartmentService.ValidationException e) {
+                    showAlert(Alert.AlertType.WARNING, "Không thể xóa", e.getMessage());
                 } catch (SQLException e) {
                     showAlert(Alert.AlertType.ERROR, "Lỗi Database", 
                             "Lỗi: " + e.getMessage() + 
