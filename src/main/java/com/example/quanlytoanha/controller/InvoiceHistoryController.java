@@ -61,7 +61,7 @@ public class InvoiceHistoryController implements Initializable {
     private void setupTiles() {
         // Tạo các đối tượng Tile
         totalDueTile = new DashboardTile(
-                "Tổng Nợ",
+                "Tổng Nợ (Tất cả căn hộ)",
                 "Loading...",
                 "Tổng số tiền hóa đơn đang chờ thanh toán"
         );
