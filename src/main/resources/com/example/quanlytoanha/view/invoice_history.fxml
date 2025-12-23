@@ -26,7 +26,7 @@
                             <Insets top="10" right="10" bottom="10" left="10"/>
                         </padding>
                         <ComboBox fx:id="invoiceSelector" promptText="Chọn hóa đơn" maxWidth="Infinity"/>
-                        <TextField fx:id="amountField" promptText="Số tiền" editable="false"/>
+                        <TextField fx:id="amountField" promptText="Số tiền" editable="true"/>
                         <Button text="Thanh Toán Ngay" onAction="#handlePayment"
                                 style="-fx-background-color: #2196F3; -fx-text-fill: white;"
                                 maxWidth="Infinity"/>

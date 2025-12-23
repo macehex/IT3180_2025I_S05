@@ -1,4 +1,3 @@
-// Vị trí: src/main/java/com/example/quanlytoanha/controller/AddFeeFormController.java
 package com.example.quanlytoanha.controller;
 
 import com.example.quanlytoanha.model.FeeType;
@@ -11,16 +10,14 @@ import java.math.BigDecimal;
 
 public class AddFeeFormController {
 
-    // --- CÁC TRƯỜNG CŨ ---
     @FXML private Label lblTitle;
     @FXML private TextField txtName;
     @FXML private TextField txtUnitPrice;
     @FXML private TextField txtUnit;
     @FXML private TextArea txtDescription;
 
-    // --- CÁC TRƯỜNG MỚI (BẠN PHẢI THÊM VÀO FXML) ---
-    @FXML private CheckBox chkIsDefault; // Ví dụ: fx:id="chkIsDefault"
-    @FXML private ComboBox<String> cmbPricingModel; // Ví dụ: fx:id="cmbPricingModel"
+    @FXML private CheckBox chkIsDefault;
+    @FXML private ComboBox<String> cmbPricingModel;
     // ------------------------------------
 
     private Stage dialogStage;
@@ -33,8 +30,8 @@ public class AddFeeFormController {
     public void initialize() {
         this.feeTypeService = new FeeTypeService();
 
-        // --- THÊM DỮ LIỆU CHO COMBOBOX ---
-        cmbPricingModel.getItems().addAll("FIXED", "PER_SQM");
+
+        cmbPricingModel.getItems().addAll("FIXED", "PER_SQM", "VOLUNTARY");
     }
 
     public void setDialogStage(Stage dialogStage) {
@@ -42,26 +39,23 @@ public class AddFeeFormController {
     }
 
     /**
-     * Controller chính gọi hàm này khi ở chế độ CHỈNH SỬA (Đã cập nhật)
+     * Controller chính gọi hàm này khi ở chế độ CHỈNH SỬA
      */
     public void setFeeToEdit(FeeType fee) {
         this.editingFeeType = fee;
         this.isEditMode = true;
 
-        // Điền thông tin cũ vào form
         lblTitle.setText("Chỉnh sửa loại phí");
         txtName.setText(fee.getFeeName());
         txtUnitPrice.setText(fee.getUnitPrice().toString());
         txtUnit.setText(fee.getUnit());
         txtDescription.setText(fee.getDescription());
-
-        // --- ĐIỀN THÔNG TIN CÁC TRƯỜNG MỚI ---
         chkIsDefault.setSelected(fee.isDefault());
         cmbPricingModel.setValue(fee.getPricingModel());
     }
 
     /**
-     * Xử lý lưu (Đã cập nhật)
+     * Xử lý lưu
      */
     @FXML
     private void handleSave() {

@@ -157,7 +157,7 @@ public class LoginController {
             if (user.getRole() == Role.ADMIN) {
                 scene.getStylesheets().add(getClass().getResource("/com/example/quanlytoanha/view/styles/admin-styles.css").toExternalForm());
             } else if (user.getRole() == Role.ACCOUNTANT) {
-                scene.getStylesheets().add(getClass().getResource("/com/example/quanlytoanha/view/styles/accountant-styles.css").toExternalForm());
+                scene.getStylesheets().add(getClass().getResource("/com/example/quanlytoanha/view/styles/accountant_styles.css").toExternalForm());
             }
 
             // 5. Hiển thị cửa sổ mới

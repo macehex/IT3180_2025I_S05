@@ -25,6 +25,10 @@ import javafx.scene.control.ListView;
 import javafx.util.Callback;
 import java.text.SimpleDateFormat;
 import java.util.stream.Collectors;
+import java.text.NumberFormat;
+import java.util.Locale;
+import java.util.Optional;
+import javafx.scene.control.ButtonType;
 
 public class InvoiceHistoryController implements Initializable {
     private final InvoiceService invoiceService = InvoiceService.getInstance();
@@ -52,6 +56,13 @@ public class InvoiceHistoryController implements Initializable {
         // Lấy userId từ SessionManager (Cần đảm bảo SessionManager hoạt động đúng)
         // Nếu SessionManager chưa sẵn sàng, bạn có thể cần cơ chế khác để lấy residentId
         residentId = SessionManager.getInstance().getCurrentUser().getUserId();
+
+        // Đảm bảo ô nhập tiền luôn cho phép chỉnh sửa
+        if (amountField != null) {
+            amountField.setEditable(true);
+            amountField.setDisable(false);
+        }
+
         setupTiles(); // Tạo và thêm Tile lần đầu
         setupTransactionTable();
         setupPaymentControls();
@@ -104,7 +115,7 @@ public class InvoiceHistoryController implements Initializable {
     }
 
     private void setupTransactionTable() {
-        // Cấu hình các cột (Giữ nguyên)
+        // Cấu hình các cột
         dateColumn.setCellValueFactory(new PropertyValueFactory<>("timestamp"));
         descriptionColumn.setCellValueFactory(new PropertyValueFactory<>("description"));
         amountColumn.setCellValueFactory(new PropertyValueFactory<>("amount"));
@@ -125,7 +136,7 @@ public class InvoiceHistoryController implements Initializable {
         List<Invoice> invoices = invoiceService.getUnpaidInvoices(residentId);
         invoiceSelector.getItems().setAll(invoices); // Dùng setAll để cập nhật thay vì addAll
 
-        // Cấu hình hiển thị ComboBox (Giữ nguyên)
+        // Cấu hình hiển thị ComboBox
         Callback<ListView<Invoice>, ListCell<Invoice>> cellFactory = lv -> new ListCell<Invoice>() {
             @Override
             protected void updateItem(Invoice item, boolean empty) {
@@ -176,44 +187,112 @@ public class InvoiceHistoryController implements Initializable {
         }
 
         try {
-            // Lấy lại số tiền từ hóa đơn để tránh người dùng sửa TextField
-            BigDecimal amountToPay = selectedInvoice.getTotalAmount();
-            // (Bạn có thể cho phép thanh toán một phần nếu muốn, logic sẽ phức tạp hơn)
+            // --- SỬA ĐỔI QUAN TRỌNG TẠI ĐÂY ---
+            // 1. Lấy số tiền từ ô nhập liệu (thay vì lấy từ hóa đơn gốc)
+            String amountText = amountField.getText().replaceAll("[,.]", ""); // Xóa dấu phẩy/chấm
+            BigDecimal amountToPay;
+            try {
+                amountToPay = new BigDecimal(amountText);
+            } catch (NumberFormatException e) {
+                showAlert(Alert.AlertType.ERROR, "Lỗi", "Số tiền nhập vào không hợp lệ.");
+                return;
+            }
 
-            // Gọi service xử lý thanh toán
+            // 2. Kiểm tra: Không cho phép trả thiếu
+            if (amountToPay.compareTo(selectedInvoice.getTotalAmount()) < 0) {
+                showAlert(Alert.AlertType.ERROR, "Lỗi",
+                        "Số tiền thanh toán không được nhỏ hơn tổng hóa đơn (" +
+                                String.format("%,.0f", selectedInvoice.getTotalAmount()) + " VNĐ).");
+                return;
+            }
+
+            // 3. Nếu trả thừa (Đóng góp) -> Hỏi xác nhận
+            if (amountToPay.compareTo(selectedInvoice.getTotalAmount()) > 0) {
+                BigDecimal donation = amountToPay.subtract(selectedInvoice.getTotalAmount());
+                Alert confirm = new Alert(Alert.AlertType.CONFIRMATION);
+                confirm.setTitle("Xác nhận đóng góp");
+                confirm.setHeaderText("Ghi nhận khoản đóng góp tự nguyện");
+                confirm.setContentText("Bạn đang thanh toán dư " + String.format("%,.0f", donation) + " VNĐ.\n"
+                        + "Số tiền này sẽ được chuyển vào quỹ đóng góp.\nBạn có chắc chắn không?");
+
+                // Nếu người dùng bấm Cancel thì dừng lại
+                if (confirm.showAndWait().get() != ButtonType.OK) {
+                    return;
+                }
+            }
+            // -----------------------------------
+
+            // 4. Gọi Service với số tiền thực tế người dùng nhập
             Transaction transaction = invoiceService.processPayment(residentId, selectedInvoice, amountToPay);
 
             if (transaction != null) {
-                showAlert(Alert.AlertType.INFORMATION, "Thành công", "Thanh toán cho hóa đơn #" + selectedInvoice.getInvoiceId() + " thành công!");
+                showAlert(Alert.AlertType.INFORMATION, "Thành công",
+                        "Thanh toán thành công! Mã giao dịch: " + transaction.getTransactionId());
 
-                refreshTiles(); // Chỉ cập nhật dữ liệu Tile
+                refreshTiles();
 
-                // FIX: Ensure the new transaction is visible by expanding date range to include today
-                LocalDate today = LocalDate.now();
-                LocalDate currentFrom = fromDate.getValue();
-                LocalDate currentTo = toDate.getValue();
-                
-                // Expand the date range if today is outside the current filter
-                if (currentFrom == null || currentTo == null || today.isBefore(currentFrom) || today.isAfter(currentTo)) {
-                    // Set a range that includes today
-                    fromDate.setValue(currentFrom != null && today.isAfter(currentFrom) ? currentFrom : today.minusMonths(1));
-                    toDate.setValue(currentTo != null && today.isBefore(currentTo) ? currentTo : today.plusMonths(1));
-                }
-                
-                filterTransactions(); // Tải lại bảng giao dịch với date range bao gồm hôm nay
+                // Mở rộng ngày lọc để thấy giao dịch mới
+                fromDate.setValue(LocalDate.now().minusDays(1));
+                toDate.setValue(LocalDate.now().plusDays(1));
+                filterTransactions();
 
-                // Cập nhật lại ComboBox
-                invoiceSelector.getItems().remove(selectedInvoice); // Xóa hóa đơn đã thanh toán
-                invoiceSelector.getSelectionModel().clearSelection(); // Bỏ chọn
-                amountField.clear(); // Xóa số tiền
+                // Xóa hóa đơn đã chọn khỏi danh sách
+                invoiceSelector.getItems().remove(selectedInvoice);
+                invoiceSelector.getSelectionModel().clearSelection();
+                amountField.clear();
             } else {
                 showAlert(Alert.AlertType.ERROR, "Lỗi", "Xử lý thanh toán thất bại. Vui lòng thử lại.");
             }
 
-        } catch (Exception e) { // Bắt lỗi chung
-            showAlert(Alert.AlertType.ERROR, "Lỗi", "Đã xảy ra lỗi khi xử lý thanh toán: " + e.getMessage());
+        } catch (Exception e) {
+            showAlert(Alert.AlertType.ERROR, "Lỗi", "Đã xảy ra lỗi: " + e.getMessage());
             e.printStackTrace();
         }
+    }
+
+    /**
+     * Hàm phụ trợ: Thực hiện gọi Service thanh toán (Tách ra để code gọn hơn)
+     */
+    private void performPaymentTransaction(Invoice invoice, BigDecimal amount) {
+        try {
+            Transaction transaction = invoiceService.processPayment(residentId, invoice, amount);
+
+            if (transaction != null) {
+                showAlert(Alert.AlertType.INFORMATION, "Thành công",
+                        "Thanh toán thành công! Cảm ơn cư dân.");
+
+                refreshTiles();
+
+                // Logic mở rộng ngày lọc để thấy giao dịch mới
+                LocalDate today = LocalDate.now();
+                LocalDate currentFrom = fromDate.getValue();
+                LocalDate currentTo = toDate.getValue();
+                if (currentFrom == null || currentTo == null || today.isBefore(currentFrom) || today.isAfter(currentTo)) {
+                    fromDate.setValue(currentFrom != null && today.isAfter(currentFrom) ? currentFrom : today.minusMonths(1));
+                    toDate.setValue(currentTo != null && today.isBefore(currentTo) ? currentTo : today.plusMonths(1));
+                }
+
+                filterTransactions();
+
+                // Cập nhật UI
+                invoiceSelector.getItems().remove(invoice);
+                invoiceSelector.getSelectionModel().clearSelection();
+                amountField.clear();
+            } else {
+                showAlert(Alert.AlertType.ERROR, "Lỗi", "Xử lý thanh toán thất bại. Vui lòng thử lại.");
+            }
+        } catch (Exception e) {
+            showAlert(Alert.AlertType.ERROR, "Lỗi", "Đã xảy ra lỗi hệ thống: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * Hàm phụ trợ: Format tiền tệ sang tiếng Việt (VND)
+     */
+    private String formatCurrency(BigDecimal amount) {
+        NumberFormat currencyFormat = NumberFormat.getCurrencyInstance(new Locale("vi", "VN"));
+        return currencyFormat.format(amount);
     }
 
     @FXML

@@ -6,7 +6,12 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.text.Font?>
 
-<AnchorPane prefHeight="700.0" prefWidth="1000.0" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.quanlytoanha.controller.AccountantDashboardController" styleClass="bg-light">
+<AnchorPane prefHeight="700.0" prefWidth="1000.0"
+            xmlns="http://javafx.com/javafx/21"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.example.quanlytoanha.controller.AccountantDashboardController"
+            styleClass="bg-light"
+            stylesheets="@styles/accountant_styles.css">
     <children>
         <VBox spacing="10.0" AnchorPane.bottomAnchor="10.0" AnchorPane.leftAnchor="10.0" AnchorPane.rightAnchor="10.0" AnchorPane.topAnchor="10.0">
             <children>
@@ -26,75 +31,88 @@
                     <tabs>
                         <Tab text="Báo cáo Công nợ">
                             <content>
-                                <BorderPane prefHeight="600.0" prefWidth="800.0">
-                                    <padding><Insets bottom="10.0" left="10.0" right="10.0" top="10.0" /></padding>
-                                    <top>
-                                        <VBox spacing="10.0" BorderPane.alignment="CENTER" styleClass="stats-card">
-                                            <children>
-                                                <Label text="📊 Thống kê Công nợ Tổng quan" styleClass="stats-title"><font><Font name="System Bold" size="18.0" /></font></Label>
-                                                <GridPane hgap="10.0" vgap="5.0">
-                                                    <padding><Insets bottom="10.0" top="10.0" /></padding>
-                                                    <children>
-                                                        <Label text="Tổng nợ chưa thanh toán:" styleClass="stats-label" GridPane.rowIndex="0" />
-                                                        <Label fx:id="lblTotalDebt" styleClass="stats-value stats-value-debt" text="0 VNĐ" GridPane.columnIndex="1" GridPane.rowIndex="0" />
-                                                        <Label text="Tổng nợ quá hạn:" styleClass="stats-label" GridPane.rowIndex="1" />
-                                                        <Label fx:id="lblTotalOverdue" styleClass="stats-value stats-value-overdue" text="0 VNĐ" GridPane.columnIndex="1" GridPane.rowIndex="1" />
-                                                        <Label text="Tổng hóa đơn chưa trả:" styleClass="stats-label" GridPane.rowIndex="2" />
-                                                        <Label fx:id="lblUnpaidInvoices" styleClass="stats-value stats-value-invoice" text="0 hóa đơn" GridPane.columnIndex="1" GridPane.rowIndex="2" />
-                                                    </children>
-                                                </GridPane>
-                                                <Label text="🔍 Chi tiết công nợ theo căn hộ:" styleClass="label-primary"><font><Font name="System Bold" size="16.0" /></font></Label>
-                                            </children>
-                                        </VBox>
-                                    </top>
-                                    <center>
-                                        <VBox spacing="10.0" BorderPane.alignment="CENTER"> <BorderPane.margin><Insets top="10.0" /></BorderPane.margin>
-                                            <children>
-                                                <TableView fx:id="debtTable" styleClass="table-view" VBox.vgrow="ALWAYS">
-                                                    <columns>
-                                                        <TableColumn fx:id="colApartmentId" prefWidth="110.0" text="Căn hộ ID" />
-                                                        <TableColumn fx:id="colOwnerName" prefWidth="220.0" text="Tên chủ hộ" />
-                                                        <TableColumn fx:id="colPhoneNumber" prefWidth="150.0" text="Số điện thoại" />
-                                                        <TableColumn fx:id="colUnpaidCount" prefWidth="120.0" text="Số HĐ nợ" />
-                                                        <TableColumn fx:id="colTotalDue" prefWidth="190.0" text="Tổng nợ (VNĐ)" />
-                                                        <TableColumn fx:id="colEarliestDueDate" prefWidth="170.0" text="Hạn trả sớm nhất" />
-                                                    </columns>
-                                                </TableView>
+                                <VBox spacing="20.0" style="-fx-background-color: #f4f7f6;">
+                                    <padding><Insets top="20.0" left="20.0" right="20.0" bottom="20.0"/></padding>
+                                    <children>
+                                        <Label text="Tổng quan Công nợ" styleClass="report-header-label"/>
 
-                                                <HBox alignment="CENTER_LEFT">
-                                                    <children>
-                                                        <Button fx:id="btnSendSingleReminder" mnemonicParsing="false" text="📧 Gửi nhắc nợ riêng..." styleClass="btn-info" />
-                                                    </children>
+                                        <HBox spacing="15.0">
+                                            <VBox styleClass="stat-widget" HBox.hgrow="ALWAYS">
+                                                <Label text="TỔNG NỢ CHƯA THANH TOÁN" styleClass="stat-widget-title"/>
+                                                <Label fx:id="lblTotalDebt" text="0 VNĐ" styleClass="stat-widget-value, text-danger"/>
+                                            </VBox>
+
+                                            <VBox styleClass="stat-widget" HBox.hgrow="ALWAYS">
+                                                <Label text="TỔNG NỢ QUÁ HẠN" styleClass="stat-widget-title"/>
+                                                <Label fx:id="lblTotalOverdue" text="0 VNĐ" styleClass="stat-widget-value, text-warning"/>
+                                            </VBox>
+
+                                            <VBox styleClass="stat-widget" HBox.hgrow="ALWAYS">
+                                                <Label text="SỐ HÓA ĐƠN CHƯA TRẢ" styleClass="stat-widget-title"/>
+                                                <Label fx:id="lblUnpaidInvoices" text="0" styleClass="stat-widget-value, text-info"/>
+                                            </VBox>
+                                        </HBox>
+
+                                        <VBox styleClass="report-card" VBox.vgrow="ALWAYS">
+                                            <children>
+                                                <HBox alignment="CENTER_LEFT" spacing="10">
+                                                    <Label text="Chi tiết công nợ theo căn hộ" styleClass="card-title"/>
+                                                    <Region HBox.hgrow="ALWAYS"/>
+                                                    <Button fx:id="btnSendSingleReminder" text="📧 Gửi nhắc nợ riêng" styleClass="btn-info"/>
                                                 </HBox>
+
+                                                <TableView fx:id="debtTable" VBox.vgrow="ALWAYS" styleClass="modern-table">
+                                                    <columns>
+                                                        <TableColumn fx:id="colApartmentId" text="Căn hộ ID" prefWidth="100"/>
+                                                        <TableColumn fx:id="colOwnerName" text="Tên chủ hộ" prefWidth="200"/>
+                                                        <TableColumn fx:id="colPhoneNumber" text="Số điện thoại" prefWidth="120"/>
+                                                        <TableColumn fx:id="colUnpaidCount" text="Số HĐ nợ" prefWidth="100" style="-fx-alignment: CENTER;"/>
+                                                        <TableColumn fx:id="colTotalDue" text="Tổng nợ (VNĐ)" prefWidth="150" styleClass="amount-column"/>
+                                                        <TableColumn fx:id="colEarliestDueDate" text="Hạn trả sớm nhất" prefWidth="150"/>
+                                                    </columns>
+                                                    <columnResizePolicy>
+                                                        <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
+                                                    </columnResizePolicy>
+                                                </TableView>
                                             </children>
                                         </VBox>
-                                    </center>
-                                </BorderPane>
+                                    </children>
+                                </VBox>
                             </content>
                         </Tab>
                         <Tab text="Quản lý Phí dịch vụ">
                             <content>
-                                <VBox prefHeight="200.0" prefWidth="100.0" spacing="10.0" styleClass="bg-white">
-                                    <padding><Insets bottom="10.0" left="10.0" right="10.0" top="10.0" /></padding>
+                                <VBox spacing="20.0" style="-fx-background-color: #f4f7f6;">
+                                    <padding><Insets top="20.0" left="20.0" right="20.0" bottom="20.0"/></padding>
                                     <children>
-                                        <Label text="💰 Danh sách các loại phí dịch vụ" styleClass="stats-title"><font><Font name="System Bold" size="18.0" /></font></Label>
-                                        <HBox spacing="10.0">
+                                        <Label text="Cấu hình Biểu phí" styleClass="report-header-label"/>
+
+                                        <VBox styleClass="report-card" VBox.vgrow="ALWAYS">
                                             <children>
-                                                <Button fx:id="btnAddFee" mnemonicParsing="false" text="➕ Thêm phí mới" styleClass="btn-success" />
-                                                <Button fx:id="btnEditFee" mnemonicParsing="false" text="✏️ Chỉnh sửa phí" styleClass="btn-info" />
-                                                <Button fx:id="btnDeleteFee" mnemonicParsing="false" text="❌ Xóa/Hủy phí" styleClass="btn-danger" />
+                                                <HBox alignment="CENTER_LEFT" spacing="10">
+                                                    <Label text="Danh sách các loại phí dịch vụ" styleClass="card-title"/>
+                                                    <Region HBox.hgrow="ALWAYS"/>
+
+                                                    <Button fx:id="btnAddFee" text="➕ Thêm phí mới" styleClass="btn-success"/>
+                                                    <Button fx:id="btnEditFee" text="✏️ Chỉnh sửa" styleClass="btn-info"/>
+                                                    <Button fx:id="btnDeleteFee" text="❌ Xóa/Hủy" styleClass="btn-danger"/>
+                                                </HBox>
+
+                                                <TableView fx:id="feeTable" VBox.vgrow="ALWAYS" styleClass="modern-table">
+                                                    <columns>
+                                                        <TableColumn fx:id="colFeeName" text="Tên loại phí" prefWidth="200"/>
+                                                        <TableColumn fx:id="colFeePrice" text="Đơn giá (VNĐ)" prefWidth="150" styleClass="amount-column"/>
+                                                        <TableColumn fx:id="colFeeUnit" text="Đơn vị" prefWidth="100"/>
+                                                        <TableColumn fx:id="colFeeIsDefault" text="Mặc định" prefWidth="100" style="-fx-alignment: CENTER;"/>
+                                                        <TableColumn fx:id="colFeePricingModel" text="Hình thức tính" prefWidth="150"/>
+                                                        <TableColumn fx:id="colFeeDesc" text="Mô tả" prefWidth="250"/>
+                                                    </columns>
+                                                    <columnResizePolicy>
+                                                        <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
+                                                    </columnResizePolicy>
+                                                </TableView>
                                             </children>
-                                        </HBox>
-                                        <TableView fx:id="feeTable" styleClass="table-view" VBox.vgrow="ALWAYS">
-                                            <columns>
-                                                <TableColumn fx:id="colFeeName" prefWidth="200.0" text="Tên loại phí" />
-                                                <TableColumn fx:id="colFeePrice" prefWidth="190.0" text="Đơn giá (VNĐ)" />
-                                                <TableColumn fx:id="colFeeUnit" prefWidth="100.0" text="Đơn vị" />
-                                                <TableColumn fx:id="colFeeIsDefault" prefWidth="110.0" text="Mặc định" />
-                                                <TableColumn fx:id="colFeePricingModel" prefWidth="160.0" text="Hình thức tính" />
-                                                <TableColumn fx:id="colFeeDesc" minWidth="200.0" prefWidth="300.0" text="Mô tả" />
-                                            </columns>
-                                        </TableView>
+                                        </VBox>
                                     </children>
                                 </VBox>
                             </content>
@@ -151,6 +169,74 @@
                                                 <TextArea fx:id="txtAutomationLog" editable="false" prefHeight="200.0" prefWidth="200.0" wrapText="true" styleClass="text-area" />
                                             </content>
                                         </TitledPane>
+                                    </children>
+                                </VBox>
+                            </content>
+                        </Tab>
+
+                        <Tab text="📊 Báo cáo &amp; Lịch sử">
+                            <content>
+                                <VBox spacing="15.0" style="-fx-background-color: #f4f7f6;">
+                                    <padding><Insets top="20.0" left="20.0" right="20.0" bottom="20.0"/></padding>
+                                    <children>
+                                        <Label text="Báo cáo Tài chính &amp; Đóng góp" styleClass="report-header-label"/>
+
+                                        <TabPane tabClosingPolicy="UNAVAILABLE" VBox.vgrow="ALWAYS" styleClass="modern-tab-pane">
+                                            <tabs>
+                                                <Tab text="Hóa đơn đã thu">
+                                                    <content>
+                                                        <VBox styleClass="report-card">
+                                                            <children>
+                                                                <HBox alignment="CENTER_LEFT" spacing="10">
+                                                                    <Label text="Danh sách hóa đơn đã thanh toán" styleClass="card-title"/>
+                                                                </HBox>
+
+                                                                <TableView fx:id="tblPaidInvoices" VBox.vgrow="ALWAYS" styleClass="modern-table">
+                                                                    <columns>
+                                                                        <TableColumn fx:id="colHistInvId" text="Mã HĐ" prefWidth="90"/>
+                                                                        <TableColumn fx:id="colHistAptId" text="Căn hộ" prefWidth="100"/>
+                                                                        <TableColumn fx:id="colHistAmount" text="Số tiền (VNĐ)" prefWidth="180"/>
+                                                                        <TableColumn fx:id="colHistDate" text="Ngày thanh toán" prefWidth="150"/>
+                                                                    </columns>
+                                                                    <columnResizePolicy>
+                                                                        <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
+                                                                    </columnResizePolicy>
+                                                                </TableView>
+                                                            </children>
+                                                        </VBox>
+                                                    </content>
+                                                </Tab>
+
+                                                <Tab text="Quỹ Đóng góp Tự nguyện">
+                                                    <content>
+                                                        <VBox styleClass="report-card">
+                                                            <children>
+                                                                <HBox alignment="CENTER_LEFT" spacing="20" style="-fx-padding: 0 0 15 0;">
+                                                                    <Label text="Chi tiết đóng góp" styleClass="card-title"/>
+                                                                    <Region HBox.hgrow="ALWAYS" />
+                                                                    <HBox alignment="CENTER" styleClass="highlight-box">
+                                                                        <Label fx:id="lblTotalContribution" text="TỔNG THU: 0 VNĐ" styleClass="highlight-label"/>
+                                                                    </HBox>
+                                                                </HBox>
+
+                                                                <TableView fx:id="tblContributions" VBox.vgrow="ALWAYS" styleClass="modern-table">
+                                                                    <columns>
+                                                                        <TableColumn fx:id="colConDate" text="Ngày đóng" prefWidth="130"/>
+                                                                        <TableColumn fx:id="colConRoom" text="Phòng" prefWidth="90"/>
+                                                                        <TableColumn fx:id="colConName" text="Người đóng" prefWidth="180"/>
+                                                                        <TableColumn fx:id="colConFee" text="Tên khoản phí" prefWidth="200"/>
+                                                                        <TableColumn fx:id="colConAmount" text="Số tiền (VNĐ)" prefWidth="140"/>
+                                                                    </columns>
+                                                                    <columnResizePolicy>
+                                                                        <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
+                                                                    </columnResizePolicy>
+                                                                </TableView>
+                                                            </children>
+                                                        </VBox>
+                                                    </content>
+                                                </Tab>
+                                            </tabs>
+                                        </TabPane>
                                     </children>
                                 </VBox>
                             </content>

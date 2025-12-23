@@ -77,8 +77,23 @@ public class InvoiceGenerationService {
 
                 BigDecimal totalAmount = BigDecimal.ZERO;
 
-                // 3. Tạo Hóa đơn cha (không đổi)
-                Invoice newInvoice = invoiceDAO.createInvoiceHeader(apartment.getApartmentId(), billingMonth);
+                // 3. Tạo hoa don cha
+                // 3.1. Kiểm tra xem có khoản phí BẮT BUỘC nào không
+                boolean hasMandatoryFee = allFeesToBill.stream()
+                        .anyMatch(fee -> !"VOLUNTARY".equals(fee.getPricingModel()));
+
+                // 3.2. Thiết lập ngày đến hạn
+                LocalDate invoiceDueDate;
+                if (hasMandatoryFee) {
+                    // Nếu có ít nhất 1 khoản bắt buộc: Hạn là ngày 15 tháng sau
+                    invoiceDueDate = billingMonth.plusMonths(1).withDayOfMonth(15);
+                } else {
+                    // Nếu TOÀN BỘ là phí tự nguyện: Hạn là ngày cuối cùng năm 2099
+                    invoiceDueDate = LocalDate.of(2099, 12, 31);
+                }
+
+                // 3.3. Gọi DAO với ngày đã chọn
+                Invoice newInvoice = invoiceDAO.createInvoiceHeader(apartment.getApartmentId(), billingMonth, invoiceDueDate);
                 if (newInvoice == null) {
                     System.err.println("Lỗi: Không thể tạo hóa đơn cha cho căn hộ: " + apartment.getApartmentId());
                     errorCount++;
@@ -91,11 +106,23 @@ public class InvoiceGenerationService {
                 for (FeeType fee : allFeesToBill) {
                     BigDecimal amount = calculationService.calculateFeeAmount(fee, apartment.getApartmentId());
                     System.out.println("   -> Tính phí '" + fee.getFeeName() + "': " + amount);
-                    if (amount != null && amount.compareTo(BigDecimal.ZERO) > 0) {
-                        invoiceDAO.addInvoiceDetail(newInvoice.getInvoiceId(), fee.getFeeId(), fee.getFeeName(), amount);
-                        totalAmount = totalAmount.add(amount);
+                    // Logic mới: Thêm nếu amount > 0 HOẶC là phí tự nguyện (để chấp nhận mức gợi ý = 0)
+                    boolean isVoluntary = "VOLUNTARY".equals(fee.getPricingModel());
+                    boolean hasAmount = amount != null && amount.compareTo(BigDecimal.ZERO) > 0;
+
+                    if (hasAmount || isVoluntary) {
+                        // Nếu là Voluntary mà amount null, gán bằng 0 cho an toàn
+                        BigDecimal finalAmount = (amount == null) ? BigDecimal.ZERO : amount;
+
+                        invoiceDAO.addInvoiceDetail(newInvoice.getInvoiceId(), fee.getFeeId(), fee.getFeeName(), finalAmount);
+
+                        // Chỉ cộng vào tổng tiền hóa đơn nếu số tiền thực sự > 0
+                        if (hasAmount) {
+                            totalAmount = totalAmount.add(finalAmount);
+                        }
+                        System.out.println("   -> Đã thêm phí '" + fee.getFeeName() + "': " + finalAmount);
                     } else {
-                        System.out.println("   -> Bỏ qua thêm chi tiết cho '" + fee.getFeeName() + "' vì số tiền là 0 hoặc null.");
+                        System.out.println("   -> Bỏ qua '" + fee.getFeeName() + "' vì số tiền là 0 và không phải phí tự nguyện.");
                     }
                 }
 

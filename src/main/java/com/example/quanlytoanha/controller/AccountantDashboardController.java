@@ -15,6 +15,8 @@ import com.example.quanlytoanha.service.FeeTypeService;
 import com.example.quanlytoanha.service.FinancialService;
 import com.example.quanlytoanha.service.InvoiceGenerationService;
 import com.example.quanlytoanha.session.SessionManager;
+import com.example.quanlytoanha.model.ContributionHistoryDTO;
+import com.example.quanlytoanha.dao.InvoiceDAO;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -27,11 +29,12 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
 public class AccountantDashboardController {
 
     // --- KHAI BÁO @FXML ---
-    // (Các @FXML cũ không thay đổi)
     @FXML private Label lblTotalDebt;
     @FXML private Label lblTotalOverdue;
     @FXML private Label lblUnpaidInvoices;
@@ -65,25 +68,38 @@ public class AccountantDashboardController {
     @FXML private CheckBox chkAutoSendOverdue;
     @FXML private Button btnSendManualReminder;
     @FXML private TextArea txtAutomationLog;
-    // -----------------------------------------
 
     @FXML private Button btnSendSingleReminder;
+
+    // --- TAB 4: BÁO CÁO & LỊCH SỬ ---
+    @FXML private TableView<Invoice> tblPaidInvoices;
+    @FXML private TableColumn<Invoice, Integer> colHistInvId;
+    @FXML private TableColumn<Invoice, Integer> colHistAptId;
+    @FXML private TableColumn<Invoice, BigDecimal> colHistAmount;
+    @FXML private TableColumn<Invoice, java.util.Date> colHistDate; // Hoặc String tùy model
+
+    @FXML private TableView<ContributionHistoryDTO> tblContributions;
+    @FXML private TableColumn<ContributionHistoryDTO, LocalDateTime> colConDate;
+    @FXML private TableColumn<ContributionHistoryDTO, String> colConRoom;
+    @FXML private TableColumn<ContributionHistoryDTO, String> colConName;
+    @FXML private TableColumn<ContributionHistoryDTO, String> colConFee;
+    @FXML private TableColumn<ContributionHistoryDTO, BigDecimal> colConAmount;
+
+    @FXML private Label lblTotalContribution;
 
     private FinancialService financialService;
     private FeeTypeService feeTypeService;
     private InvoiceGenerationService invoiceGenerationService;
-    // --- KHAI BÁO SERVICE MỚI ---
     private NotificationService notificationService;
-    // ---------------------------
+    private InvoiceDAO invoiceDAO;
 
     @FXML
     public void initialize() {
         this.financialService = new FinancialService();
         this.feeTypeService = new FeeTypeService();
         this.invoiceGenerationService = new InvoiceGenerationService();
-        // --- KHỞI TẠO SERVICE MỚI ---
         this.notificationService = new NotificationService();
-        // ---------------------------
+        this.invoiceDAO = InvoiceDAO.getInstance();
 
         setupNumericTextField(txtDaysBefore);
         setupNumericTextField(txtBillingMonth);
@@ -116,6 +132,9 @@ public class AccountantDashboardController {
                 }
             }
         });
+
+        setupReportTables();
+        loadReportData();
     }
 
 
@@ -209,7 +228,7 @@ public class AccountantDashboardController {
         colTotalDue.setCellValueFactory(new PropertyValueFactory<>("totalDue"));
         colEarliestDueDate.setCellValueFactory(new PropertyValueFactory<>("earliestDueDate"));
     }
-    
+
     private void configureFeeTableColumns() {
         colFeeName.setCellValueFactory(new PropertyValueFactory<>("feeName"));
         colFeePrice.setCellValueFactory(new PropertyValueFactory<>("unitPrice"));
@@ -540,4 +559,55 @@ public class AccountantDashboardController {
         button.setOnMouseExited(e -> button.setStyle(originalStyle));
     }
 
-} // <-- Dấu ngoặc cuối cùng của lớp
+    // --- LOGIC CHO TAB BÁO CÁO ---
+
+    private void setupReportTables() {
+        // 1. Setup bảng Hóa đơn đã thu
+        colHistInvId.setCellValueFactory(new PropertyValueFactory<>("invoiceId"));
+        colHistAptId.setCellValueFactory(new PropertyValueFactory<>("apartmentId"));
+        colHistAmount.setCellValueFactory(new PropertyValueFactory<>("totalAmount"));
+        colHistDate.setCellValueFactory(new PropertyValueFactory<>("dueDate")); // Lưu ý: Cần đảm bảo InvoiceDAO trả về ngày thanh toán vào cột này
+
+        // 2. Setup bảng Đóng góp
+        colConRoom.setCellValueFactory(new PropertyValueFactory<>("roomNumber"));
+        colConName.setCellValueFactory(new PropertyValueFactory<>("ownerName"));
+        colConFee.setCellValueFactory(new PropertyValueFactory<>("feeName"));
+        colConAmount.setCellValueFactory(new PropertyValueFactory<>("amount"));
+        colConDate.setCellValueFactory(new PropertyValueFactory<>("paymentDate"));
+
+        // Format ngày giờ cho đẹp (dd/MM/yyyy HH:mm)
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+        colConDate.setCellFactory(column -> new TableCell<>() {
+            @Override
+            protected void updateItem(LocalDateTime item, boolean empty) {
+                super.updateItem(item, empty);
+                if (empty || item == null) setText(null);
+                else setText(formatter.format(item));
+            }
+        });
+    }
+
+    private void loadReportData() {
+        try {
+            // 1. Load Hóa đơn đã thu
+            List<Invoice> paidInvoices = invoiceDAO.getPaidInvoicesHistory();
+            tblPaidInvoices.getItems().setAll(paidInvoices);
+
+            // 2. Load Lịch sử đóng góp
+            List<ContributionHistoryDTO> contributions = invoiceDAO.getContributionHistory();
+            tblContributions.getItems().setAll(contributions);
+
+            // 3. Tính tổng tiền đóng góp
+            BigDecimal total = contributions.stream()
+                    .map(ContributionHistoryDTO::getAmount)
+                    .reduce(BigDecimal.ZERO, BigDecimal::add);
+            lblTotalContribution.setText(String.format("TỔNG THU: %,.0f VNĐ", total));
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            // Có thể thêm showAlert nếu cần thiết, nhưng nên hạn chế popup lúc khởi động
+        }
+    }
+
+    // Bạn có thể thêm một nút "Làm mới dữ liệu" (Refresh) trên giao diện và gọi hàm loadReportData() này.
+}

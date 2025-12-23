@@ -37,6 +37,9 @@ public class InvoiceCalculationService {
                 // (apartment.getArea() đọc từ model Apartment.java)
                 return fee.getUnitPrice().multiply(apartment.getArea());
 
+            case "VOLUNTARY":
+                return fee.getUnitPrice();
+
             default:
                 // Nếu là 'PER_UNIT' (điện, nước) mà chúng ta chưa làm
                 // Tạm thời trả về 0

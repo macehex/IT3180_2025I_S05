@@ -177,4 +177,21 @@ public class FeeTypeDAO {
         }
         return feeTypes;
     }
+
+    /**
+     * HÀM MỚI: Tìm id của phí đóng góp đang hoạt động
+     */
+    public Integer getActiveVoluntaryFeeId() {
+        String sql = "SELECT fee_id FROM fee_types WHERE pricing_model = 'VOLUNTARY' AND is_active = TRUE LIMIT 1";
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql);
+             ResultSet rs = stmt.executeQuery()) {
+            if (rs.next()) {
+                return rs.getInt("fee_id");
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
 }

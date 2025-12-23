@@ -1,6 +1,7 @@
 // Vị trí: src/main/java/com/example/quanlytoanha/dao/InvoiceDAO.java
 package com.example.quanlytoanha.dao;
 
+import com.example.quanlytoanha.model.ContributionHistoryDTO;
 import com.example.quanlytoanha.model.Invoice;
 import com.example.quanlytoanha.model.InvoiceDetail;
 import com.example.quanlytoanha.utils.DatabaseConnection;
@@ -13,15 +14,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-/**
- * LƯU Ý QUAN TRỌNG:
- * File này giả định rằng bạn đã sửa file model 'Invoice.java'
- * để bao gồm các trường/hàm sau:
- * - public Invoice() { ... } (Constructor rỗng)
- * - private int apartmentId; (và getter/setter)
- * - private int ownerId; (và getter/setter)
- * - private String status; (và getter/setter)
- */
 public class InvoiceDAO {
     private static InvoiceDAO instance;
 
@@ -33,11 +25,6 @@ public class InvoiceDAO {
         }
         return instance;
     }
-
-    // -----------------------------------------------------------------
-    // --- CÁC HÀM MỚI CHO NGHIỆP VỤ "TẠO HÓA ĐƠN HÀNG LOẠT" ---
-    // (Dùng cho InvoiceGenerationService)
-    // -----------------------------------------------------------------
 
     /**
      * KIỂM TRA: Hóa đơn cho căn hộ/kỳ thanh toán này đã tồn tại chưa?
@@ -77,12 +64,8 @@ public class InvoiceDAO {
      * (ĐÃ SỬA: Bỏ cột issued_date)
      * @return Đối tượng Invoice chứa ID mới
      */
-    public Invoice createInvoiceHeader(int apartmentId, LocalDate billingMonth) {
-        // (Giả sử Hạn thanh toán là ngày 15 của tháng SAU tháng tạo hóa đơn)
-        // Ví dụ: Tạo hóa đơn tháng 10 (billingMonth=10/2025) -> Hạn là 15/11/2025
-        LocalDate dueDate = billingMonth.plusMonths(1).withDayOfMonth(15);
+    public Invoice createInvoiceHeader(int apartmentId, LocalDate billingMonth, LocalDate dueDate) {
 
-        // Sửa SQL: Bỏ issued_date
         String sql = "INSERT INTO invoices (apartment_id, due_date, status, total_amount) VALUES (?, ?, 'UNPAID', 0)";
 
         try (Connection conn = DatabaseConnection.getConnection();
@@ -143,12 +126,6 @@ public class InvoiceDAO {
         }
     }
 
-
-    // -----------------------------------------------------------------
-    // --- CÁC HÀM CŨ CỦA BẠN (CHO NGHIỆP VỤ CƯ DÂN/NHẮC NỢ) ---
-    // (Đã sửa lỗi)
-    // -----------------------------------------------------------------
-
     /**
      * Lấy các hóa đơn chưa thanh toán cho 1 Cư dân (ĐÃ SỬA LỖI)
      */
@@ -208,12 +185,11 @@ public class InvoiceDAO {
     }
 
     /**
-     * Lấy danh sách hóa đơn CHƯA THANH TOÁN sắp đến hạn (ĐÃ SỬA LỖI SQL)
+     * Lấy danh sách hóa đơn CHƯA THANH TOÁN sắp đến hạn
      */
     public List<Invoice> findUpcomingDueInvoices(int daysBefore) throws SQLException {
         List<Invoice> invoices = new ArrayList<>();
 
-        // SỬA LỖI SQL: Dùng 'make_interval' cho PostgreSQL
         String sql = "SELECT i.invoice_id, i.apartment_id, i.total_amount, i.due_date, a.owner_id " +
                 "FROM invoices i " +
                 "JOIN apartments a ON i.apartment_id = a.apartment_id " +
@@ -235,7 +211,7 @@ public class InvoiceDAO {
     }
 
     /**
-     * Lấy danh sách hóa đơn CHƯA THANH TOÁN đã quá hạn (Không lỗi)
+     * Lấy danh sách hóa đơn CHƯA THANH TOÁN đã quá hạn
      */
     public List<Invoice> findOverdueInvoices() throws SQLException {
         List<Invoice> invoices = new ArrayList<>();
@@ -259,7 +235,7 @@ public class InvoiceDAO {
     }
 
     /**
-     * Tạo hóa đơn MỚI và các chi tiết của nó (ĐÃ SỬA LỖI SQL)
+     * Tạo hóa đơn MỚI và các chi tiết của nó
      */
     public boolean createInvoiceWithDetails(Invoice invoice, List<InvoiceDetail> details) throws SQLException {
         Connection conn = null;
@@ -326,7 +302,7 @@ public class InvoiceDAO {
     }
 
     /**
-     * Cập nhật trạng thái hóa đơn (Không lỗi)
+     * Cập nhật trạng thái hóa đơn
      */
     public boolean updateInvoiceStatus(int invoiceId, String status) {
         String sql = "UPDATE invoices SET status = ? WHERE invoice_id = ?";
@@ -344,10 +320,6 @@ public class InvoiceDAO {
         }
     }
 
-    /**
-     * Hàm tiện ích: Ánh xạ ResultSet thành Invoice
-     * (Giả định Model Invoice.java đã được sửa)
-     */
     private Invoice mapResultSetToInvoiceBase(ResultSet rs) throws SQLException {
         Invoice invoice = new Invoice(); // Giả định constructor rỗng
         invoice.setInvoiceId(rs.getInt("invoice_id"));
@@ -359,7 +331,7 @@ public class InvoiceDAO {
     }
 
     /**
-     * Lấy chi tiết của một hóa đơn (ĐÃ SỬA LỖI)
+     * Lấy chi tiết của một hóa đơn
      */
     public List<InvoiceDetail> getInvoiceDetails(int invoiceId) {
         List<InvoiceDetail> details = new ArrayList<>();
@@ -449,20 +421,135 @@ public class InvoiceDAO {
      */
     public BigDecimal getTotalDebtForApartment(int apartmentId) {
         String sql = "SELECT COALESCE(SUM(total_amount), 0) as total_debt FROM invoices WHERE apartment_id = ? AND status = 'UNPAID'";
-        
+
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
-            
+
             stmt.setInt(1, apartmentId);
             ResultSet rs = stmt.executeQuery();
-            
+
             if (rs.next()) {
                 return rs.getBigDecimal("total_debt");
             }
         } catch (SQLException e) {
             e.printStackTrace();
         }
-        
+
         return BigDecimal.ZERO;
+    }
+
+    /**
+     * --- MỚI ---
+     * Tìm ID của loại phí VOLUNTARY trong hóa đơn (nếu có)
+     */
+    public Integer getVoluntaryFeeIdInInvoice(int invoiceId) {
+        String sql = """
+            SELECT id.fee_id 
+            FROM invoicedetails id
+            JOIN fee_types ft ON id.fee_id = ft.fee_id
+            WHERE id.invoice_id = ? AND ft.pricing_model = 'VOLUNTARY'
+            LIMIT 1
+        """;
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setInt(1, invoiceId);
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt("fee_id");
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null; // Không tìm thấy khoản phí tự nguyện nào
+    }
+
+    /**
+     * REPORT 1: Lấy lịch sử tất cả hóa đơn ĐÃ THANH TOÁN
+     */
+    public List<Invoice> getPaidInvoicesHistory() {
+        List<Invoice> list = new ArrayList<>();
+
+        // LOGIC MỚI: Tính tổng tiền hiển thị = Tổng thực tế - Tổng các khoản Tự Nguyện
+        String sql = """
+        SELECT 
+            i.invoice_id, 
+            a.apartment_id,
+            t.transaction_date,
+            (i.total_amount - COALESCE(
+                (SELECT SUM(id.amount) 
+                 FROM invoicedetails id 
+                 JOIN fee_types ft ON id.fee_id = ft.fee_id 
+                 WHERE id.invoice_id = i.invoice_id AND ft.pricing_model = 'VOLUNTARY')
+            , 0)) AS original_amount
+        FROM invoices i
+        JOIN transactions t ON i.invoice_id = t.invoice_id
+        JOIN apartments a ON i.apartment_id = a.apartment_id
+        WHERE i.status = 'PAID'
+        ORDER BY t.transaction_date DESC
+    """;
+
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql);
+             ResultSet rs = stmt.executeQuery()) {
+
+            while (rs.next()) {
+                Invoice inv = new Invoice();
+                inv.setInvoiceId(rs.getInt("invoice_id"));
+                inv.setApartmentId(rs.getInt("apartment_id"));
+                inv.setDueDate(rs.getDate("transaction_date"));
+                // Lấy cột "original_amount" vừa tính toán
+                inv.setTotalAmount(rs.getBigDecimal("original_amount"));
+                list.add(inv);
+            }
+        } catch (Exception e) { e.printStackTrace(); }
+        return list;
+    }
+
+    /**
+     * REPORT 2: Lấy chi tiết lịch sử đóng góp (VOLUNTARY)
+     */
+    public List<ContributionHistoryDTO> getContributionHistory() {
+        List<ContributionHistoryDTO> list = new ArrayList<>();
+        String sql = """
+            SELECT t.transaction_date, 
+                   a.apartment_id,              -- 1. Lấy trực tiếp cột ID
+                   r.full_name as owner_name, 
+                   ft.fee_name, 
+                   id.amount
+            FROM invoicedetails id
+            JOIN fee_types ft ON id.fee_id = ft.fee_id
+            JOIN invoices i ON id.invoice_id = i.invoice_id
+            JOIN transactions t ON i.invoice_id = t.invoice_id
+            JOIN apartments a ON i.apartment_id = a.apartment_id
+            LEFT JOIN users r ON a.owner_id = r.user_id  -- 2. Sửa bảng residents -> users (theo schema của bạn)
+            WHERE ft.pricing_model = 'VOLUNTARY'
+              AND i.status = 'PAID'
+              AND id.amount > 0
+            ORDER BY t.transaction_date DESC
+        """;
+
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql);
+             ResultSet rs = stmt.executeQuery()) {
+
+            while (rs.next()) {
+                // 3. Xử lý dữ liệu: Lấy int apartment_id và chuyển thành String
+                String roomNumberStr = String.valueOf(rs.getInt("apartment_id"));
+
+                list.add(new ContributionHistoryDTO(
+                        rs.getTimestamp("transaction_date").toLocalDateTime(),
+                        roomNumberStr,          // Truyền chuỗi ID vào DTO
+                        rs.getString("owner_name"),
+                        rs.getString("fee_name"),
+                        rs.getBigDecimal("amount")
+                ));
+            }
+        } catch (Exception e) {
+            System.err.println("LỖI LẤY LỊCH SỬ ĐÓNG GÓP:");
+            e.printStackTrace();
+        }
+        return list;
     }
 }
