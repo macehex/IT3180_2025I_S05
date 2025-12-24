@@ -194,4 +194,65 @@ public class FeeTypeDAO {
         }
         return null;
     }
+
+    /**
+     * HÀM MỚI: Lấy loại phí vừa được tạo gần đây nhất (có fee_id lớn nhất)
+     * Dùng để lấy ID ngay sau khi thêm mới.
+     */
+    public FeeType getLatestFee() {
+        // Sắp xếp ID giảm dần và lấy cái đầu tiên -> Chính là cái mới nhất
+        String sql = "SELECT * FROM fee_types ORDER BY fee_id DESC LIMIT 1";
+
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql);
+             ResultSet rs = stmt.executeQuery()) {
+
+            if (rs.next()) {
+                return new FeeType(
+                        rs.getInt("fee_id"),
+                        rs.getString("fee_name"),
+                        rs.getBigDecimal("unit_price"),
+                        rs.getString("unit"),
+                        rs.getString("description"),
+                        rs.getBoolean("is_active"),
+                        rs.getBoolean("is_default"),
+                        rs.getString("pricing_model")
+                );
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    /**
+     * HÀM MỚI: Tìm thông tin loại phí dựa theo tên
+     * Dùng để lấy ID sau khi vừa tạo phí mới.
+     */
+    public FeeType getFeeByName(String feeName) {
+        String sql = "SELECT * FROM fee_types WHERE fee_name = ? AND is_active = TRUE LIMIT 1";
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setString(1, feeName);
+
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    return new FeeType(
+                            rs.getInt("fee_id"),
+                            rs.getString("fee_name"),
+                            rs.getBigDecimal("unit_price"),
+                            rs.getString("unit"),
+                            rs.getString("description"),
+                            rs.getBoolean("is_active"),
+                            rs.getBoolean("is_default"),
+                            rs.getString("pricing_model")
+                    );
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
 }

@@ -245,3 +245,15 @@
     -fx-font-weight: bold;
     -fx-text-fill: #27ae60;
 }
+
+.btn-warning {
+    -fx-background-color: #f39c12; /* Màu cam */
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-background-radius: 8px;
+    -fx-padding: 10px 20px;
+    -fx-cursor: hand;
+}
+.btn-warning:hover {
+    -fx-background-color: #e67e22; /* Cam đậm khi di chuột */
+}

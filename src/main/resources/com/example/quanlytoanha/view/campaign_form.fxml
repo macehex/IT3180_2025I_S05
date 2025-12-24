@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.Font?>
+
+<VBox spacing="15.0" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="com.example.quanlytoanha.controller.CampaignFormController"
+      style="-fx-padding: 20; -fx-background-color: white;">
+
+    <Label text="Phát động Đợt Đóng góp Mới" textFill="#2c3e50">
+        <font><Font name="System Bold" size="18.0"/></font>
+    </Label>
+    <Separator />
+
+    <GridPane vgap="10.0" hgap="10.0">
+        <columnConstraints>
+            <ColumnConstraints minWidth="120" />
+            <ColumnConstraints hgrow="ALWAYS" />
+        </columnConstraints>
+
+        <Label text="Tên đợt/Quỹ:" GridPane.rowIndex="0" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
+        <TextField fx:id="txtName" promptText="VD: Ủng hộ đồng bào lũ lụt..." GridPane.rowIndex="0" GridPane.columnIndex="1"/>
+
+        <Label text="Mức tối thiểu:" GridPane.rowIndex="1" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
+        <TextField fx:id="txtMinAmount" text="0" promptText="Nhập số tiền (VNĐ)" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
+        <Label text="(VNĐ - Thường để 0đ nếu là tùy tâm)" style="-fx-font-size: 11px; -fx-text-fill: #7f8c8d;" GridPane.rowIndex="2" GridPane.columnIndex="1"/>
+
+        <Label text="Ngày hết hạn:" GridPane.rowIndex="3" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
+        <DatePicker fx:id="dpDueDate" promptText="Chọn ngày kết thúc đợt" GridPane.rowIndex="3" GridPane.columnIndex="1" maxWidth="Infinity"/>
+
+        <Label text="Mô tả chi tiết:" GridPane.rowIndex="4" GridPane.columnIndex="0" GridPane.valignment="TOP" style="-fx-font-weight: bold;"/>
+        <TextArea fx:id="txtDescription" promptText="Nhập nội dung kêu gọi..." prefRowCount="4" wrapText="true" GridPane.rowIndex="4" GridPane.columnIndex="1"/>
+    </GridPane>
+
+    <HBox spacing="10.0" alignment="CENTER_RIGHT" style="-fx-padding: 10 0 0 0;">
+        <Button text="Hủy bỏ" onAction="#handleCancel" style="-fx-background-color: #95a5a6; -fx-text-fill: white; -fx-cursor: hand;"/>
+        <Button fx:id="btnAction" text="🚀 Phát động ngay" onAction="#handleLaunch" style="-fx-background-color: #f39c12; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand;"/>
+    </HBox>
+</VBox>

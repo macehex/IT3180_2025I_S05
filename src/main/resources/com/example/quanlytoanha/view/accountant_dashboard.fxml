@@ -93,6 +93,7 @@
                                                     <Label text="Danh sách các loại phí dịch vụ" styleClass="card-title"/>
                                                     <Region HBox.hgrow="ALWAYS"/>
 
+                                                    <Button fx:id="btnLaunchCampaign" text="📢 Phát động" styleClass="btn-warning"/>
                                                     <Button fx:id="btnAddFee" text="➕ Thêm phí mới" styleClass="btn-success"/>
                                                     <Button fx:id="btnEditFee" text="✏️ Chỉnh sửa" styleClass="btn-info"/>
                                                     <Button fx:id="btnDeleteFee" text="❌ Xóa/Hủy" styleClass="btn-danger"/>

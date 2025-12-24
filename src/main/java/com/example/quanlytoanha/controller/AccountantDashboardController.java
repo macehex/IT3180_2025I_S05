@@ -23,6 +23,7 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
 import java.io.IOException;
@@ -70,6 +71,7 @@ public class AccountantDashboardController {
     @FXML private TextArea txtAutomationLog;
 
     @FXML private Button btnSendSingleReminder;
+    @FXML private Button btnLaunchCampaign;
 
     // --- TAB 4: BÁO CÁO & LỊCH SỬ ---
     @FXML private TableView<Invoice> tblPaidInvoices;
@@ -135,6 +137,8 @@ public class AccountantDashboardController {
 
         setupReportTables();
         loadReportData();
+
+        btnLaunchCampaign.setOnAction(event -> handleLaunchCampaign());
     }
 
 
@@ -255,6 +259,7 @@ public class AccountantDashboardController {
             loadFeeData();
         }
     }
+
     @FXML
     private void handleEditFee() {
         FeeType selectedFee = feeTable.getSelectionModel().getSelectedItem();
@@ -262,11 +267,57 @@ public class AccountantDashboardController {
             showAlert(Alert.AlertType.WARNING, "Chưa chọn", "Vui lòng chọn một loại phí để chỉnh sửa.");
             return;
         }
-        boolean saveClicked = showFeeEditDialog(selectedFee);
-        if (saveClicked) {
-            loadFeeData();
+
+        // --- PHÂN LUỒNG XỬ LÝ MỚI ---
+        if ("VOLUNTARY".equals(selectedFee.getPricingModel())) {
+            // Nếu là phí Đóng góp -> Dùng logic sửa đặc biệt
+            editVoluntaryFee(selectedFee);
+        } else {
+            // Nếu là phí thường -> Dùng logic cũ
+            if (showFeeEditDialog(selectedFee)) {
+                loadFeeData();
+            }
         }
     }
+
+    // Hàm xử lý riêng cho phí Đóng góp
+    private void editVoluntaryFee(FeeType fee) {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/example/quanlytoanha/view/campaign_form.fxml"));
+            Parent root = loader.load();
+            CampaignFormController controller = loader.getController();
+
+            // 1. Lấy hạn cũ từ DB
+            LocalDate currentDueDate = invoiceDAO.getLatestDueDateForFee(fee.getFeeId());
+
+            // 2. Mở form Edit
+            Stage dialogStage = new Stage();
+            dialogStage.setTitle("Chỉnh sửa Đợt đóng góp");
+            dialogStage.setScene(new Scene(root));
+            controller.setDialogStage(dialogStage);
+            controller.setCampaignToEdit(fee, currentDueDate); // Đẩy data cũ vào
+
+            dialogStage.showAndWait();
+
+            // 3. Xử lý sau khi Lưu
+            if (controller.isLaunched()) {
+                LocalDate newDueDate = controller.getSelectedDueDate();
+
+                // Cập nhật ngày trong DB nếu có thay đổi
+                boolean isDateChanged = newDueDate != null && !newDueDate.equals(currentDueDate);
+                if (isDateChanged) {
+                    invoiceDAO.updateCampaignDueDate(fee.getFeeId(), newDueDate);
+                }
+                showAlert(Alert.AlertType.INFORMATION, "Thành công",
+                        "Đã cập nhật thông tin đợt đóng góp.");
+                loadFeeData();
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+            showAlert(Alert.AlertType.ERROR, "Lỗi", "Không thể mở form chỉnh sửa: " + e.getMessage());
+        }
+    }
+
     @FXML
     private void handleDeleteFee() {
         FeeType selectedFee = feeTable.getSelectionModel().getSelectedItem();
@@ -274,24 +325,34 @@ public class AccountantDashboardController {
             showAlert(Alert.AlertType.WARNING, "Chưa chọn", "Vui lòng chọn một loại phí để xóa/hủy.");
             return;
         }
+
         Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
         alert.setTitle("Xác nhận");
-        alert.setHeaderText("Bạn có chắc chắn muốn hủy loại phí này?");
-        alert.setContentText(selectedFee.getFeeName());
+        alert.setHeaderText("Bạn có chắc chắn muốn kết thúc/hủy loại phí này?");
+        alert.setContentText("Phí: " + selectedFee.getFeeName() + "\n(Lưu ý: Các khoản chưa đóng sẽ bị xóa bỏ)");
+
         alert.showAndWait().ifPresent(response -> {
             if (response == ButtonType.OK) {
                 try {
-                    feeTypeService.deactivateFee(selectedFee.getFeeId());
-                    showAlert(Alert.AlertType.INFORMATION, "Thành công", "Đã hủy loại phí thành công.");
-                    loadFeeData();
+                    // 1. Thực hiện Hủy phí (Service sẽ tự gọi DAO để xóa hóa đơn UNPAID)
+                    boolean success = feeTypeService.deactivateFee(selectedFee.getFeeId());
+
+                    if (success) {
+                        showAlert(Alert.AlertType.INFORMATION, "Thành công", "Đã kết thúc loại phí và dọn dẹp dữ liệu.");
+                        loadFeeData(); // Refresh lại bảng
+                    } else {
+                        showAlert(Alert.AlertType.ERROR, "Lỗi", "Không thể hủy phí. Vui lòng thử lại.");
+                    }
                 } catch (SecurityException e) {
                     showAlert(Alert.AlertType.ERROR, "Lỗi Phân Quyền", e.getMessage());
                 } catch (Exception e) {
-                    showAlert(Alert.AlertType.ERROR, "Lỗi Hệ Thống", "Không thể hủy phí: " + e.getMessage());
+                    showAlert(Alert.AlertType.ERROR, "Lỗi Hệ Thống", "Lỗi: " + e.getMessage());
+                    e.printStackTrace();
                 }
             }
         });
     }
+
     private boolean showFeeEditDialog(FeeType fee) {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/example/quanlytoanha/view/add_fee_form.fxml"));
@@ -609,5 +670,45 @@ public class AccountantDashboardController {
         }
     }
 
-    // Bạn có thể thêm một nút "Làm mới dữ liệu" (Refresh) trên giao diện và gọi hàm loadReportData() này.
+    @FXML
+    private void handleLaunchCampaign() {
+        try {
+            // 1. Load file FXML mới
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/example/quanlytoanha/view/campaign_form.fxml"));
+            Parent root = loader.load();
+
+            // 2. Lấy Controller và setup Stage
+            CampaignFormController controller = loader.getController();
+            Stage dialogStage = new Stage();
+            dialogStage.setTitle("Phát động Đóng góp");
+            dialogStage.initOwner((Stage) btnLaunchCampaign.getScene().getWindow());
+            dialogStage.setScene(new Scene(root));
+            controller.setDialogStage(dialogStage);
+
+            // 3. Hiển thị và chờ người dùng thao tác
+            dialogStage.showAndWait();
+
+            // 4. Xử lý sau khi đóng form
+            if (controller.isLaunched()) {
+                FeeType newFee = controller.getCreatedFee();
+                LocalDate dueDate = controller.getSelectedDueDate();
+
+                if (newFee != null && dueDate != null) {
+                    // Gọi Service để tạo hóa đơn hàng loạt (như logic cũ)
+                    String result = invoiceGenerationService.createContributionCampaign(newFee, LocalDate.now(), dueDate);
+
+                    showAlert(Alert.AlertType.INFORMATION, "Thành công", result);
+
+                    // Refresh bảng
+                    loadDashboardData();
+                } else {
+                    showAlert(Alert.AlertType.WARNING, "Cảnh báo", "Đã tạo phí nhưng không lấy được ID để tạo hóa đơn. Vui lòng kiểm tra lại.");
+                }
+            }
+
+        } catch (IOException e) {
+            e.printStackTrace();
+            showAlert(Alert.AlertType.ERROR, "Lỗi Giao diện", "Không thể mở form phát động: " + e.getMessage());
+        }
+    }
 }

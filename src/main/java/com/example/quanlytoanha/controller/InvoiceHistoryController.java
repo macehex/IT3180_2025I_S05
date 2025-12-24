@@ -1,11 +1,13 @@
-// Vị trí: src/main/java/com/example/quanlytoanha/controller/InvoiceHistoryController.java
 package com.example.quanlytoanha.controller;
 
 import com.example.quanlytoanha.model.Invoice;
 import com.example.quanlytoanha.model.Transaction;
 import com.example.quanlytoanha.service.InvoiceService;
 import com.example.quanlytoanha.session.SessionManager;
-import com.example.quanlytoanha.ui.DashboardTile; // Đảm bảo import đúng
+import com.example.quanlytoanha.ui.DashboardTile;
+import com.example.quanlytoanha.service.InvoiceGenerationService;
+import com.example.quanlytoanha.dao.InvoiceDAO;
+
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
@@ -32,6 +34,7 @@ import javafx.scene.control.ButtonType;
 
 public class InvoiceHistoryController implements Initializable {
     private final InvoiceService invoiceService = InvoiceService.getInstance();
+    private final InvoiceGenerationService invoiceGenerationService = new InvoiceGenerationService();
     public Button backButton;
     private int residentId;
 
@@ -187,9 +190,8 @@ public class InvoiceHistoryController implements Initializable {
         }
 
         try {
-            // --- SỬA ĐỔI QUAN TRỌNG TẠI ĐÂY ---
-            // 1. Lấy số tiền từ ô nhập liệu (thay vì lấy từ hóa đơn gốc)
-            String amountText = amountField.getText().replaceAll("[,.]", ""); // Xóa dấu phẩy/chấm
+            // 1. Lấy số tiền từ ô nhập liệu và xử lý định dạng
+            String amountText = amountField.getText().replaceAll("[,.]", "");
             BigDecimal amountToPay;
             try {
                 amountToPay = new BigDecimal(amountText);
@@ -198,46 +200,77 @@ public class InvoiceHistoryController implements Initializable {
                 return;
             }
 
-            // 2. Kiểm tra: Không cho phép trả thiếu
-            if (amountToPay.compareTo(selectedInvoice.getTotalAmount()) < 0) {
-                showAlert(Alert.AlertType.ERROR, "Lỗi",
-                        "Số tiền thanh toán không được nhỏ hơn tổng hóa đơn (" +
-                                String.format("%,.0f", selectedInvoice.getTotalAmount()) + " VNĐ).");
+            // Kiểm tra số tiền tối thiểu (chung cho mọi trường hợp)
+            if (amountToPay.compareTo(new BigDecimal("1000")) < 0) {
+                showAlert(Alert.AlertType.WARNING, "Số tiền quá nhỏ",
+                        "Số tiền thanh toán tối thiểu phải là 1.000 VNĐ.");
                 return;
             }
 
-            // 3. Nếu trả thừa (Đóng góp) -> Hỏi xác nhận
-            if (amountToPay.compareTo(selectedInvoice.getTotalAmount()) > 0) {
-                BigDecimal donation = amountToPay.subtract(selectedInvoice.getTotalAmount());
+            BigDecimal invoiceTotal = selectedInvoice.getTotalAmount();
+
+            // --- PHÂN LUỒNG XỬ LÝ ---
+
+            // TRƯỜNG HỢP 1: Hóa đơn Đóng góp (Gốc = 0đ)
+            if (invoiceTotal.compareTo(BigDecimal.ZERO) == 0) {
+                // Với loại này, cho phép đóng bao nhiêu cũng được (miễn là > 1k)
                 Alert confirm = new Alert(Alert.AlertType.CONFIRMATION);
                 confirm.setTitle("Xác nhận đóng góp");
                 confirm.setHeaderText("Ghi nhận khoản đóng góp tự nguyện");
-                confirm.setContentText("Bạn đang thanh toán dư " + String.format("%,.0f", donation) + " VNĐ.\n"
-                        + "Số tiền này sẽ được chuyển vào quỹ đóng góp.\nBạn có chắc chắn không?");
+                confirm.setContentText("Bạn xác nhận muốn đóng góp số tiền: " +
+                        String.format("%,.0f", amountToPay) + " VNĐ vào quỹ chung cư không?");
 
-                // Nếu người dùng bấm Cancel thì dừng lại
+                if (confirm.showAndWait().get() != ButtonType.OK) {
+                    return; // Người dùng bấm Cancel
+                }
+            }
+            // TRƯỜNG HỢP 2: Hóa đơn Dịch vụ thông thường (Điện, Nước...)
+            else {
+                // BẮT BUỘC: Phải trả ĐÚNG số tiền (Không thừa, không thiếu)
+                if (amountToPay.compareTo(invoiceTotal) != 0) {
+                    showAlert(Alert.AlertType.WARNING, "Sai số tiền",
+                            "Vui lòng chỉ thanh toán ĐÚNG số tiền trên hóa đơn (" +
+                                    String.format("%,.0f", invoiceTotal) + " VNĐ).\n" +
+                                    "Hệ thống không hỗ trợ thanh toán dư hoặc thiếu cho hóa đơn dịch vụ.");
+
+                    // Tự động điền lại số đúng cho người dùng đỡ phải gõ lại
+                    amountField.setText(String.format("%,.0f", invoiceTotal));
+                    return;
+                }
+
+                // Nếu đúng số tiền -> Hiện xác nhận thanh toán bình thường
+                Alert confirm = new Alert(Alert.AlertType.CONFIRMATION);
+                confirm.setTitle("Xác nhận thanh toán");
+                confirm.setHeaderText("Thanh toán hóa đơn");
+                confirm.setContentText("Bạn xác nhận thanh toán số tiền: " +
+                        String.format("%,.0f", amountToPay) + " VNĐ?");
+
                 if (confirm.showAndWait().get() != ButtonType.OK) {
                     return;
                 }
             }
+
             // -----------------------------------
 
-            // 4. Gọi Service với số tiền thực tế người dùng nhập
+            // 2. Gọi Service xử lý thanh toán (Logic giữ nguyên)
             Transaction transaction = invoiceService.processPayment(residentId, selectedInvoice, amountToPay);
 
             if (transaction != null) {
                 showAlert(Alert.AlertType.INFORMATION, "Thành công",
-                        "Thanh toán thành công! Mã giao dịch: " + transaction.getTransactionId());
+                        "Giao dịch thành công! Mã giao dịch: " + transaction.getTransactionId());
 
                 refreshTiles();
 
-                // Mở rộng ngày lọc để thấy giao dịch mới
+                // Tái tạo hóa đơn đóng góp (nếu cần)
+                invoiceGenerationService.regenerateVoluntaryInvoice(selectedInvoice.getInvoiceId());
+
+                // Refresh UI
                 fromDate.setValue(LocalDate.now().minusDays(1));
                 toDate.setValue(LocalDate.now().plusDays(1));
                 filterTransactions();
 
-                // Xóa hóa đơn đã chọn khỏi danh sách
-                invoiceSelector.getItems().remove(selectedInvoice);
+                List<Invoice> updatedInvoices = invoiceService.getUnpaidInvoices(residentId);
+                invoiceSelector.getItems().setAll(updatedInvoices);
                 invoiceSelector.getSelectionModel().clearSelection();
                 amountField.clear();
             } else {

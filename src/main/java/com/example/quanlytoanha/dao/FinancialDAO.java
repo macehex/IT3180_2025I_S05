@@ -24,6 +24,7 @@ public class FinancialDAO {
                 SELECT invoice_id, total_amount, due_date,
                        CASE WHEN due_date < CURRENT_DATE THEN 1 ELSE 0 END AS is_overdue
                 FROM invoices WHERE status = 'UNPAID'
+                AND total_amount > 0
             )
             SELECT COUNT(*) AS total_unpaid_invoices,
                    SUM(CASE WHEN is_overdue = 1 THEN 1 ELSE 0 END) AS total_overdue_invoices,
@@ -67,6 +68,7 @@ public class FinancialDAO {
             JOIN apartments a ON i.apartment_id = a.apartment_id
             JOIN users u ON a.owner_id = u.user_id
             WHERE i.status = 'UNPAID'
+            AND i.total_amount > 0
             GROUP BY a.apartment_id, u.user_id, u.full_name, u.phone_number -- Thêm u.user_id vào GROUP BY
             ORDER BY total_due DESC;
         """;

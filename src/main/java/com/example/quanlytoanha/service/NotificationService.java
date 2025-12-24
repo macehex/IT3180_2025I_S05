@@ -9,6 +9,7 @@ import com.example.quanlytoanha.session.SessionManager; // Đảm bảo đúng �
 import java.math.BigDecimal;
 import java.sql.SQLException;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
 import java.time.LocalDateTime; // Dùng LocalDateTime cho log time chính xác hơn
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -289,6 +290,49 @@ public class NotificationService {
                     LocalDateTime.now().format(logTimestampFormat), invoice.getInvoiceId(), userId, e.getMessage());
             e.printStackTrace();
             return false;
+        }
+    }
+
+    /**
+     * HÀM MỚI: Gửi thông báo cập nhật Chiến dịch đóng góp
+     */
+    public void sendCampaignUpdateNotification(int userId, String campaignName, LocalDate newDueDate) {
+        String title = "🔔 Cập nhật: " + campaignName;
+        String content = "Ban quản lý đã cập nhật thông tin đợt đóng góp '" + campaignName + "'.\n" +
+                "Hạn đóng góp mới là: " + newDueDate.format(DateTimeFormatter.ofPattern("dd/MM/yyyy")) + ".\n" +
+                "Trân trọng thông báo.";
+
+        // Tạo notification và lưu DB
+        Notification noti = new Notification(userId, title, content, null);
+        try {
+            notificationDAO.createNotification(noti);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * HÀM MỚI: Gửi thông báo KẾT THÚC chiến dịch đóng góp và CẢM ƠN.
+     */
+    public void sendCampaignEndedNotification(int userId, String campaignName) {
+        String title = "🔔 Kết thúc đợt vận động: " + campaignName;
+
+        // Nội dung cảm ơn chân thành
+        String message = String.format(
+                "Ban Quản lý trân trọng thông báo: Đợt vận động đóng góp \"%s\" đã chính thức kết thúc.\n\n" +
+                        "Chúng tôi xin gửi lời cảm ơn chân thành đến Quý cư dân đã nhiệt tình hưởng ứng và đóng góp. " +
+                        "Sự chung tay của Quý vị là nguồn động viên to lớn cho cộng đồng.\n\n" +
+                        "Trân trọng cảm ơn!",
+                campaignName
+        );
+
+        Notification notification = new Notification(userId, title, message, null); // null vì không cần link tới hóa đơn cụ thể
+
+        try {
+            notificationDAO.createNotification(notification);
+        } catch (SQLException e) {
+            e.printStackTrace();
+            System.err.println("Lỗi gửi thông báo cảm ơn tới User ID: " + userId);
         }
     }
 }

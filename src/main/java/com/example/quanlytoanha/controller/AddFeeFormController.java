@@ -31,7 +31,7 @@ public class AddFeeFormController {
         this.feeTypeService = new FeeTypeService();
 
 
-        cmbPricingModel.getItems().addAll("FIXED", "PER_SQM", "VOLUNTARY");
+        cmbPricingModel.getItems().addAll("FIXED", "PER_SQM");
     }
 
     public void setDialogStage(Stage dialogStage) {
