@@ -72,9 +72,8 @@ public class ResidentListController implements Initializable {
         setupTableColumns();
         setupStatusComboBox();
 
-        // --- BỔ SUNG: Logic kích hoạt nút ---
         setupButtonListeners();
-
+        setupContextMenu();
         loadAllResidents();
 
         // Tự động refresh khi cửa sổ quay lại focus (đồng bộ với thay đổi căn hộ)
@@ -137,7 +136,7 @@ public class ResidentListController implements Initializable {
 
     private void setupStatusComboBox() {
         ObservableList<String> statusOptions = FXCollections.observableArrayList(
-                "Tất cả", "RESIDING", "MOVED_OUT"
+                "Tất cả", "RESIDING", "MOVED_OUT", "TEMPORARY"
         );
         cmbStatus.setItems(statusOptions);
         cmbStatus.setValue("Tất cả");
@@ -344,5 +343,71 @@ public class ResidentListController implements Initializable {
         alert.setHeaderText(null);
         alert.setContentText(message);
         alert.showAndWait();
+    }
+
+    private void setupContextMenu() {
+        // Tạo RowFactory để gán ContextMenu cho mỗi dòng
+        tableView.setRowFactory(tv -> {
+            TableRow<Resident> row = new TableRow<>();
+
+            // Tạo ContextMenu
+            ContextMenu contextMenu = new ContextMenu();
+
+            // Item 1: Đang cư trú
+            MenuItem itemResiding = new MenuItem("🟢 Đặt: Đang cư trú (RESIDING)");
+            itemResiding.setOnAction(e -> updateResidentStatus(row.getItem(), "RESIDING"));
+
+            // Item 2: Tạm trú
+            MenuItem itemTemporary = new MenuItem("🟡 Đặt: Tạm trú (TEMPORARY)");
+            itemTemporary.setOnAction(e -> updateResidentStatus(row.getItem(), "TEMPORARY"));
+
+            // Item 3: Đã chuyển đi
+            MenuItem itemMovedOut = new MenuItem("🔴 Đặt: Đã chuyển đi (MOVED_OUT)");
+            itemMovedOut.setOnAction(e -> updateResidentStatus(row.getItem(), "MOVED_OUT"));
+
+            contextMenu.getItems().addAll(itemResiding, itemTemporary, itemMovedOut);
+
+            // Chỉ hiện menu khi dòng không rỗng
+            row.contextMenuProperty().bind(
+                    javafx.beans.binding.Bindings.when(row.emptyProperty())
+                            .then((ContextMenu) null)
+                            .otherwise(contextMenu)
+            );
+
+            return row;
+        });
+    }
+
+    private void updateResidentStatus(Resident resident, String newStatus) {
+        if (resident == null) return;
+
+        // Nếu trạng thái không đổi thì không làm gì
+        if (newStatus.equals(resident.getStatus())) {
+            return;
+        }
+
+        try {
+            // Gọi DAO để cập nhật (Bạn cần thêm hàm này vào ResidentDAO nếu chưa có)
+            // Ví dụ: residentDAO.updateStatus(resident.getResidentId(), newStatus);
+
+            // Ở đây tôi giả định bạn sẽ viết thêm hàm updateStatus trong DAO
+            boolean success = residentDAO.updateStatus(resident.getResidentId(), newStatus);
+
+            if (success) {
+                // Cập nhật UI ngay lập tức
+                resident.setStatus(newStatus);
+                tableView.refresh(); // Refresh lại bảng để hiện màu/chữ mới
+
+                // Hiển thị thông báo nhỏ (Optional)
+                txtStatusMessage.setText("Đã cập nhật trạng thái: " + newStatus);
+                txtStatusMessage.setStyle("-fx-fill: green");
+            } else {
+                showAlert(Alert.AlertType.ERROR, "Lỗi", "Không thể cập nhật trạng thái trong CSDL.");
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+            showAlert(Alert.AlertType.ERROR, "Lỗi Database", "Lỗi khi cập nhật: " + e.getMessage());
+        }
     }
 }

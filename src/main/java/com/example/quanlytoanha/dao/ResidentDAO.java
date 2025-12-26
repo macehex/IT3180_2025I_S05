@@ -368,4 +368,23 @@ public class ResidentDAO {
         }
         return stats;
     }
+
+    public boolean updateStatus(int residentId, String newStatus) throws SQLException {
+        String sql;
+        // Logic thông minh: Nếu chuyển đi -> Ghi nhận ngày đi. Nếu quay lại -> Xóa ngày đi.
+        if ("MOVED_OUT".equals(newStatus)) {
+            sql = "UPDATE residents SET status = ?, move_out_date = CURRENT_DATE WHERE resident_id = ?";
+        } else {
+            sql = "UPDATE residents SET status = ?, move_out_date = NULL WHERE resident_id = ?";
+        }
+
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+            pstmt.setString(1, newStatus);
+            pstmt.setInt(2, residentId);
+
+            return pstmt.executeUpdate() > 0;
+        }
+    }
 }

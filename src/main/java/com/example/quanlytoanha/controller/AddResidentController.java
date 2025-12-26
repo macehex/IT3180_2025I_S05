@@ -222,47 +222,93 @@ public class AddResidentController {
 
     // --- LOGIC THÊM MỚI (GIỮ NGUYÊN) ---
     private void createNewResident() {
+        // Biến lưu thông tin để dùng lại nếu cần thử lại (retry)
+        Resident newResident = new Resident();
+
         try {
             // 1. Lấy dữ liệu từ form
             String fullName = txtFullName.getText().trim();
             Integer apartmentId = cbApartmentId.getSelectionModel().getSelectedItem();
             String idCard = txtIdCard.getText().trim();
-
             String finalIdCard = idCard.isEmpty() ? null : idCard;
             Date dateOfBirth = (dpDateOfBirth.getValue() != null)
                     ? Date.from(dpDateOfBirth.getValue().atStartOfDay(ZoneId.systemDefault()).toInstant())
                     : null;
             String relationship = cbRelationship.getSelectionModel().getSelectedItem();
             String phoneNumber = txtPhoneNumber.getText().trim();
-
             Date moveInDate = (dpMoveInDate.getValue() != null)
                     ? Date.from(dpMoveInDate.getValue().atStartOfDay(ZoneId.systemDefault()).toInstant())
                     : new Date();
 
-            // 2. Tạo đối tượng Resident
-            Resident newResident = new Resident();
+            // 2. Tạo đối tượng
             newResident.setFullName(fullName);
-            newResident.setApartmentId(apartmentId);
+            newResident.setApartmentId(apartmentId != null ? apartmentId : 0);
             newResident.setIdCardNumber(finalIdCard);
             newResident.setDateOfBirth(dateOfBirth);
             newResident.setRelationship(relationship);
             newResident.setPhoneNumber(phoneNumber);
             newResident.setMoveInDate(moveInDate);
 
-            // 3. Gọi Service
-            if (residentService.createNewResident(newResident)) {
-                showAlert(Alert.AlertType.INFORMATION, "Thành công", "Thêm cư dân mới thành công: " + fullName);
+            // 3. Gọi Service (lần đầu: forceTransfer = false)
+            performCreateResident(newResident, false);
+
+        } catch (ValidationException e) {
+            // XỬ LÝ ĐẶC BIỆT: Nếu lỗi là do đã có chủ hộ
+            if ("APARTMENT_HAS_OWNER".equals(e.getMessage())) {
+                showTransferOwnerConfirmation(newResident);
+            } else {
+                showAlert(Alert.AlertType.WARNING, "Thiếu thông tin", e.getMessage());
+            }
+        } catch (Exception e) { // Bắt NullPointerException hoặc lỗi khác khi get dữ liệu form
+            showAlert(Alert.AlertType.ERROR, "Lỗi Nhập Liệu", "Vui lòng kiểm tra lại các trường nhập liệu.");
+            e.printStackTrace();
+        }
+    }
+
+    private void performCreateResident(Resident resident, boolean forceTransfer) throws ValidationException {
+        try {
+            if (residentService.createNewResident(resident, forceTransfer)) {
+                String msg = "Thêm cư dân mới thành công: " + resident.getFullName();
+                if (forceTransfer) {
+                    msg += "\n(Đã chuyển quyền Chủ hộ từ người cũ sang người này)";
+                }
+                showAlert(Alert.AlertType.INFORMATION, "Thành công", msg);
                 Stage stage = (Stage) btnSave.getScene().getWindow();
                 stage.close();
             } else {
                 showAlert(Alert.AlertType.ERROR, "Lỗi", "Không thể thêm cư dân (Lỗi không xác định).");
             }
-        } catch (ValidationException e) {
-            showAlert(Alert.AlertType.WARNING, "Thiếu thông tin", e.getMessage());
         } catch (SQLException e) {
             showAlert(Alert.AlertType.ERROR, "Lỗi Database", "Lỗi DB: Không thể lưu hồ sơ. " + e.getMessage());
             e.printStackTrace();
         }
+    }
+
+    /**
+     * Hiển thị hộp thoại xác nhận chuyển chủ hộ
+     */
+    private void showTransferOwnerConfirmation(Resident resident) {
+        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+        alert.setTitle("Xác nhận chuyển quyền Chủ hộ");
+        alert.setHeaderText("Căn hộ này đã có Chủ hộ.");
+        alert.setContentText("Bạn có muốn chuyển quyền Chủ hộ cho người mới này không?\n\n" +
+                "Lưu ý: Chủ hộ cũ sẽ được chuyển thành 'Thành viên'.");
+
+        // Thêm nút tùy chỉnh
+        ButtonType btnYes = new ButtonType("Đồng ý chuyển", ButtonBar.ButtonData.YES);
+        ButtonType btnNo = new ButtonType("Hủy bỏ", ButtonBar.ButtonData.NO);
+        alert.getButtonTypes().setAll(btnYes, btnNo);
+
+        alert.showAndWait().ifPresent(type -> {
+            if (type == btnYes) {
+                try {
+                    // Gọi lại hàm tạo với forceTransfer = true
+                    performCreateResident(resident, true);
+                } catch (ValidationException ex) {
+                    showAlert(Alert.AlertType.ERROR, "Lỗi", ex.getMessage());
+                }
+            }
+        });
     }
 
     // --- LOGIC CẬP NHẬT HỒ SƠ CÓ SẴN (BỔ SUNG AUDIT LOG - US1_1_1.4) ---
