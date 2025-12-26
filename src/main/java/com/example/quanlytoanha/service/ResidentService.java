@@ -38,10 +38,10 @@ public class ResidentService {
     /**
      * Tạo hồ sơ cư dân mới, bao gồm validation nghiệp vụ.
      */
-    public boolean createNewResident(Resident resident) throws ValidationException, SQLException {
+    public boolean createNewResident(Resident resident, boolean forceTransferOwnership) throws ValidationException, SQLException {
         String idCard = resident.getIdCardNumber();
 
-        // --- 1. VALIDATION TRƯỜNG BẮT BUỘC (GIỮ NGUYÊN) ---
+        // 1. Validation cơ bản (Giữ nguyên)
         if (resident.getFullName() == null || resident.getFullName().trim().isEmpty()) {
             throw new ValidationException("Họ tên cư dân là trường bắt buộc.");
         }
@@ -52,13 +52,12 @@ public class ResidentService {
             throw new ValidationException("Số điện thoại là trường bắt buộc.");
         }
 
-        // --- 2. XỬ LÝ DỮ LIỆU USER BẮT BUỘC (GIỮ NGUYÊN) ---
+        // 2. Tạo username/password tạm (Giữ nguyên)
         String tempUsername;
         if (idCard != null && idCard.trim().length() >= 6) {
             String lastSixDigits = idCard.trim().substring(idCard.trim().length() - 6);
             tempUsername = "res" + resident.getApartmentId() + lastSixDigits;
         } else {
-            System.err.println("Cảnh báo: ID Card không hợp lệ hoặc quá ngắn, sử dụng username ngẫu nhiên.");
             tempUsername = "res" + resident.getApartmentId() + (int)(Math.random() * 9000 + 1000);
         }
         resident.setUsername(tempUsername);
@@ -68,19 +67,22 @@ public class ResidentService {
             resident.setEmail(tempUsername + "@temp.com");
         }
 
-
-        // --- 3. VALIDATION NGHIỆP VỤ (GIỮ NGUYÊN) ---
+        // 3. Validation Nghiệp vụ
+        ApartmentDAO apartmentDAO = new ApartmentDAO(); // Khởi tạo tại đây để dùng
         if (!residentDAO.isApartmentExist(resident.getApartmentId())) {
             throw new ValidationException("Căn hộ ID " + resident.getApartmentId() + " không tồn tại.");
         }
 
-        // --- 3.1. KIỂM TRA CĂN HỘ ĐÃ CÓ CHỦ HỘ CHƯA (NẾU QUAN HỆ LÀ "Chủ hộ") ---
-        if (resident.getRelationship() != null && 
-            (resident.getRelationship().equals("Chủ hộ") || resident.getRelationship().equalsIgnoreCase("Chủ hộ"))) {
-            ApartmentDAO apartmentDAO = new ApartmentDAO();
+        boolean isNewOwner = resident.getRelationship() != null &&
+                (resident.getRelationship().equalsIgnoreCase("Chủ hộ"));
+
+        if (isNewOwner) {
             Apartment existingApartment = apartmentDAO.getApartmentById(resident.getApartmentId());
-            if (existingApartment != null && existingApartment.getOwnerId() > 0) {
-                throw new ValidationException("Căn hộ đã có chủ hộ.");
+
+            // Nếu căn hộ đã có chủ hộ và KHÔNG PHẢI chế độ ép buộc chuyển đổi
+            if (existingApartment != null && existingApartment.getOwnerId() > 0 && !forceTransferOwnership) {
+                // Ném ngoại lệ đặc biệt để Controller bắt được và hiện hộp thoại xác nhận
+                throw new ValidationException("APARTMENT_HAS_OWNER");
             }
         }
 
@@ -91,30 +93,36 @@ public class ResidentService {
             }
         }
 
-        // --- 4. GỌI DAO VÀ THỰC HIỆN LƯU ---
+        // 4. Lưu User & Resident
         boolean success = userDAO.addResident(resident);
-        
-        // --- 5. TỰ ĐỘNG CẬP NHẬT CHỦ HỘ NẾU QUAN HỆ LÀ "Chủ hộ" ---
-        if (success && resident.getRelationship() != null && 
-            (resident.getRelationship().equals("Chủ hộ") || resident.getRelationship().equalsIgnoreCase("Chủ hộ"))) {
+
+        // 5. Cập nhật Chủ hộ (Nếu thành công và là Chủ hộ)
+        if (success && isNewOwner) {
             try {
-                ApartmentDAO apartmentDAO = new ApartmentDAO();
-                Apartment apartment = new Apartment();
-                apartment.setApartmentId(resident.getApartmentId());
-                apartment.setOwnerId(resident.getUserId());
-                // Giữ nguyên diện tích hiện tại
                 Apartment existingApartment = apartmentDAO.getApartmentById(resident.getApartmentId());
-                if (existingApartment != null) {
-                    apartment.setArea(existingApartment.getArea());
+
+                // Trường hợp 1: Có chủ hộ cũ và forceTransfer = true -> Dùng hàm chuyển chủ hộ
+                if (existingApartment.getOwnerId() > 0 && forceTransferOwnership) {
+                    apartmentDAO.transferApartmentOwner(
+                            resident.getApartmentId(),
+                            existingApartment.getOwnerId(), // Chủ cũ
+                            resident.getUserId()            // Chủ mới (vừa tạo xong)
+                    );
                 }
-                apartmentDAO.updateApartment(apartment);
+                // Trường hợp 2: Chưa có chủ hộ -> Cập nhật bình thường
+                else {
+                    Apartment apartmentToUpdate = new Apartment();
+                    apartmentToUpdate.setApartmentId(resident.getApartmentId());
+                    apartmentToUpdate.setOwnerId(resident.getUserId());
+                    apartmentToUpdate.setArea(existingApartment.getArea());
+                    apartmentDAO.updateApartment(apartmentToUpdate);
+                }
             } catch (SQLException e) {
-                // Log lỗi nhưng không throw để không ảnh hưởng đến việc thêm cư dân
-                System.err.println("Cảnh báo: Không thể tự động cập nhật chủ hộ: " + e.getMessage());
+                System.err.println("Cảnh báo: Lỗi cập nhật chủ hộ: " + e.getMessage());
                 e.printStackTrace();
             }
         }
-        
+
         return success;
     }
 
