@@ -138,7 +138,6 @@ public class InvoiceDAO {
                 "LEFT JOIN invoicedetails id ON i.invoice_id = id.invoice_id " +
                 "JOIN apartments a ON i.apartment_id = a.apartment_id " +
                 "WHERE a.owner_id = ? AND i.status = 'UNPAID' " +
-                "AND i.total_amount > 0 " +
                 "ORDER BY i.due_date";
 
         try (Connection conn = DatabaseConnection.getConnection();
@@ -151,7 +150,6 @@ public class InvoiceDAO {
                 int invoiceId = rs.getInt("invoice_id");
                 final ResultSet finalRs = rs;
 
-                // Giả định Model Invoice.java đã được sửa
                 Invoice invoice = invoices.computeIfAbsent(invoiceId, k -> {
                     Invoice newInvoice = new Invoice(); // Giả định constructor rỗng
                     try {
@@ -169,13 +167,12 @@ public class InvoiceDAO {
                 // Add invoice detail if it exists
                 int feeId = rs.getInt("fee_id");
                 if (!rs.wasNull()) {
-                    // SỬA LỖI 2: Gọi đúng constructor 3 tham số của InvoiceDetail
                     InvoiceDetail detail = new InvoiceDetail(
                             feeId,
                             rs.getString("name"),
-                            rs.getBigDecimal("detail_amount") // Sửa: getBigDecimal
+                            rs.getBigDecimal("detail_amount")
                     );
-                    invoice.addDetail(detail); // (Giả định hàm addDetail tồn tại)
+                    invoice.addDetail(detail);
                 }
             }
         } catch (SQLException e) {
