@@ -305,4 +305,98 @@ public class ApartmentDAO {
             }
         }
     }
+
+    /**
+     * Tìm kiếm căn hộ có phân trang.
+     * @param keyword Từ khóa (ID hoặc tên chủ hộ).
+     * @param limit Số dòng mỗi trang.
+     * @param offset Vị trí bắt đầu.
+     */
+    public List<Apartment> searchApartments(String keyword, int limit, int offset) {
+        List<Apartment> apartments = new ArrayList<>();
+        StringBuilder sql = new StringBuilder(
+                "SELECT a.apartment_id, a.area, a.owner_id, u.full_name AS owner_name " +
+                        "FROM apartments a " +
+                        "LEFT JOIN users u ON a.owner_id = u.user_id " +
+                        "WHERE 1=1 ");
+
+        if (keyword != null && !keyword.trim().isEmpty()) {
+            sql.append("AND (CAST(a.apartment_id AS TEXT) LIKE ? OR u.full_name ILIKE ?) ");
+        }
+
+        sql.append("ORDER BY a.apartment_id LIMIT ? OFFSET ?");
+
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql.toString())) {
+
+            int paramIndex = 1;
+            if (keyword != null && !keyword.trim().isEmpty()) {
+                String pattern = "%" + keyword.trim() + "%";
+                stmt.setString(paramIndex++, pattern);
+                stmt.setString(paramIndex++, pattern);
+            }
+
+            stmt.setInt(paramIndex++, limit);
+            stmt.setInt(paramIndex++, offset);
+
+            ResultSet rs = stmt.executeQuery();
+            while (rs.next()) {
+                Apartment apartment = new Apartment();
+                apartment.setApartmentId(rs.getInt("apartment_id"));
+                apartment.setArea(rs.getBigDecimal("area")); // Đọc diện tích
+
+                // Xử lý owner_id có thể NULL
+                int ownerId = rs.getInt("owner_id");
+                if (rs.wasNull()) {
+                    apartment.setOwnerId(0); // 0 để đại diện cho NULL
+                } else {
+                    apartment.setOwnerId(ownerId);
+                }
+
+                // Xử lý owner_name có thể NULL (căn hộ trống)
+                String ownerName = rs.getString("owner_name");
+                apartment.setOwnerName(ownerName != null ? ownerName : "");
+
+                apartments.add(apartment);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return apartments;
+    }
+    public int countSearchResults(String keyword) {
+        // SQL đếm số lượng
+        StringBuilder sql = new StringBuilder(
+                "SELECT COUNT(*) " +
+                        "FROM apartments a " +
+                        "LEFT JOIN users u ON a.owner_id = u.user_id " +
+                        "WHERE 1=1 "
+        );
+
+        // Logic điều kiện WHERE phải khớp 100% với hàm searchApartments
+        if (keyword != null && !keyword.trim().isEmpty()) {
+            sql.append("AND (CAST(a.apartment_id AS TEXT) LIKE ? OR u.full_name ILIKE ?) ");
+        }
+
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql.toString())) {
+
+            // Set tham số (nếu có từ khóa)
+            if (keyword != null && !keyword.trim().isEmpty()) {
+                String pattern = "%" + keyword.trim() + "%";
+                stmt.setString(1, pattern);
+                stmt.setString(2, pattern);
+            }
+
+            // Thực thi và lấy kết quả
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt(1); // Lấy giá trị của cột COUNT(*)
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return 0; // Trả về 0 nếu có lỗi
+    }
 }

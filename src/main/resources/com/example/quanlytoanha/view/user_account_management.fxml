@@ -37,6 +37,9 @@
                         <TableColumn fx:id="colLastLogin" text="Đăng nhập cuối" prefWidth="150.0"/>
                     </columns>
                 </TableView>
+
+                <Pagination fx:id="pagination" maxPageIndicatorCount="50" pageCount="1"
+                            prefHeight="50.0" VBox.vgrow="NEVER" />
             </VBox>
 
             <!-- Cột phải: Form thêm/sửa -->

@@ -11,13 +11,16 @@ import com.example.quanlytoanha.dao.ApartmentDAO;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
+import javafx.scene.Node;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import javafx.util.StringConverter;
 
 import java.math.BigDecimal;
 import java.sql.SQLException;
+import java.util.List;
 
 public class AddApartmentController {
 
@@ -33,6 +36,8 @@ public class AddApartmentController {
     @FXML private TableColumn<Apartment, Integer> colApartmentId;
     @FXML private TableColumn<Apartment, BigDecimal> colArea;
     @FXML private TableColumn<Apartment, String> colOwnerName;
+    @FXML private TextField txtSearch;
+    @FXML private Pagination pagination;
 
     // --- KHAI BÁO SERVICE ---
     private final ApartmentService apartmentService = new ApartmentService();
@@ -42,6 +47,7 @@ public class AddApartmentController {
     // Biến lưu căn hộ đang được chọn để sửa/xóa
     private Apartment selectedApartment = null;
 
+    private static final int ROWS_PER_PAGE = 30;
     /**
      * Phương thức khởi tạo logic cho các ComboBox (Chạy sau khi FXML load)
      */
@@ -82,6 +88,9 @@ public class AddApartmentController {
             System.err.println("LỖI KHỞI TẠO FORM THÊM CĂN HỘ:");
             e.printStackTrace();
         }
+
+        pagination.setPageFactory(this::createPage);
+        handleSearch();
     }
 
     /**
@@ -442,6 +451,47 @@ public class AddApartmentController {
         alert.setHeaderText(null);
         alert.setContentText(message);
         alert.showAndWait();
+    }
+
+    private Node createPage(int pageIndex) {
+        String keyword = txtSearch.getText();
+        int offset = pageIndex * ROWS_PER_PAGE;
+
+        List<Apartment> data = apartmentDAO.searchApartments(keyword, ROWS_PER_PAGE, offset);
+        tableViewApartments.setItems(FXCollections.observableArrayList(data));
+
+        return new VBox(); // Trả về node rỗng vì ta update TableView trực tiếp
+    }
+
+    @FXML
+    private void handleSearch() {
+        String keyword = "";
+        if (txtSearch != null) {
+            keyword = txtSearch.getText();
+        }
+
+        // 1. Lấy tổng số bản ghi từ DB
+        int totalItems = apartmentDAO.countSearchResults(keyword);
+
+        // 2. Tính số trang: (total / limit) + (1 nếu có dư)
+        int pageCount = (totalItems / ROWS_PER_PAGE);
+        if (totalItems % ROWS_PER_PAGE > 0) {
+            pageCount++;
+        }
+
+        // Tránh trường hợp 0 trang gây lỗi
+        if (pageCount == 0) pageCount = 1;
+
+        // 3. Cập nhật vào Pagination Control
+        pagination.setPageCount(pageCount);
+
+        // 4. Reset về trang đầu tiên
+        pagination.setCurrentPageIndex(0);
+
+        // Lưu ý: Việc setPageIndex(0) sẽ tự động kích hoạt createPage(0),
+        // nhưng nếu nó đang là 0 sẵn thì có thể không kích hoạt.
+        // Để chắc chắn, bạn có thể gọi force update:
+        createPage(0);
     }
 }
 

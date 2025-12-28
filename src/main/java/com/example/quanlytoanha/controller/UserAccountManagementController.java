@@ -8,8 +8,10 @@ import com.example.quanlytoanha.service.UserAccountService;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
+import javafx.scene.Node;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.layout.VBox;
 
 import java.sql.SQLException;
 import java.sql.Timestamp;
@@ -43,6 +45,7 @@ public class UserAccountManagementController {
     @FXML private Button btnDeleteUser;
     @FXML private Button btnResetPassword;
     @FXML private Button btnRefresh;
+    @FXML private Pagination pagination;
 
     private UserAccountService userAccountService;
     private ResidentDAO residentDAO;
@@ -50,6 +53,7 @@ public class UserAccountManagementController {
     private ObservableList<User> userList;
     private User selectedUser;
 
+    private static final int ROWS_PER_PAGE = 50;
     @FXML
     public void initialize() {
         this.userAccountService = new UserAccountService();
@@ -64,7 +68,7 @@ public class UserAccountManagementController {
         setupUserForm();
 
         // Tải dữ liệu ban đầu
-        loadUserData();
+        setupPagination();
     }
 
     private void setupUserTable() {
@@ -313,7 +317,7 @@ public class UserAccountManagementController {
 
     @FXML
     private void handleRefresh() {
-        loadUserData();
+        setupPagination(); // Tính lại số trang và load lại trang 1 (hoặc giữ trang hiện tại nếu muốn logic phức tạp hơn)
     }
 
     private void loadUserData() {
@@ -336,5 +340,44 @@ public class UserAccountManagementController {
         alert.setContentText(message);
         alert.showAndWait();
     }
+
+    private void setupPagination() {
+        try {
+            // 1. Lấy tổng số user để tính số trang
+            // Lưu ý: Nếu dùng Service thì gọi qua Service, ở đây ví dụ gọi DAO trực tiếp hoặc qua Service
+            int totalItems = userAccountService.countTotalUsers();
+            int pageCount = (totalItems / ROWS_PER_PAGE) + 1;
+
+            pagination.setPageCount(pageCount);
+
+            // 2. Set Factory để load dữ liệu mỗi khi chuyển trang
+            pagination.setPageFactory(this::createPage);
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private Node createPage(int pageIndex) {
+        loadUserDataForPage(pageIndex);
+        return new VBox(); // Trả về node rỗng vì ta update TableView trực tiếp
+    }
+
+    // Hàm loadUserData cũ sửa lại thành load theo trang
+    private void loadUserDataForPage(int pageIndex) {
+        try {
+            int offset = pageIndex * ROWS_PER_PAGE;
+            List<User> users = userAccountService.getUsersByPage(ROWS_PER_PAGE, offset);
+
+            userList.clear();
+            userList.addAll(users);
+
+        } catch (SQLException e) {
+            showAlert(Alert.AlertType.ERROR, "Lỗi Database", "Không thể tải danh sách trang " + (pageIndex + 1));
+            e.printStackTrace();
+        }
+    }
+
+
 }
 

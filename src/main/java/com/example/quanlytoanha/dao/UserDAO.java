@@ -586,4 +586,63 @@ public class UserDAO {
         }
         return false;
     }
+
+    /**
+     * Lấy danh sách User có phân trang.
+     * @param limit Số lượng bản ghi mỗi trang.
+     * @param offset Vị trí bắt đầu.
+     */
+    public List<User> getUsersByPage(int limit, int offset) throws SQLException {
+        List<User> users = new ArrayList<>();
+        // Sắp xếp theo ID để dữ liệu ổn định khi phân trang
+        String sql = "SELECT * FROM users ORDER BY user_id LIMIT ? OFFSET ?";
+
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+            pstmt.setInt(1, limit);
+            pstmt.setInt(2, offset);
+            ResultSet rs = pstmt.executeQuery();
+
+            while (rs.next()) {
+                // Tái sử dụng logic map User cũ (hoặc trích xuất ra hàm riêng để gọn code)
+                int userId = rs.getInt("user_id");
+                int roleId = rs.getInt("role_id");
+                Role userRole = Role.fromId(roleId);
+                String username = rs.getString("username");
+                String email = rs.getString("email");
+                String fullName = rs.getString("full_name");
+                String phone = rs.getString("phone_number");
+                Timestamp createdAt = rs.getTimestamp("created_at");
+                Timestamp lastLogin = rs.getTimestamp("last_login");
+
+                User user;
+                switch (userRole) {
+                    case ADMIN: user = new Admin(userId, username, email, fullName, userRole, createdAt, lastLogin, phone); break;
+                    case ACCOUNTANT: user = new Accountant(userId, username, email, fullName, userRole, createdAt, lastLogin, phone); break;
+                    case POLICE: user = new Police(userId, username, email, fullName, userRole, createdAt, lastLogin, phone); break;
+                    case RESIDENT: user = new Resident(userId, username, email, fullName, userRole, createdAt, lastLogin, phone, 0, 0, null, "", ""); break;
+                    default: throw new IllegalStateException("Vai trò không xác định: " + userRole);
+                }
+                users.add(user);
+            }
+        }
+        return users;
+    }
+
+    /**
+     * Đếm tổng số lượng User.
+     */
+    public int countTotalUsers() throws SQLException {
+        String sql = "SELECT COUNT(*) FROM users";
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql);
+             ResultSet rs = pstmt.executeQuery()) {
+            if (rs.next()) {
+                return rs.getInt(1);
+            }
+        }
+        return 0;
+    }
+
 }

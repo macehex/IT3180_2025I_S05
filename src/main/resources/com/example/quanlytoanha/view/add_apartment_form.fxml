@@ -14,8 +14,9 @@
 <?import javafx.scene.text.Font?>
 <?import javafx.scene.control.ScrollPane?>
 
-<BorderPane xmlns="http://javafx.com/javafx/17" 
-            xmlns:fx="http://javafx.com/fxml/1" 
+<?import javafx.scene.control.Pagination?>
+<BorderPane xmlns="http://javafx.com/javafx/17"
+            xmlns:fx="http://javafx.com/fxml/1"
             fx:controller="com.example.quanlytoanha.controller.AddApartmentController"
             style="-fx-background-color: #f8f9fa;">
     
@@ -92,7 +93,10 @@
                 <children>
                     <Label text="DANH SÁCH CĂN HỘ HIỆN CÓ" 
                            style="-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #1e3c72; -fx-padding: 0 0 15 0;"/>
-                    
+                    <HBox spacing="10" style="-fx-padding: 0 0 10 0;">
+                        <TextField fx:id="txtSearch" promptText="Tìm theo ID hoặc Tên chủ hộ..." prefWidth="300"/>
+                        <Button text="🔍 Tìm" onAction="#handleSearch"/>
+                    </HBox>
                     <TableView fx:id="tableViewApartments" prefHeight="400.0" prefWidth="500.0"
                                style="-fx-background-radius: 8;">
                         <columns>
@@ -101,6 +105,8 @@
                             <TableColumn fx:id="colOwnerName" text="Chủ hộ" prefWidth="300"/>
                         </columns>
                     </TableView>
+
+                    <Pagination fx:id="pagination" maxPageIndicatorCount="50" pageCount="1" />
                 </children>
             </VBox>
         </HBox>

@@ -183,5 +183,14 @@ public class UserAccountService {
         checkPermission();
         return permissionDAO.removePermissionFromRole(role.getRoleId(), permissionId);
     }
+
+    // Trong UserAccountService.java
+    public List<User> getUsersByPage(int limit, int offset) throws SQLException {
+        return userDAO.getUsersByPage(limit, offset);
+    }
+
+    public int countTotalUsers() throws SQLException {
+        return userDAO.countTotalUsers();
+    }
 }
 

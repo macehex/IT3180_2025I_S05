@@ -7,6 +7,8 @@ import com.example.quanlytoanha.model.Role;
 import java.sql.*;
 import java.util.Map; // <-- BỔ SUNG: Import cho hàm Báo cáo
 import java.util.HashMap; // <-- BỔ SUNG: Import cho hàm Báo cáo
+import java.util.List;
+import  java.util.ArrayList;
 
 public class ResidentDAO {
 
@@ -386,5 +388,48 @@ public class ResidentDAO {
 
             return pstmt.executeUpdate() > 0;
         }
+    }
+
+    /**
+     * Lấy danh sách cư dân có phân trang.
+     * @param limit Số lượng bản ghi mỗi trang.
+     * @param offset Vị trí bắt đầu lấy.
+     */
+    public List<Resident> getResidentsByPage(int limit, int offset) throws SQLException {
+        List<Resident> residents = new ArrayList<>();
+        // Câu SQL cũ thêm LIMIT và OFFSET
+        String SQL = "SELECT u.user_id, u.username, u.email, u.full_name, u.role_id, u.created_at, u.last_login, u.phone_number, " +
+                "r.resident_id, r.apartment_id, r.date_of_birth, r.id_card_number, r.relationship, r.status, r.move_in_date, r.move_out_date " +
+                "FROM residents r LEFT JOIN users u ON r.user_id = u.user_id " +
+                "ORDER BY r.resident_id DESC LIMIT ? OFFSET ?"; // Sắp xếp để dữ liệu ổn định
+
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(SQL)) {
+
+            pstmt.setInt(1, limit);
+            pstmt.setInt(2, offset);
+
+            try (ResultSet rs = pstmt.executeQuery()) {
+                while (rs.next()) {
+                    residents.add(mapResultSetToResident(rs));
+                }
+            }
+        }
+        return residents;
+    }
+
+    /**
+     * Đếm tổng số lượng cư dân (để tính số trang).
+     */
+    public int countTotalResidents() throws SQLException {
+        String sql = "SELECT COUNT(*) FROM residents";
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql);
+             ResultSet rs = pstmt.executeQuery()) {
+            if (rs.next()) {
+                return rs.getInt(1);
+            }
+        }
+        return 0;
     }
 }

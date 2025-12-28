@@ -10,10 +10,12 @@ import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader; // Cần import
 import javafx.fxml.Initializable;
+import javafx.scene.Node;
 import javafx.scene.Parent; // Cần import
 import javafx.scene.Scene; // Cần import
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.layout.VBox;
 import javafx.scene.text.Text;
 import javafx.stage.Modality; // Cần import
 import javafx.stage.Stage; // Cần import
@@ -55,12 +57,17 @@ public class ResidentListController implements Initializable {
     @FXML private Button btnViewHistory;
     @FXML private Button btnDeleteResident;
 
+    @FXML private Pagination pagination;
+
+
     // Data
     private ObservableList<Resident> residentList;
     private ResidentDAO residentDAO;
     private UserAccountService userAccountService;
     private ApartmentDAO apartmentDAO;
     private SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy");
+
+    private static final int ROWS_PER_PAGE = 50;
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
@@ -74,7 +81,8 @@ public class ResidentListController implements Initializable {
 
         setupButtonListeners();
         setupContextMenu();
-        loadAllResidents();
+        setupPagination();
+        //loadAllResidents();
 
         // Tự động refresh khi cửa sổ quay lại focus (đồng bộ với thay đổi căn hộ)
         tableView.sceneProperty().addListener((obsScene, oldScene, newScene) -> {
@@ -408,6 +416,51 @@ public class ResidentListController implements Initializable {
         } catch (SQLException e) {
             e.printStackTrace();
             showAlert(Alert.AlertType.ERROR, "Lỗi Database", "Lỗi khi cập nhật: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Thiết lập logic cho Pagination
+     */
+    private void setupPagination() {
+        try {
+            // 1. Tính tổng số trang
+            int totalItems = residentDAO.countTotalResidents();
+            int pageCount = (totalItems / ROWS_PER_PAGE) + 1;
+            pagination.setPageCount(pageCount);
+
+            // 2. Cài đặt Factory để load dữ liệu khi đổi trang
+            pagination.setPageFactory(this::createPage);
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * Hàm được gọi mỗi khi người dùng chọn một trang số 'pageIndex'
+     */
+    private Node createPage(int pageIndex) {
+        loadResidentsForPage(pageIndex);
+        return new VBox(); // Trả về node rỗng vì ta cập nhật TableView trực tiếp, không thay đổi nội dung Pagination
+    }
+
+    /**
+     * Tải dữ liệu cho trang cụ thể
+     */
+    private void loadResidentsForPage(int pageIndex) {
+        try {
+            int offset = pageIndex * ROWS_PER_PAGE;
+            List<Resident> residents = residentDAO.getResidentsByPage(ROWS_PER_PAGE, offset);
+
+            residentList.clear();
+            residentList.addAll(residents);
+
+            lblResultCount.setText("Hiển thị: " + residents.size() + " cư dân (Trang " + (pageIndex + 1) + ")");
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+            showAlert(Alert.AlertType.ERROR, "Lỗi", "Không thể tải trang dữ liệu: " + e.getMessage());
         }
     }
 }

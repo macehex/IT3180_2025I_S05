@@ -96,6 +96,9 @@
                     </columns>
                 </TableView>
 
+                <Pagination fx:id="pagination" maxPageIndicatorCount="50" pageCount="1"
+                            prefHeight="50.0" VBox.vgrow="NEVER" />
+
                 <HBox spacing="10.0" alignment="CENTER_LEFT">
                     <Button fx:id="btnProfileChangeRequests" text="Yêu cầu chỉnh sửa" onAction="#handleProfileChangeRequests"
                             style="-fx-background-color: #6f42c1; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 6;" />

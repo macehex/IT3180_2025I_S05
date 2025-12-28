@@ -1,0 +1,83 @@
+/* resident_history_styles.css */
+
+.root {
+    -fx-font-family: 'Segoe UI', sans-serif;
+}
+
+/* Header Title */
+.header-label {
+    -fx-font-size: 22px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #2c3e50;
+    -fx-padding: 0 0 10 0;
+}
+
+/* Nút tải lại */
+.btn-info {
+    -fx-background-color: #17a2b8;
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-background-radius: 5;
+    -fx-padding: 8 15;
+    -fx-cursor: hand;
+}
+
+.btn-info:hover {
+    -fx-background-color: #138496;
+}
+
+/* Bảng Lịch sử */
+.table-view {
+    -fx-base: #ffffff;
+    -fx-control-inner-background: #ffffff;
+    -fx-background-color: transparent;
+    -fx-table-cell-border-color: transparent;
+    -fx-table-header-border-color: transparent;
+    -fx-padding: 5;
+    -fx-background-radius: 8;
+    -fx-border-radius: 8;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.1), 10, 0, 0, 0);
+}
+
+.table-view .column-header-background {
+    -fx-background-color: #ecf0f1;
+    -fx-background-radius: 8 8 0 0;
+    -fx-background-insets: 0 0 0 0;
+}
+
+.table-view .column-header, .table-view .filler {
+    -fx-size: 35;
+    -fx-border-width: 0 0 1 0;
+    -fx-background-color: transparent;
+    -fx-border-color:
+        transparent
+        transparent
+        derive(-fx-base, 80%)
+        transparent;
+    -fx-border-insets: 0 10 1 0;
+}
+
+.table-view .column-header .label {
+    -fx-font-size: 13pt;
+    -fx-font-weight: bold;
+    -fx-text-fill: #34495e;
+    -fx-alignment: center-left;
+    -fx-opacity: 1;
+}
+
+.table-view:focused .table-row-cell:filled:focused:selected {
+    -fx-background-color: -fx-focus-color;
+}
+
+.table-row-cell:odd {
+    -fx-background-color: #f9f9f9;
+}
+
+.table-row-cell:even {
+    -fx-background-color: #ffffff;
+}
+
+.table-row-cell:hover {
+    -fx-background-color: #e8f6f3;
+    -fx-cursor: hand;
+}
