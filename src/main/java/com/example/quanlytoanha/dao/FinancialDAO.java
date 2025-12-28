@@ -1,6 +1,5 @@
 package com.example.quanlytoanha.dao;
 
-
 import com.example.quanlytoanha.model.DebtReport;
 import com.example.quanlytoanha.model.ApartmentDebt;
 import com.example.quanlytoanha.model.Invoice;
@@ -13,18 +12,29 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.sql.Date; // <-- BỔ SUNG: Import java.sql.Date cho hàm mới
-
+import java.sql.Date;
 
 public class FinancialDAO {
 
+    /**
+     * BÁO CÁO TỔNG QUAN (US7): Thống kê tổng nợ, tổng quá hạn.
+     * CẬP NHẬT: Loại bỏ hoàn toàn hóa đơn VOLUNTARY khỏi thống kê nợ.
+     */
     public DebtReport getDebtStatistics() {
         String sql = """
             WITH UnpaidInvoices AS (
-                SELECT invoice_id, total_amount, due_date,
-                       CASE WHEN due_date < CURRENT_DATE THEN 1 ELSE 0 END AS is_overdue
-                FROM invoices WHERE status = 'UNPAID'
-                AND total_amount > 0
+                SELECT i.invoice_id, i.total_amount, i.due_date,
+                       CASE WHEN i.due_date < CURRENT_DATE THEN 1 ELSE 0 END AS is_overdue
+                FROM invoices i
+                WHERE i.status = 'UNPAID'
+                AND i.total_amount > 0
+                -- LỌC BỎ CÁC HÓA ĐƠN TỪ THIỆN/ĐÓNG GÓP
+                AND NOT EXISTS (
+                    SELECT 1 FROM invoicedetails d 
+                    JOIN fee_types f ON d.fee_id = f.fee_id 
+                    WHERE d.invoice_id = i.invoice_id 
+                    AND f.pricing_model = 'VOLUNTARY'
+                )
             )
             SELECT COUNT(*) AS total_unpaid_invoices,
                    SUM(CASE WHEN is_overdue = 1 THEN 1 ELSE 0 END) AS total_overdue_invoices,
@@ -48,19 +58,18 @@ public class FinancialDAO {
         return report;
     }
 
-
     /**
-     * Lấy danh sách công nợ chi tiết theo từng căn hộ. (ĐÃ SỬA)
+     * DANH SÁCH CÔNG NỢ CHI TIẾT THEO CĂN HỘ (US7_2)
+     * CẬP NHẬT: Loại bỏ hoàn toàn hóa đơn VOLUNTARY.
      */
     public List<ApartmentDebt> getDebtListByApartment() {
         List<ApartmentDebt> debtList = new ArrayList<>();
-        // --- SỬA CÂU SQL: Thêm u.user_id AS owner_user_id ---
         String sql = """
             SELECT
                 a.apartment_id,
                 u.full_name AS owner_name,
                 u.phone_number,
-                u.user_id AS owner_user_id, -- Lấy user_id để gửi thông báo
+                u.user_id AS owner_user_id,
                 COUNT(i.invoice_id) AS unpaid_count,
                 SUM(i.total_amount) AS total_due,
                 MIN(i.due_date) AS earliest_due_date
@@ -69,10 +78,16 @@ public class FinancialDAO {
             JOIN users u ON a.owner_id = u.user_id
             WHERE i.status = 'UNPAID'
             AND i.total_amount > 0
-            GROUP BY a.apartment_id, u.user_id, u.full_name, u.phone_number -- Thêm u.user_id vào GROUP BY
+            -- LỌC BỎ CÁC HÓA ĐƠN TỪ THIỆN/ĐÓNG GÓP
+            AND NOT EXISTS (
+                SELECT 1 FROM invoicedetails d 
+                JOIN fee_types f ON d.fee_id = f.fee_id 
+                WHERE d.invoice_id = i.invoice_id 
+                AND f.pricing_model = 'VOLUNTARY'
+            )
+            GROUP BY a.apartment_id, u.user_id, u.full_name, u.phone_number
             ORDER BY total_due DESC;
         """;
-        // ----------------------------------------------------
 
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql);
@@ -86,11 +101,7 @@ public class FinancialDAO {
                 debt.setUnpaidCount(rs.getInt("unpaid_count"));
                 debt.setTotalDue(rs.getBigDecimal("total_due"));
                 debt.setEarliestDueDate(rs.getDate("earliest_due_date"));
-
-                // --- SỬA CODE: Gán giá trị cho trường mới ---
                 debt.setOwnerUserId(rs.getInt("owner_user_id"));
-                // ------------------------------------------
-
                 debtList.add(debt);
             }
         } catch (Exception e) {
@@ -99,17 +110,29 @@ public class FinancialDAO {
         return debtList;
     }
 
-    // ... (Hàm getUnpaidInvoiceDetails() giữ nguyên) ...
+    /**
+     * CHI TIẾT CÁC HÓA ĐƠN NỢ CỦA 1 CĂN HỘ (Dùng cho Popup xem chi tiết)
+     * CẬP NHẬT: Thêm điều kiện total_amount > 0 và lọc VOLUNTARY
+     */
     public List<Invoice> getUnpaidInvoiceDetails(int apartmentId) {
         Map<Integer, Invoice> invoiceMap = new HashMap<>();
         String sql = """
-        SELECT i.invoice_id, i.total_amount, i.due_date,
-               d.fee_id, d.name, d.amount
-        FROM invoices i
-        LEFT JOIN invoicedetails d ON i.invoice_id = d.invoice_id
-        WHERE i.apartment_id = ? AND i.status = 'UNPAID'
-        ORDER BY i.due_date, i.invoice_id;
-    """;
+            SELECT i.invoice_id, i.total_amount, i.due_date,
+                   d.fee_id, d.name, d.amount
+            FROM invoices i
+            LEFT JOIN invoicedetails d ON i.invoice_id = d.invoice_id
+            WHERE i.apartment_id = ? 
+            AND i.status = 'UNPAID'
+            AND i.total_amount > 0  -- Ẩn hóa đơn 0 đồng
+            -- LỌC BỎ HÓA ĐƠN ĐÓNG GÓP
+            AND NOT EXISTS (
+                SELECT 1 FROM invoicedetails id2 
+                JOIN fee_types ft ON id2.fee_id = ft.fee_id 
+                WHERE id2.invoice_id = i.invoice_id 
+                AND ft.pricing_model = 'VOLUNTARY'
+            )
+            ORDER BY i.due_date, i.invoice_id;
+        """;
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setInt(1, apartmentId);
@@ -125,10 +148,10 @@ public class FinancialDAO {
                     invoiceMap.put(invoiceId, invoice);
                 }
                 Invoice currentInvoice = invoiceMap.get(invoiceId);
-                int feeId = rs.getInt("fee_id"); // Lấy fee_id từ ResultSet
-                if (!rs.wasNull()) { // Kiểm tra xem fee_id có null không (tránh lỗi nếu LEFT JOIN không khớp)
+                int feeId = rs.getInt("fee_id");
+                if (!rs.wasNull()) {
                     InvoiceDetail detail = new InvoiceDetail(
-                            feeId, // Truyền fee_id vào constructor
+                            feeId,
                             rs.getString("name"),
                             rs.getBigDecimal("amount")
                     );
@@ -141,21 +164,12 @@ public class FinancialDAO {
         return new ArrayList<>(invoiceMap.values());
     }
 
-
-    // --- BỔ SUNG: HÀM MỚI CHO BÁO CÁO CÔNG NỢ (US7_2_1) ---
-
     /**
-     * BÁO CÁO CÔNG NỢ (US7_2_1):
-     * Lấy danh sách HÓA ĐƠN CHI TIẾT theo căn hộ DỰA TRÊN KHOẢNG THỜI GIAN
-     * (lọc theo ngày đến hạn - due_date).
-     * @param startDate Ngày bắt đầu (java.sql.Date)
-     * @param endDate Ngày kết thúc (java.sql.Date)
-     * @return Danh sách các mục công nợ (ApartmentDebt)
+     * BÁO CÁO THEO KHOẢNG THỜI GIAN
+     * CẬP NHẬT: Loại bỏ hóa đơn VOLUNTARY.
      */
     public List<ApartmentDebt> getDebtReportByDateRange(Date startDate, Date endDate) {
         List<ApartmentDebt> debtList = new ArrayList<>();
-        // SQL này lấy CÁC HÓA ĐƠN RIÊNG LẺ (không gộp)
-        // và lọc theo 'due_date' (ngày đến hạn)
         String sql = """
             SELECT
                 a.apartment_id,
@@ -170,6 +184,14 @@ public class FinancialDAO {
             JOIN apartments a ON i.apartment_id = a.apartment_id
             JOIN users u ON a.owner_id = u.user_id
             WHERE i.due_date BETWEEN ? AND ?
+            AND i.total_amount > 0
+            -- LỌC BỎ HÓA ĐƠN ĐÓNG GÓP
+            AND NOT EXISTS (
+                SELECT 1 FROM invoicedetails d 
+                JOIN fee_types f ON d.fee_id = f.fee_id 
+                WHERE d.invoice_id = i.invoice_id 
+                AND f.pricing_model = 'VOLUNTARY'
+            )
             ORDER BY a.apartment_id, i.due_date DESC;
         """;
 
@@ -183,20 +205,12 @@ public class FinancialDAO {
 
             while (rs.next()) {
                 ApartmentDebt debt = new ApartmentDebt();
-                // Tái sử dụng model ApartmentDebt
                 debt.setApartmentId(rs.getInt("apartment_id"));
                 debt.setOwnerName(rs.getString("owner_name"));
                 debt.setPhoneNumber(rs.getString("phone_number"));
                 debt.setOwnerUserId(rs.getInt("owner_user_id"));
-
-                // Gán TotalDue = total_amount của 1 hóa đơn
                 debt.setTotalDue(rs.getBigDecimal("total_amount"));
-                // Gán EarliestDueDate = due_date của 1 hóa đơn
                 debt.setEarliestDueDate(rs.getDate("due_date"));
-
-                // (Bạn có thể thêm trường status và invoice_id vào model ApartmentDebt
-                // để hiển thị trạng thái PAID/UNPAID nếu muốn)
-
                 debtList.add(debt);
             }
         } catch (Exception e) {

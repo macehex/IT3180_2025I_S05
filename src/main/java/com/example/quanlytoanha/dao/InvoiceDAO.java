@@ -127,58 +127,46 @@ public class InvoiceDAO {
     }
 
     /**
-     * Lấy các hóa đơn chưa thanh toán cho 1 Cư dân (ĐÃ SỬA LỖI)
+     * Lấy các hóa đơn chưa thanh toán cho Cư dân xem.
      */
     public List<Invoice> getUnpaidInvoices(int residentId) {
         Map<Integer, Invoice> invoices = new HashMap<>();
-
-        // FIXED: Join directly through apartments.owner_id instead of residents table
-        String sql = "SELECT i.*, id.fee_id, id.name, id.amount as detail_amount " +
-                "FROM invoices i " +
-                "LEFT JOIN invoicedetails id ON i.invoice_id = id.invoice_id " +
-                "JOIN apartments a ON i.apartment_id = a.apartment_id " +
-                "WHERE a.owner_id = ? AND i.status = 'UNPAID' " +
-                "ORDER BY i.due_date";
+        String sql = """
+            SELECT i.*, id.fee_id, id.name, id.amount as detail_amount 
+            FROM invoices i 
+            LEFT JOIN invoicedetails id ON i.invoice_id = id.invoice_id 
+            JOIN apartments a ON i.apartment_id = a.apartment_id 
+            WHERE a.owner_id = ? 
+            AND i.status = 'UNPAID' 
+            AND i.total_amount > 0 -- CHỈ HIỆN HÓA ĐƠN CÓ TIỀN
+            ORDER BY i.due_date
+        """;
 
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
-
             pstmt.setInt(1, residentId);
             ResultSet rs = pstmt.executeQuery();
-
             while (rs.next()) {
                 int invoiceId = rs.getInt("invoice_id");
                 final ResultSet finalRs = rs;
-
                 Invoice invoice = invoices.computeIfAbsent(invoiceId, k -> {
-                    Invoice newInvoice = new Invoice(); // Giả định constructor rỗng
+                    Invoice newInvoice = new Invoice();
                     try {
                         newInvoice.setInvoiceId(invoiceId);
                         newInvoice.setApartmentId(finalRs.getInt("apartment_id"));
-                        newInvoice.setTotalAmount(finalRs.getBigDecimal("total_amount")); // Sửa: getBigDecimal
+                        newInvoice.setTotalAmount(finalRs.getBigDecimal("total_amount"));
                         newInvoice.setDueDate(finalRs.getDate("due_date"));
                         newInvoice.setStatus(finalRs.getString("status"));
-                    } catch (SQLException e) {
-                        e.printStackTrace();
-                    }
+                    } catch (SQLException e) { e.printStackTrace(); }
                     return newInvoice;
                 });
-
-                // Add invoice detail if it exists
                 int feeId = rs.getInt("fee_id");
                 if (!rs.wasNull()) {
-                    InvoiceDetail detail = new InvoiceDetail(
-                            feeId,
-                            rs.getString("name"),
-                            rs.getBigDecimal("detail_amount")
-                    );
+                    InvoiceDetail detail = new InvoiceDetail(feeId, rs.getString("name"), rs.getBigDecimal("detail_amount"));
                     invoice.addDetail(detail);
                 }
             }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-
+        } catch (SQLException e) { e.printStackTrace(); }
         return new ArrayList<>(invoices.values());
     }
 
@@ -358,8 +346,7 @@ public class InvoiceDAO {
     }
 
     /**
-     * TÌM ID HÓA ĐƠN: Tìm ID của hóa đơn dựa trên căn hộ và tháng (due_date)
-     * @return ID hóa đơn hoặc null nếu không tìm thấy
+     * TÌM ID HÓA ĐƠN DỊCH VỤ THÁNG (Không lấy hóa đơn đóng góp)
      */
     public Integer findInvoiceIdByApartmentAndMonth(int apartmentId, LocalDate billingMonth) {
         LocalDate expectedDueDate = billingMonth.plusMonths(1).withDayOfMonth(15);
@@ -367,30 +354,30 @@ public class InvoiceDAO {
         int dueYear = expectedDueDate.getYear();
 
         String sql = """
-            SELECT invoice_id FROM invoices
-            WHERE apartment_id = ?
-              AND EXTRACT(MONTH FROM due_date) = ?
-              AND EXTRACT(YEAR FROM due_date) = ?
+            SELECT i.invoice_id 
+            FROM invoices i
+            WHERE i.apartment_id = ?
+              AND EXTRACT(MONTH FROM i.due_date) = ?
+              AND EXTRACT(YEAR FROM i.due_date) = ?
+              -- Chỉ tìm hóa đơn CÓ CHỨA phí dịch vụ/bắt buộc
+              AND EXISTS (
+                  SELECT 1 FROM invoicedetails d
+                  JOIN fee_types f ON d.fee_id = f.fee_id
+                  WHERE d.invoice_id = i.invoice_id
+                  AND f.pricing_model != 'VOLUNTARY'
+              )
             LIMIT 1
             """;
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
-
             stmt.setInt(1, apartmentId);
             stmt.setInt(2, dueMonth);
             stmt.setInt(3, dueYear);
-
             try (ResultSet rs = stmt.executeQuery()) {
-                if (rs.next()) {
-                    return rs.getInt("invoice_id"); // Trả về ID nếu tìm thấy
-                } else {
-                    return null; // Trả về null nếu không có hóa đơn cho tháng đó
-                }
+                if (rs.next()) return rs.getInt("invoice_id");
             }
-        } catch (Exception e) {
-            e.printStackTrace();
-            return null; // Trả về null nếu có lỗi
-        }
+        } catch (Exception e) { e.printStackTrace(); }
+        return null;
     }
 
     /**
@@ -412,26 +399,28 @@ public class InvoiceDAO {
     }
 
     /**
-     * Lấy tổng số tiền nợ (hóa đơn chưa thanh toán) của một căn hộ
-     * @param apartmentId ID của căn hộ
-     * @return Tổng số tiền nợ
+     * Tính tổng nợ cho 1 căn hộ.
      */
     public BigDecimal getTotalDebtForApartment(int apartmentId) {
-        String sql = "SELECT COALESCE(SUM(total_amount), 0) as total_debt FROM invoices WHERE apartment_id = ? AND status = 'UNPAID' AND total_amount > 0";
-
+        String sql = """
+            SELECT COALESCE(SUM(total_amount), 0) as total_debt 
+            FROM invoices i
+            WHERE apartment_id = ? 
+            AND status = 'UNPAID' 
+            AND total_amount > 0
+            AND NOT EXISTS (
+                SELECT 1 FROM invoicedetails d 
+                JOIN fee_types f ON d.fee_id = f.fee_id 
+                WHERE d.invoice_id = i.invoice_id 
+                AND f.pricing_model = 'VOLUNTARY'
+            )
+        """;
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
-
             stmt.setInt(1, apartmentId);
             ResultSet rs = stmt.executeQuery();
-
-            if (rs.next()) {
-                return rs.getBigDecimal("total_debt");
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-
+            if (rs.next()) return rs.getBigDecimal("total_debt");
+        } catch (SQLException e) { e.printStackTrace(); }
         return BigDecimal.ZERO;
     }
 

@@ -11,42 +11,69 @@
 <?import javafx.scene.layout.GridPane?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
+
 <VBox xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1"
       fx:controller="com.example.quanlytoanha.controller.AddFeeFormController"
-      prefWidth="450.0" spacing="15.0" style="-fx-padding: 20;">
+      prefWidth="500.0" spacing="20.0" style="-fx-padding: 25; -fx-background-color: #f4f4f4;">
     <children>
-        <Label fx:id="lblTitle" text="Thêm loại phí mới" style="-fx-font-size: 18px; -fx-font-weight: bold;"/>
+        <!-- Tiêu đề -->
+        <Label fx:id="lblTitle" text="Thêm loại phí mới"
+               style="-fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: #2c3e50;"/>
 
-        <GridPane hgap="10.0" vgap="10.0">
+        <GridPane hgap="15.0" vgap="15.0">
             <children>
-                <Label text="Tên phí:" GridPane.rowIndex="0" GridPane.columnIndex="0"/>
-                <TextField fx:id="txtName" GridPane.rowIndex="0" GridPane.columnIndex="1"/>
+                <!-- Dòng 1: Tên phí -->
+                <Label text="Tên loại phí:" style="-fx-font-weight: bold;" GridPane.rowIndex="0" GridPane.columnIndex="0"/>
+                <TextField fx:id="txtName" promptText="VD: Phí gửi xe máy, Phí dịch vụ..."
+                           style="-fx-background-radius: 3;" GridPane.rowIndex="0" GridPane.columnIndex="1"/>
 
-                <Label text="Đơn giá:" GridPane.rowIndex="1" GridPane.columnIndex="0"/>
-                <TextField fx:id="txtUnitPrice" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
+                <!-- Dòng 2: Đơn giá -->
+                <Label text="Đơn giá (VNĐ):" style="-fx-font-weight: bold;" GridPane.rowIndex="1" GridPane.columnIndex="0"/>
+                <TextField fx:id="txtUnitPrice" promptText="0"
+                           style="-fx-background-radius: 3;" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
 
-                <Label text="Đơn vị (m², m³, xe...):" GridPane.rowIndex="2" GridPane.columnIndex="0"/>
-                <TextField fx:id="txtUnit" GridPane.rowIndex="2" GridPane.columnIndex="1"/>
+                <!-- Dòng 3: Đơn vị tính -->
+                <Label text="Đơn vị tính:" style="-fx-font-weight: bold;" GridPane.rowIndex="2" GridPane.columnIndex="0"/>
+                <TextField fx:id="txtUnit" promptText="m2, xe, tháng, người..."
+                           style="-fx-background-radius: 3;" GridPane.rowIndex="2" GridPane.columnIndex="1"/>
 
-                <Label text="Mô tả:" GridPane.rowIndex="3" GridPane.columnIndex="0"/>
-                <TextArea fx:id="txtDescription" GridPane.rowIndex="3" GridPane.columnIndex="1" prefHeight="80.0" wrapText="true"/>
+                <!-- Dòng 4: Mô tả -->
+                <Label text="Mô tả chi tiết:" style="-fx-font-weight: bold;" GridPane.rowIndex="3" GridPane.columnIndex="0"/>
+                <TextArea fx:id="txtDescription" GridPane.rowIndex="3" GridPane.columnIndex="1"
+                          prefHeight="100.0" wrapText="true" promptText="Nhập mô tả về loại phí này..."
+                          style="-fx-background-radius: 3;"/>
 
-                <Label text="Phí mặc định:" GridPane.rowIndex="4" GridPane.columnIndex="0"/>
-                <CheckBox fx:id="chkIsDefault" text="Tích nếu đây là phí mặc định (Vệ sinh, Nước...)" GridPane.rowIndex="4" GridPane.columnIndex="1" />
+                <!-- Dòng 5: Checkbox Mặc định -->
+                <Label text="Cấu hình:" style="-fx-font-weight: bold;" GridPane.rowIndex="4" GridPane.columnIndex="0"/>
+                <VBox spacing="5.0" GridPane.rowIndex="4" GridPane.columnIndex="1">
+                    <CheckBox fx:id="chkIsDefault" text="Là phí thu hàng tháng (Mặc định)" style="-fx-cursor: hand;"/>
+                    <Label text="* Tích chọn nếu khoản phí này áp dụng tự động cho các căn hộ."
+                           style="-fx-font-size: 11px; -fx-text-fill: #7f8c8d; -fx-font-style: italic;"/>
+                </VBox>
 
-                <Label text="Hình thức tính:" GridPane.rowIndex="5" GridPane.columnIndex="0"/>
-                <ComboBox fx:id="cmbPricingModel" prefWidth="250.0" promptText="Chọn hình thức tính" GridPane.rowIndex="5" GridPane.columnIndex="1" />
+                <!-- Dòng 6: Pricing Model -->
+                <Label text="Hình thức tính:" style="-fx-font-weight: bold;" GridPane.rowIndex="5" GridPane.columnIndex="0"/>
+                <VBox spacing="5.0" GridPane.rowIndex="5" GridPane.columnIndex="1">
+                    <ComboBox fx:id="cmbPricingModel" prefWidth="300.0" promptText="-- Chọn cách tính tiền --"
+                              style="-fx-background-radius: 3; -fx-cursor: hand;"/>
+                    <!-- Gợi ý nhỏ giúp kế toán chọn đúng -->
+                    <Label text="FIXED: Cố định | PER_SQM: Theo diện tích | PER_VEHICLE: Theo xe"
+                           style="-fx-font-size: 10px; -fx-text-fill: #7f8c8d;"/>
+                </VBox>
             </children>
             <columnConstraints>
-                <ColumnConstraints hgrow="NEVER" minWidth="120.0"/>
+                <ColumnConstraints hgrow="NEVER" minWidth="130.0"/>
                 <ColumnConstraints hgrow="ALWAYS"/>
             </columnConstraints>
         </GridPane>
 
-        <HBox alignment="CENTER_RIGHT" spacing="10.0">
+        <!-- Hàng nút bấm -->
+        <HBox alignment="CENTER_RIGHT" spacing="15.0" style="-fx-padding: 10 0 0 0;">
             <children>
-                <Button fx:id="btnSave" onAction="#handleSave" text="Lưu" defaultButton="true"/>
-                <Button fx:id="btnCancel" onAction="#handleCancel" text="Hủy" cancelButton="true"/>
+                <Button fx:id="btnCancel" onAction="#handleCancel" text="Hủy bỏ" cancelButton="true"
+                        prefWidth="100.0" style="-fx-background-color: #95a5a6; -fx-text-fill: white; -fx-cursor: hand;"/>
+                <Button fx:id="btnSave" onAction="#handleSave" text="Lưu thông tin" defaultButton="true"
+                        prefWidth="120.0" style="-fx-background-color: #27ae60; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand;"/>
             </children>
         </HBox>
     </children>

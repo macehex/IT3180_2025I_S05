@@ -1,3 +1,4 @@
+// Vị trí: src/main/java/com/example/quanlytoanha/controller/AddFeeFormController.java
 package com.example.quanlytoanha.controller;
 
 import com.example.quanlytoanha.model.FeeType;
@@ -30,8 +31,13 @@ public class AddFeeFormController {
     public void initialize() {
         this.feeTypeService = new FeeTypeService();
 
+        // 1. FIXED: Phí cố định / Dịch vụ đăng ký (Gym, Bể bơi)
+        // 2. PER_SQM: Phí dịch vụ, Phí quản lý (Tính theo m2)
+        // 3. PER_VEHICLE: Phí gửi xe (Tính theo số lượng xe)
+        cmbPricingModel.getItems().addAll("FIXED", "PER_SQM", "PER_VEHICLE");
 
-        cmbPricingModel.getItems().addAll("FIXED", "PER_SQM");
+        // Mặc định chọn cái đầu tiên để tránh lỗi Null
+        cmbPricingModel.getSelectionModel().selectFirst();
     }
 
     public void setDialogStage(Stage dialogStage) {
@@ -63,7 +69,7 @@ public class AddFeeFormController {
             // 1. Validation (Xác thực dữ liệu)
             String name = txtName.getText();
             String priceStr = txtUnitPrice.getText();
-            String pricingModel = cmbPricingModel.getValue(); // <-- Đọc giá trị mới
+            String pricingModel = cmbPricingModel.getValue();
 
             if (name == null || name.trim().isEmpty()) {
                 showAlert(Alert.AlertType.ERROR, "Lỗi", "Tên phí không được để trống.");
@@ -73,7 +79,7 @@ public class AddFeeFormController {
                 showAlert(Alert.AlertType.ERROR, "Lỗi", "Đơn giá không được để trống.");
                 return;
             }
-            if (pricingModel == null) { // <-- Thêm validation
+            if (pricingModel == null) {
                 showAlert(Alert.AlertType.ERROR, "Lỗi", "Vui lòng chọn hình thức tính.");
                 return;
             }
@@ -83,7 +89,7 @@ public class AddFeeFormController {
                 showAlert(Alert.AlertType.ERROR, "Lỗi", "Đơn giá không được là số âm.");
                 return;
             }
-            boolean isDefault = chkIsDefault.isSelected(); // <-- Đọc giá trị mới
+            boolean isDefault = chkIsDefault.isSelected();
 
             // 2. Gọi Service
             if (isEditMode) {
@@ -92,8 +98,8 @@ public class AddFeeFormController {
                 editingFeeType.setUnitPrice(unitPrice);
                 editingFeeType.setUnit(txtUnit.getText());
                 editingFeeType.setDescription(txtDescription.getText());
-                editingFeeType.setDefault(isDefault); // <-- Set giá trị mới
-                editingFeeType.setPricingModel(pricingModel); // <-- Set giá trị mới
+                editingFeeType.setDefault(isDefault);
+                editingFeeType.setPricingModel(pricingModel);
 
                 feeTypeService.updateFee(editingFeeType);
             } else {
@@ -103,8 +109,8 @@ public class AddFeeFormController {
                 newFee.setUnitPrice(unitPrice);
                 newFee.setUnit(txtUnit.getText());
                 newFee.setDescription(txtDescription.getText());
-                newFee.setDefault(isDefault); // <-- Set giá trị mới
-                newFee.setPricingModel(pricingModel); // <-- Set giá trị mới
+                newFee.setDefault(isDefault);
+                newFee.setPricingModel(pricingModel);
 
                 feeTypeService.addFee(newFee);
             }
