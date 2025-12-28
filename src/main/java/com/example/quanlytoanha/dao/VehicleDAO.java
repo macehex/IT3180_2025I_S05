@@ -75,7 +75,6 @@ public class VehicleDAO {
         String sql = "DELETE FROM vehicles WHERE vehicle_id = ?";
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
-
             pstmt.setInt(1, vehicleId);
             return pstmt.executeUpdate() > 0;
         }
@@ -156,5 +155,55 @@ public class VehicleDAO {
         v.setRegistrationDate(rs.getDate("registration_date").toLocalDate());
         v.setActive(rs.getBoolean("is_active"));
         return v;
+    }
+
+    /**
+     * Lấy TẤT CẢ phương tiện.
+     * Chỉ cần JOIN bảng users để lấy tên chủ xe.
+     */
+    public List<Vehicle> getAllVehicles() {
+        List<Vehicle> vehicles = new ArrayList<>();
+        // Đã bỏ JOIN apartments
+        String sql = "SELECT v.*, u.full_name " +
+                "FROM vehicles v " +
+                "LEFT JOIN users u ON v.resident_id = u.user_id " +
+                "ORDER BY v.registration_date DESC";
+
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql);
+             ResultSet rs = pstmt.executeQuery()) {
+
+            while (rs.next()) {
+                Vehicle v = mapResultSetToVehicle(rs);
+                // Map thêm tên chủ xe
+                v.setResidentFullName(rs.getString("full_name"));
+                vehicles.add(v);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return vehicles;
+    }
+
+    /**
+     * Cập nhật thông tin xe.
+     */
+    public boolean updateVehicle(Vehicle v) {
+        String sql = "UPDATE vehicles SET license_plate = ?, vehicle_type = ?, is_active = ?, resident_id = ?, apartment_id = ? WHERE vehicle_id = ?";
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+            pstmt.setString(1, v.getLicensePlate());
+            pstmt.setString(2, v.getVehicleType());
+            pstmt.setBoolean(3, v.isActive());
+            pstmt.setInt(4, v.getResidentId());
+            pstmt.setInt(5, v.getApartmentId());
+            pstmt.setInt(6, v.getVehicleId());
+
+            return pstmt.executeUpdate() > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
     }
 }

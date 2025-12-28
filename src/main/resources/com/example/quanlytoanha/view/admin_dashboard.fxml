@@ -52,7 +52,6 @@
                             maxWidth="Infinity" />
 
                     <VBox fx:id="vboxNotificationSubMenu" visible="false" managed="false" spacing="0">
-
                         <Button fx:id="btnTaoThongBao" text="➕ Tạo thông báo mới"
                                 styleClass="sidebar-menu-item"
                                 style="-fx-padding: 10 10 10 50; -fx-font-size: 13px; -fx-background-color: transparent;"
@@ -75,21 +74,17 @@
                 <Button fx:id="btnQuanLyBaoTri" text="🔧 Lịch sử Bảo trì" styleClass="sidebar-menu-item" onAction="#handleOpenMaintenanceHistory" />
 
                 <Button fx:id="btnBaoCaoDanCu" text="📊 Báo cáo Dân cư" styleClass="sidebar-menu-item" onAction="#handleOpenPopulationReport" />
-
                 <Button fx:id="btnBaoCaoCongNo" text="📈 Báo cáo Công nợ" styleClass="sidebar-menu-item" onAction="#handleOpenDebtReport" />
-
                 <Button fx:id="btnBaoCaoTaiSan" text="📊 Báo cáo Tài sản" styleClass="sidebar-menu-item" onAction="#handleOpenAssetReport" />
-
                 <Button fx:id="btnKiemSoatRaVao" text="🛡️ Kiểm soát Ra/Vào" styleClass="sidebar-menu-item" onAction="#handleOpenAccessControl" />
 
                 <Region VBox.vgrow="ALWAYS" />
 
                 <Separator />
-                <Button fx:id="btnLogout" text="🚪 Đăng xuất" styleClass="sidebar-logout-btn" onAction="#handleLogout">
-                    <VBox.margin>
-                        <Insets top="10.0" bottom="15.0" left="15.0" right="15.0" />
-                    </VBox.margin>
-                </Button>
+
+                <!-- Nút Quản lý gửi xe đã được căn chỉnh lại, loại bỏ margin riêng để thẳng hàng -->
+                <Button fx:id="btnQuanLyGuiXe" text="🚗 Quản lý gửi xe" styleClass="sidebar-menu-item" onAction="#handleOpenParkingManagement" />
+
             </children>
         </VBox>
     </left>

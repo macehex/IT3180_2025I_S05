@@ -14,6 +14,8 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ProgressBar;
 import javafx.scene.layout.VBox;
+import javafx.event.ActionEvent;
+import javafx.scene.Node;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import java.net.URL;
@@ -55,32 +57,50 @@ public class AdminDashboardController {
     @FXML
     private Label lblUserName;
 
-    @FXML private Label lblTotalResidents;
-    @FXML private Label lblTotalApartments;
-    @FXML private Label lblTotalDebt;
-    @FXML private Label lblTotalUnpaidInvoices;
-    @FXML private PieChart residentStatusPieChart;
-    @FXML private Label lblTotalPaid;
-    @FXML private ProgressBar debtProgressBar;
+    @FXML
+    private Label lblTotalResidents;
+    @FXML
+    private Label lblTotalApartments;
+    @FXML
+    private Label lblTotalDebt;
+    @FXML
+    private Label lblTotalUnpaidInvoices;
+    @FXML
+    private PieChart residentStatusPieChart;
+    @FXML
+    private Label lblTotalPaid;
+    @FXML
+    private ProgressBar debtProgressBar;
 
     // --- FXML cho TÀI SẢN (US2_1_1) ---
-    @FXML private Label lblAssetsInTrouble;
-    @FXML private Button btnQuanLyTaiSan;
+    @FXML
+    private Label lblAssetsInTrouble;
+    @FXML
+    private Button btnQuanLyTaiSan;
 
     // --- FXML cho BẢO TRÌ (US2_2_1) ---
-    @FXML private Button btnQuanLyBaoTri;
+    @FXML
+    private Button btnQuanLyBaoTri;
 
     // --- FXML cho BÁO CÁO DÂN CƯ (US7_2_1) ---
-    @FXML private Button btnBaoCaoDanCu;
+    @FXML
+    private Button btnBaoCaoDanCu;
 
     // --- FXML cho BÁO CÁO CÔNG NỢ (US7_2_1) ---
-    @FXML private Button btnBaoCaoCongNo;
+    @FXML
+    private Button btnBaoCaoCongNo;
 
     // --- BỔ SUNG (US8_1_1): Khai báo nút Kiểm soát Ra/Vào ---
-    @FXML private Button btnKiemSoatRaVao;
+    @FXML
+    private Button btnKiemSoatRaVao;
 
     // --- BỔ SUNG: Khai báo nút Báo cáo Tài sản ---
-    @FXML private Button btnBaoCaoTaiSan;
+    @FXML
+    private Button btnBaoCaoTaiSan;
+
+    // --- BỔ SUNG: Nút Quản lý gửi xe ---
+    @FXML
+    private Button btnQuanLyGuiXe;
 
     // --- Khai báo Service ---
     private DashboardService dashboardService;
@@ -168,6 +188,10 @@ public class AdminDashboardController {
             // --- BỔ SUNG: Gắn sự kiện cho nút Báo cáo Tài sản ---
             if (btnBaoCaoTaiSan != null) {
                 btnBaoCaoTaiSan.setOnAction(event -> handleOpenAssetReport());
+            }
+
+            if (btnQuanLyGuiXe != null) {
+                btnQuanLyGuiXe.setOnAction(event -> handleOpenParkingManagement());
             }
         }
     }
@@ -566,10 +590,12 @@ public class AdminDashboardController {
     }
 
     @FXML
-    private void handleLogout() {
+    private void handleLogout(ActionEvent event) { // Thêm tham số event
         try {
             SessionManager.getInstance().logout();
-            Stage currentStage = (Stage) btnLogout.getScene().getWindow();
+
+            // SỬA: Lấy Stage từ nguồn phát ra sự kiện (nút được bấm) thay vì biến btnLogout
+            Stage currentStage = (Stage) ((Node) event.getSource()).getScene().getWindow();
             currentStage.close();
 
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/example/quanlytoanha/view/login.fxml"));
@@ -577,10 +603,7 @@ public class AdminDashboardController {
             Stage loginStage = new Stage();
             loginStage.setTitle("Quản lý Tòa nhà - Đăng nhập");
             loginStage.setScene(new Scene(root, 450, 500));
-            loginStage.setResizable(true);
-            loginStage.setMinWidth(450);
-            loginStage.setMinHeight(500);
-            loginStage.setMaximized(true); // Set full screen
+            // ... các cài đặt khác ...
             loginStage.show();
 
         } catch (IOException e) {
@@ -651,6 +674,34 @@ public class AdminDashboardController {
         } catch (IOException e) {
             e.printStackTrace();
             showAlert(Alert.AlertType.ERROR, "Lỗi", "Không thể tải màn hình Lịch sử thông báo: " + e.getMessage());
+        }
+    }
+
+    // --- HÀM MỞ MÀN HÌNH QUẢN LÝ GỬI XE (MỚI) ---
+    @FXML
+    private void handleOpenParkingManagement() {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/example/quanlytoanha/view/parking_management.fxml"));
+            Parent root = loader.load();
+
+            Scene scene = new Scene(root, 1100, 700);
+            // Sử dụng lại table_styles.css nếu có
+            URL cssUrl = getClass().getResource("/com/example/quanlytoanha/view/styles/table_styles.css");
+            if (cssUrl != null) {
+                scene.getStylesheets().add(cssUrl.toExternalForm());
+            }
+
+            Stage stage = new Stage();
+            stage.setTitle("Quản Lý Gửi Xe");
+            stage.initModality(Modality.WINDOW_MODAL);
+            stage.initOwner(btnQuanLyGuiXe.getScene().getWindow());
+            stage.setScene(scene);
+            stage.setResizable(true);
+            stage.showAndWait();
+
+        } catch (IOException e) {
+            e.printStackTrace();
+            showAlert(Alert.AlertType.ERROR, "Lỗi", "Không thể tải màn hình Quản lý gửi xe: " + e.getMessage());
         }
     }
 }
