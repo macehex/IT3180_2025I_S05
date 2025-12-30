@@ -87,6 +87,8 @@ public class AccountantDashboardController {
     @FXML private TableColumn<ContributionHistoryDTO, String> colConFee;
     @FXML private TableColumn<ContributionHistoryDTO, BigDecimal> colConAmount;
 
+    @FXML private Label lblPaidInvoices;
+    @FXML private Label lblTotalCollected;
     @FXML private Label lblTotalContribution;
 
     private FinancialService financialService;
@@ -168,6 +170,14 @@ public class AccountantDashboardController {
             lblTotalDebt.setText(String.format("%,.0f VNĐ", report.getTotalDebtAmount()));
             lblTotalOverdue.setText(String.format("%,.0f VNĐ", report.getTotalOverdueAmount()));
             lblUnpaidInvoices.setText(report.getTotalUnpaidInvoices() + " hóa đơn");
+
+            if (lblPaidInvoices != null) {
+                lblPaidInvoices.setText(report.getTotalPaidInvoices() + " hóa đơn");
+            }
+
+            if (lblTotalCollected != null) {
+                lblTotalCollected.setText(String.format("%,.0f VNĐ", report.getTotalCollectedAmount()));
+            }
             List<ApartmentDebt> debtList = financialService.getDetailedDebtList();
             debtTable.getItems().setAll(debtList);
         } catch (SecurityException e) {

@@ -51,6 +51,15 @@
                                                 <Label text="SỐ HÓA ĐƠN CHƯA TRẢ" styleClass="stat-widget-title"/>
                                                 <Label fx:id="lblUnpaidInvoices" text="0" styleClass="stat-widget-value, text-info"/>
                                             </VBox>
+
+                                            <VBox styleClass="stat-widget" HBox.hgrow="ALWAYS" style="-fx-background-color: #e8f5e9;"> <Label text="HÓA ĐƠN ĐÃ ĐÓNG" styleClass="stat-widget-title" style="-fx-text-fill: #2e7d32;"/>
+                                                <Label fx:id="lblPaidInvoices" text="0" styleClass="stat-widget-value" style="-fx-text-fill: #2e7d32;"/>
+                                            </VBox>
+
+                                            <VBox styleClass="stat-widget" HBox.hgrow="ALWAYS" style="-fx-background-color: #e8f5e9;">
+                                                <Label text="TỔNG TIỀN ĐÃ THU" styleClass="stat-widget-title" style="-fx-text-fill: #2e7d32;"/>
+                                                <Label fx:id="lblTotalCollected" text="0 VNĐ" styleClass="stat-widget-value" style="-fx-text-fill: #2e7d32;"/>
+                                            </VBox>
                                         </HBox>
 
                                         <VBox styleClass="report-card" VBox.vgrow="ALWAYS">

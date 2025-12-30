@@ -9,8 +9,13 @@ public class DebtReport {
     private int totalOverdueInvoices; // Số hóa đơn đã quá hạn
     private BigDecimal totalDebtAmount;  // Tổng số tiền đang nợ
     private BigDecimal totalOverdueAmount; // Tổng số tiền đã quá hạn
+    private int totalPaidInvoices;        // Tổng số hóa đơn đã thanh toán
+    private BigDecimal totalCollectedAmount;
 
     public DebtReport() {
+        this.totalDebtAmount = BigDecimal.ZERO;
+        this.totalOverdueAmount = BigDecimal.ZERO;
+        this.totalCollectedAmount = BigDecimal.ZERO;
     }
 
     /**
@@ -21,6 +26,8 @@ public class DebtReport {
         this.totalOverdueInvoices = totalOverdueInvoices;
         this.totalDebtAmount = totalDebtAmount;
         this.totalOverdueAmount = totalOverdueAmount;
+        this.totalPaidInvoices = totalPaidInvoices;
+        this.totalCollectedAmount = totalCollectedAmount;
     }
 
     // --- Getters and Setters ---
@@ -57,14 +64,21 @@ public class DebtReport {
         this.totalOverdueAmount = totalOverdueAmount;
     }
 
+    public int getTotalPaidInvoices() { return totalPaidInvoices; }
+    public void setTotalPaidInvoices(int totalPaidInvoices) { this.totalPaidInvoices = totalPaidInvoices; }
+
+    public BigDecimal getTotalCollectedAmount() { return totalCollectedAmount; }
+    public void setTotalCollectedAmount(BigDecimal totalCollectedAmount) { this.totalCollectedAmount = totalCollectedAmount; }
     // --- (Tùy chọn) Phương thức toString() để debug ---
     @Override
     public String toString() {
         return "DebtReport{" +
-                "totalUnpaidInvoices=" + totalUnpaidInvoices +
-                ", totalOverdueInvoices=" + totalOverdueInvoices +
-                ", totalDebtAmount=" + totalDebtAmount +
-                ", totalOverdueAmount=" + totalOverdueAmount +
+                "unpaid=" + totalUnpaidInvoices +
+                ", overdue=" + totalOverdueInvoices +
+                ", debt=" + totalDebtAmount +
+                ", overdueAmount=" + totalOverdueAmount +
+                ", paid=" + totalPaidInvoices +
+                ", collected=" + totalCollectedAmount +
                 '}';
     }
 }

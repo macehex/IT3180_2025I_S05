@@ -787,5 +787,23 @@ public class InvoiceDAO {
         }
         return list;
     }
+
+    public Map<String, Object> getPaymentStatistics() {
+        Map<String, Object> stats = new HashMap<>();
+        String sql = "SELECT COUNT(*) as count, COALESCE(SUM(total_amount), 0) as amount FROM invoices WHERE status = 'PAID'";
+
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql);
+             ResultSet rs = stmt.executeQuery()) {
+
+            if (rs.next()) {
+                stats.put("count", rs.getInt("count"));
+                stats.put("amount", rs.getBigDecimal("amount"));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return stats;
+    }
 }
 
